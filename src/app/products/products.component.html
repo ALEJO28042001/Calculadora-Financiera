@@ -1,0 +1,136 @@
+<!-- Fields Manager to handle product input -->
+
+<button class="custom-button" (click)="this.getData()">Get Data</button>
+<button class="custom-button" (click)="calculate()">calculate</button>
+
+<form class="form">
+    <div class="form-row">
+        <div class="input-data">
+        <input type="number" required class="input" inputmode="decimal"
+            placeholder=" " name="Liquidez" 
+            [(ngModel)]="liquidez"
+            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+            <div class="underline"></div>
+        <label>Liquidez</label>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="input-data">
+        <input type="number" required class="input" inputmode="decimal"
+            placeholder="" name="Ahorro Mensual" 
+            [(ngModel)]="ingresos"
+            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+            <div class="underline"></div>
+        <label>Ahorro Mensual</label>
+        </div>
+    </div>
+</form>
+<p></p>
+
+<form class="form">
+    <div class="form-row">
+        <form class="form">
+
+        <div class="input-data">
+        <input type="number" required class="input" inputmode="decimal"
+            placeholder=" " name="Deuda Creditos" 
+            [(ngModel)]="totalCreditos"
+            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+            <div class="underline"></div>
+        <label>Deuda Creditos</label>
+        </div>
+        <div class="input-data">
+            <input type="number" required class="input" inputmode="decimal"
+                placeholder=" " name="Plazo Credito" 
+                [(ngModel)]="plazoCredito"
+                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+                <div class="underline"></div>
+            <label>Plazo Credito</label>
+        </div>
+        <div class="input-data">
+            <input type="number" required class="input" inputmode="decimal"
+                placeholder=" " name="Pago Mensual" 
+                [(ngModel)]="pagoCredito"
+                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+                <div class="underline"></div>
+            <label>Pago Credito</label>
+        </div>
+        <div class="input-data">
+            <input type="number" required class="input" inputmode="decimal"
+                placeholder=" " name="Interes Credito Actual" 
+                [(ngModel)]="interesCreditoActual"
+                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+                <div class="underline"></div>
+            <label>Interes Credito Actual</label>
+        </div>
+        <div class="input-data">
+            <input type="number" required class="input" inputmode="decimal"
+                placeholder=" " name="Interes Credito Beneficiar" 
+                [(ngModel)]="interesCreditoBeneficiar"
+                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+                <div class="underline"></div>
+            <label>Interes Credito Beneficiar</label>
+        </div>
+    
+</form>
+
+
+
+    <div class="form-row">
+        <form class="form">
+
+        <div class="input-data">
+        <input type="number" required class="input" inputmode="decimal"
+            placeholder="" name="Deuda Tarjetas" 
+            [(ngModel)]="totalTarjetas"
+            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+            <div class="underline"></div>
+        <label>Deuda Tarjetas</label>
+        </div>
+        <div class="input-data">
+            <input type="number" required class="input" inputmode="decimal"
+                placeholder="" name="Plazo Rotativo" 
+                [(ngModel)]="plazoRotativo"
+                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+                <div class="underline"></div>
+            <label>Plazo Rotativo</label>
+        </div>
+        <div class="input-data">
+            <input type="number" required class="input" inputmode="decimal"
+                placeholder="" name="Pago Rotativo" 
+                [(ngModel)]="pagoRotativo"
+                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+                <div class="underline"></div>
+            <label>Pago Rotativo</label>
+        </div>
+    <div class="input-data">
+        <input type="number" required class="input" inputmode="decimal"
+            placeholder=" " name="Interes Tarjetas Actual" 
+            [(ngModel)]="interesTarjetaActual"
+            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+            <div class="underline"></div>
+        <label>Interes Tarjeta Actual</label>
+    </div>
+    <div class="input-data">
+        <input type="number" required class="input" inputmode="decimal"
+            placeholder=" " name="Interes Rotativo Beneficiar" 
+            [(ngModel)]="interesRotativoBeneficiar"
+            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+            <div class="underline"></div>
+        <label>Interes Rotativo Beneficiar</label>
+    </div>
+        
+</form>
+
+<!-- First instance of GenerateChartComponent -->
+<app-generate-chart #resumenInteres title="Resumen Interes"></app-generate-chart>
+<app-generate-chart #resumenFlujoCaja title="Resumen Flujo de Caja"></app-generate-chart>
+<div [ngStyle]="{ 'visibility': false ? 'visible' : 'hidden' }">
+<app-generate-chart #todosLosProductos title="Todos los Productos"></app-generate-chart>
+<app-generate-chart #productosRefinanciamiento title="Productos a Refinanciar"></app-generate-chart>
+<app-generate-chart #tarjetasRefinanciamiento title="Tarjetas a Refinanciar"></app-generate-chart>
+<app-generate-chart #creditosRefinanciamiento title="Creditos a Refinanciar"></app-generate-chart>
+<app-generate-chart #productosBeneficiar title="Productos Beneficiar"></app-generate-chart>
+<app-generate-chart #creditosBeneficiar title="Creditos Beneficiar"></app-generate-chart>
+<app-generate-chart #tarjetasBeneficiar title="Tarjetas Beneficiar"></app-generate-chart>
+</div>

@@ -1,0 +1,33 @@
+h2{
+  color: white;
+}
+.chart-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+  }
+  
+  .chart-title::before {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #3498db;
+    margin: 10px auto 0;
+  }
+  
+  .chart-title::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 2px;
+    background-color: #2ecc71;
+    margin: 5px auto;
+  }
+  

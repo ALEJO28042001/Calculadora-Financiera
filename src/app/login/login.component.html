@@ -1,0 +1,52 @@
+<div class="component">
+<form class="form">
+  <div class="form-row">
+  <img class="img" src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" alt="">
+  </div>
+  <div class="form-row">
+    <div class="input-data">
+    <input
+      type="email"
+      id="email"
+      name="email"
+      required
+      [(ngModel)]="email"
+      #emailModel="ngModel"
+      placeholder=""
+    />
+    <div class="underline"></div>
+        <label>Email</label>
+
+      <div *ngIf="emailModel.invalid && emailModel.touched" class="error">
+        <span *ngIf="emailModel.errors?.['required']">Email is required.</span>
+        <span *ngIf="emailModel.errors?.['email']">Invalid email format.</span>
+      </div>
+    </div>
+  </div>
+  
+      <!-- Password Input -->
+      <div class="form-row">
+        <div class="input-data">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          [(ngModel)]="password"
+          #passwordModel="ngModel"
+          placeholder=""
+        />
+        <div class="underline"></div>
+            <label>Password</label>
+
+        <div *ngIf="passwordModel.invalid && passwordModel.touched" class="error">
+          <span *ngIf="passwordModel.errors?.['required']">Password is required.</span>
+          <span *ngIf="passwordModel.errors?.['minlength']">
+            Password must be at least 6 characters long.
+          </span>
+        </div>
+        </div>
+      </div>
+      <button class="custom-button" (click)="onSubmit()">Ingresar</button>
+</form>
+</div>

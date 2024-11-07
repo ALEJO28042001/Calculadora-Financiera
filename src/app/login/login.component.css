@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500&display=swap');
+
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+
+@import url('https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css');
+
+.component{
+  display: grid;
+  justify-content: center;
+  background-color: aliceblue;
+}
+img{
+  display: grid;
+  margin: 10px;
+}
+*{
+  outline: none;
+  font-weight: bold;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  scale:1;
+    transition: scale .3s ease-in-out;
+    @starting-style{
+      scale:0;
+    }
+}
+form{
+  display: grid;
+  background-color: aliceblue;  
+  margin:8px;
+  gap: 10px;
+  max-width: 400px;
+  align-items: start;
+  border-radius: 15px;
+  border-color: black;
+}
+
+
+.container .text{ /* Title: Gradient text*/
+  text-align: center;
+  font-size: 41px;
+  font-family: 'Poppins', sans-serif;
+  background: -webkit-linear-gradient(right, #ff8410, #3f7cff,  #ff8410, #3f7cff,);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: scale .3s ease-in-out;
+  @starting-style{
+    scale:0;
+  }
+}
+.form-row .input-data{
+  height: 40px;
+  position: relative;
+  border-radius: 15px;
+  margin: 15px;
+}
+.input-data input,
+.textarea textarea{
+  display: grid;
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-size: 17px;
+  border-bottom: 2px solid rgba(0,0,0, 0.12);
+  border-radius: 15px;
+  padding: 15px;
+}
+.input-data input:focus ~ label, .textarea textarea:focus ~ label,
+.input-data input:valid ~ label, .textarea textarea:valid ~ label{
+  transform: translateY(-28px);
+  font-size: 14px;
+  color: #3498db;
+}
+.input-data label{
+  position: absolute;
+  pointer-events: none;
+  bottom: 10px;
+  font-size: 16px;
+  left: 13px;
+  transition: all 0.3s ease;
+}
+.input-data .underline{
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  width: 92%;
+  left: 13px;
+}
+.input-data .underline:before{
+  position: absolute;
+  content: "";
+  height: 2px;
+  width: 100%;
+  background: #3498db;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+.input-data input:focus ~ .underline:before,
+.input-data input:valid ~ .underline:before,
+.textarea textarea:focus ~ .underline:before,
+.textarea textarea:valid ~ .underline:before{
+  transform: scale(1);
+}
+.submit-btn .input-data{
+  overflow: hidden;
+  height: 45px!important;
+  width: 25%!important;
+}
+
+.custom-button {
+  border: none; /* Remove border */
+  text-align: center; /* Center the text */
+  display: inline-block; /* Inline-block display */
+  font-weight: bold; /* Bold text */
+  border-radius: 15px; /* Rounded corners */
+  transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s ease-in-out; /* Add transition effects */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a slight shadow */
+  cursor: pointer; /* Add a pointer cursor on hover */
+  position: relative;
+  background-color: rgb(252, 236, 185);
+}
+
+/* Hover and Active State */
+.custom-button:hover {
+  background-color: rgb(26, 255, 0); /* Darker green on hover */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Increase shadow */
+  transform: scale(1.05); /* Slightly increase size */
+}
+li{
+  padding: 10px;
+}
+  /* Disabled state for button */
+  button[disabled] {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  /* Error message styling */
+  .error {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  

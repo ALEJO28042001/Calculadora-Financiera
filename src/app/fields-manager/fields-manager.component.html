@@ -1,0 +1,78 @@
+<!-- Form for product details -->
+<div></div>
+<form class="form">
+  
+
+  <!-- Informacion del Producto -->
+  <div class="form-row" *ngFor="let field of keys| slice:0:1; ; let i = index">
+    <div class="input-data">
+      <input type="chart" required class="input" 
+             placeholder=" " name="input{{i}}" 
+             [(ngModel)]="product[field]">
+      <div class="underline"></div>
+      <label>{{field}}</label>
+    </div>
+  </div>
+  
+  <div class="form-row">
+      <div class="checkbox-wrapper">
+        <label>Tarjeta</label>
+        <input type="checkbox" name="tipo de producto" [(ngModel)]="isTarjeta" (change)="tipoDeProducto($event)">
+        <label>Coop</label>
+        <input type="checkbox" name="entidad" [(ngModel)]="isCoop" (change)="tipoDeEntidad($event)"/>
+        <label>Ref</label>
+        <input type="checkbox" name="refinanciamiento" [(ngModel)]="isRef" (change)="eleccionRef($event)"/>
+      </div>
+  </div>
+  
+    <div class="form-row" *ngFor="let field of keys | slice:4:-1;; let i = index">
+      <div class="input-data">
+        <input type="chart" required class="input" 
+               placeholder=" " name="input{{i}}" 
+               [(ngModel)]="product[field]"
+          onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || 
+          event.charCode == 46 && !this.value.includes('.')"
+               [ngStyle]="{'color': num(product[field]) < 0 ? 'red' : 'green'}">
+        <div class="underline"></div>
+        <label>{{field}}</label>
+      </div>
+    </div>
+    
+  </form>
+  
+  <!-- Buttons for different actions -->
+  <div class="form">
+    <button class="custom-button" (click)="addProduct()">
+      {{ selectedProductIndex === null ? 'Agregar Producto' : 'Actualizar Producto' }}
+    </button>
+    <button *ngIf="productList.length > 0" class="custom-button" (click)="resetForm()">Nuevo Producto  </button>
+    <button *ngIf="productList.length > 0" class="custom-button" (click)="toggleProductList() ">Mostrar Productos</button> 
+    <button *ngIf="productList.length > 0" class="custom-button delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
+  
+    <button *ngIf="productList.length > 0" class="custom-button" (click)="saveData()">Guardar Productos</button>
+  
+  <!-- Dropdown to choose a product for edit/delete -->
+  <div *ngIf="productList.length > 0" class="dropdown-group">
+    <select [(ngModel)]="selectedProductIndex" class="dropdown"
+      (change)="chooseProduct(selectedProductIndex!)">
+      <option *ngFor="let product of productList; let i = index" [value]="i" >
+        {{ product['Nombre Producto'] }} </option>
+    </select>
+  </div>
+  
+  </div>
+  <!-- Display all products -->
+  <div *ngIf="showAllProducts && productList.length > 0">
+    <h2>Product List</h2>
+    <ul>selectedProductIndex
+      <li *ngFor="let item of productList; let idx = index">
+        <strong>Product {{ item['Nombre Producto']}}:</strong> {{ item | json }}
+      </li>
+    </ul>
+  </div>
+  
+  <!-- Message if no products are present -->
+  <div *ngIf="showAllProducts && productList.length === 0">
+    <p>No products entered yet.</p>
+  </div>
+  

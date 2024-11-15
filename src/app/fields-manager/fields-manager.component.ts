@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class FieldsManagerComponent implements OnInit{
   constructor(private DataService: DataService) { }
+  documento='';
   
   isRef: boolean = false;
   isTarjeta: boolean = false;
@@ -22,13 +23,13 @@ export class FieldsManagerComponent implements OnInit{
 
   ngOnInit() { 
     this.productList = this.DataService.getData();
-    console.log("Inicia fields manager");
   }
+  
   @Input() product: { [key: string]: string } = {
     "Nombre Producto": "",
     "Tarjeta":"false",
     "Coop": "false",
-    "Refinanciamiento": "false",
+    "Refinanciamiento": "true",
     "Deuda Actual": "",
     "Plazo Actual": "",
     "Pago Mensual": "",
@@ -99,7 +100,7 @@ export class FieldsManagerComponent implements OnInit{
       "Nombre Producto": "",
       "Tarjeta": "false",
       "Coop": "false",
-      "Refinanciamiento": "false",
+      "Refinanciamiento": "true",
       "Deuda Actual": "",
       "Plazo Actual": "",
       "Pago Mensual": "",
@@ -174,6 +175,10 @@ export class FieldsManagerComponent implements OnInit{
 
   saveData() {
     this.DataService.setData(this.productList);
-    console.log(this.DataService.getData().length);
+  }
+
+  searchData(){
+    this.DataService.pullData(this.documento);
+    this.ngOnInit();
   }
 }

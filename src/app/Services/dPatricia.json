@@ -1,0 +1,62 @@
+{
+    "result": [
+        {
+            "Cedula": "52551760",
+            "Nombre": "OLGA PATRICIA GONZALEZ CELEITA",
+            "Entidad": "BANCO DE BOGOTA",
+            "TipoContrato": "TERMINO INDEFINIDO",
+            "Afiliado": "08/13/2007",
+            "Retirado": "03/15/2007",
+            "Estado": "2",
+            "DesEstado": "ACTIVO",
+            "Salario": "3200000",
+            "PlaExequial": "S",
+            "CodAsociado": "614000",
+            "CodError": 0,
+            "Registros": [
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "2",
+                    "DESCRIPCION": "Aporte y ahorros permanentes",
+                    "VALORCONSOLIDADO": "27861227"
+                },
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "4",
+                    "DESCRIPCION": "Productos de ahorro",
+                    "VALORCONSOLIDADO": "149495"
+                },
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "1",
+                    "DESCRIPCION": "Saldos credito (Capital)",
+                    "VALORCONSOLIDADO": "42763089"
+                },
+                {
+                    "IDSUBPRODUCTO": "24",
+                    "IDPRODUCTO": "5",
+                    "DESCRIPCION": "Saldo credito rotativo",
+                    "VALORCONSOLIDADO": "0"
+                },
+                {
+                    "IDSUBPRODUCTO": "23",
+                    "IDPRODUCTO": "5",
+                    "DESCRIPCION": "Saldo tarjeta Debito",
+                    "VALORCONSOLIDADO": "0"
+                },
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "8",
+                    "DESCRIPCION": "Servicios complementarios",
+                    "VALORCONSOLIDADO": "37536"
+                },
+                {
+                    "IDSUBPRODUCTO": "1",
+                    "IDPRODUCTO": "2",
+                    "DESCRIPCION": "Interes al ahorro permanente 2023",
+                    "VALORCONSOLIDADO": "1793876"
+                }
+            ]
+        }
+    ]
+}

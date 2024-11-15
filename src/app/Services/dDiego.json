@@ -1,0 +1,62 @@
+{
+    "result": [
+        {
+            "Cedula": "1000470149",
+            "Nombre": "DIEGO ALEJANDRO BERMUDEZ GONZALEZ",
+            "Entidad": "ASOCIADO INDEPENDIENTE",
+            "TipoContrato": "INDEPENDIENTE",
+            "Afiliado": "11/20/2015",
+            "Retirado": "",
+            "Estado": "2",
+            "DesEstado": "ACTIVO",
+            "Salario": "1300000",
+            "PlaExequial": "N",
+            "CodAsociado": "731504",
+            "CodError": 0,
+            "Registros": [
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "2",
+                    "DESCRIPCION": "Aporte y ahorros permanentes",
+                    "VALORCONSOLIDADO": "11698304"
+                },
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "4",
+                    "DESCRIPCION": "Productos de ahorro",
+                    "VALORCONSOLIDADO": "0"
+                },
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "1",
+                    "DESCRIPCION": "Saldos credito (Capital)",
+                    "VALORCONSOLIDADO": "0"
+                },
+                {
+                    "IDSUBPRODUCTO": "24",
+                    "IDPRODUCTO": "5",
+                    "DESCRIPCION": "Saldo credito rotativo",
+                    "VALORCONSOLIDADO": "0"
+                },
+                {
+                    "IDSUBPRODUCTO": "23",
+                    "IDPRODUCTO": "5",
+                    "DESCRIPCION": "Saldo tarjeta Debito",
+                    "VALORCONSOLIDADO": "0"
+                },
+                {
+                    "IDSUBPRODUCTO": "0",
+                    "IDPRODUCTO": "8",
+                    "DESCRIPCION": "Servicios complementarios",
+                    "VALORCONSOLIDADO": "0"
+                },
+                {
+                    "IDSUBPRODUCTO": "1",
+                    "IDPRODUCTO": "2",
+                    "DESCRIPCION": "Interes al ahorro permanente 2023",
+                    "VALORCONSOLIDADO": "682149"
+                }
+            ]
+        }
+    ]
+}

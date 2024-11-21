@@ -36,19 +36,41 @@ export class ApiService {
     // Send POST request
     return this.http.post(this.apiUrl, body, { headers });
   }
-  getBeneficiarInfo(cc:string){
-    if(cc==='3167398')
-    return this.beneficiar["3167398"].result;
-    else return this.beneficiar["80170625"].result;
-  }
+  getBeneficiarInfo(documento:string){
+    const consultaBeneficiar = this.infoBeneficiar[documento];////////////////// Cambiar al service
+
+    if (consultaBeneficiar) {
+
+    return consultaBeneficiar.result[0];
+    } else {
+    // Handle the case where the key is not found
+    console.error(`Document ID "${documento}" not found in cifin.`);
+    return ""; // Or throw an error, return a default value, etc.
+    }
+    }
+  getBeneficiarProducts(codAsociado:string){
+    const consultaBeneficiar = this.creditosBeneficiar[codAsociado];////////////////// Cambiar al service
+
+    if (consultaBeneficiar) {
+    return consultaBeneficiar.result[0].Registros;
+    } else {
+    // Handle the case where the key is not found
+    console.error(`Asociado ID "${codAsociado}" not found in cifin.`);
+    return null; // Or throw an error, return a default value, etc.
+    }
+    }  
   getCifinProducts(documento:string){
-    console.log(documento);
-    if(documento==='3167398')
-    return this.cifin["3167398"].result.JAObligaciones;
-    else return this.cifin["80170625"].result.JAObligaciones;
-  }
-  hola = { "a": { "a": "asd", "b": "asjdhb" }, "b": { "a": "asd", "b": "asjdhb" } };
-cifin={
+    const consultaCifin = this.cifin[documento];////////////////// Cambiar al service
+
+    if (consultaCifin) {
+    return consultaCifin.result.JAObligaciones;
+    } else {
+    // Handle the case where the key is not found
+    console.error(`Document ID "${documento}" not found in cifin.`);
+    return null; // Or throw an error, return a default value, etc.
+    }
+    }
+cifin:Info={
   "3167398":{
     "result": {
         "IDCICREDTERCERO": "6426",
@@ -321,7 +343,6 @@ cifin={
         ]
     }
 }
-
   ,"80170625":{
     "result": {
         "IDCICREDTERCERO": "6821",
@@ -1642,8 +1663,8 @@ cifin={
         ]
     }
 }
-}
-beneficiar={
+    }
+infoBeneficiar:Info={
     "3167398":
     {
         "result": [
@@ -1834,5 +1855,69 @@ beneficiar={
         ]
     },
 
+    }
+creditosBeneficiar:Info={
+    "33792":{
+        "result": [
+            {
+                "CodError": 0,
+                "Registros": [
+                    {
+                        "MORA": "0",
+                        "ALTURA": "19",
+                        "PAGARE": "847728",
+                        "LINEA": "CONSUMO",
+                        "MONTO": "40000000",
+                        "PLAZO": "48",
+                        "FREC": "M",
+                        "PX": "C",
+                        "TASA": "22",
+                        "VRCUOTA": "1260243",
+                        "SALDO": "28151937"
+                    }
+                ]
+            }
+        ]
+    },
+    "40160":{
+            "result": [
+                {
+                    "CodError": 0,
+                    "Registros": [
+                        {
+                            "MORA": "0",
+                            "ALTURA": "49",
+                            "PAGARE": "810249",
+                            "LINEA": "INMOBILIARIO",
+                            "MONTO": "100000000",
+                            "PLAZO": "120",
+                            "FREC": "M",
+                            "PX": "N",
+                            "TASA": "12",
+                            "VRCUOTA": "1431395",
+                            "SALDO": "71199406"
+                        },
+                        {
+                            "MORA": "0",
+                            "ALTURA": "5",
+                            "PAGARE": "864878",
+                            "LINEA": "CONSUMO",
+                            "MONTO": "8000000",
+                            "PLAZO": "12",
+                            "FREC": "M",
+                            "PX": "N",
+                            "TASA": "13",
+                            "VRCUOTA": "711219",
+                            "SALDO": "4769632"
+                        }
+                    ]
+                }
+            ]
+        }
+    
+    }
 }
+
+interface Info {
+    [key: string]:any;
 }

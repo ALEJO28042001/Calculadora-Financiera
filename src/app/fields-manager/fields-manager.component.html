@@ -4,13 +4,13 @@
   
 
   <!-- Informacion del Producto -->
-  <div class="form-row" *ngFor="let field of keys| slice:0:1; ; let i = index">
+  <div class="form-row">
     <div class="input-data">
       <input type="chart" required class="input" 
-             placeholder=" " name="input{{i}}" 
-             [(ngModel)]="product[field]">
+             placeholder=" " name="Nombre Producto"
+             [(ngModel)]="product['Nombre Producto']">
       <div class="underline"></div>
-      <label>{{field}}</label>
+      <label>Nombre Producto</label>
     </div>
   </div>
   
@@ -18,26 +18,53 @@
       <div class="checkbox-wrapper">
         <label>Tarjeta</label>
         <input type="checkbox" name="tipo de producto" [(ngModel)]="isTarjeta" (change)="tipoDeProducto($event)">
-        <label>Coop</label>
-        <input type="checkbox" name="entidad" [(ngModel)]="isCoop" (change)="tipoDeEntidad($event)"/>
         <label>Ref</label>
         <input type="checkbox" name="refinanciamiento" [(ngModel)]="isRef" (change)="eleccionRef($event)"/>
       </div>
   </div>
   
-    <div class="form-row" *ngFor="let field of keys | slice:4:-1;; let i = index">
+  <div class="form-row" *ngFor="let field of [
+  'Deuda Actual',
+  'Plazo Actual',
+  'Pago Mensual',
+  'Tasa Entidad',
+  'Tasa Real',
+  'Diferencia Tasas',
+  'Interes Actual',
+  'Interes Beneficiar',
+  'Diferencia Interes'
+]; let i = index">
+<div class="input-data">
+  <input 
+    type="text" 
+    required 
+    class="input" 
+    placeholder=" " 
+    [name]="'input' + i" 
+    [(ngModel)]="product[field]"
+    onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || 
+          event.charCode == 46 && !this.value.includes('.')"
+    [ngStyle]="{'color': num(product[field]) < 0 ? 'red' : 'green'}" />
+  <div class="underline"></div>
+  <label>{{ field }}</label>
+</div>
+</div>
+ 
+
+    <div class="form-row">
       <div class="input-data">
         <input type="chart" required class="input" 
-               placeholder=" " name="input{{i}}" 
-               [(ngModel)]="product[field]"
-          onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || 
-          event.charCode == 46 && !this.value.includes('.')"
-               [ngStyle]="{'color': num(product[field]) < 0 ? 'red' : 'green'}">
+       placeholder=" " name="Tasa Beneficiar" 
+       [(ngModel)]="product['Tasa Beneficiar']"
+       (keypress)="allowNumbers($event)" 
+       
+       [ngStyle]="{'color': num(product['Tasa Beneficiar']) < 0 ? 'red' : 'green'}">
+
         <div class="underline"></div>
-        <label>{{field}}</label>
+        <label>Tasa Beneficiar</label>
       </div>
     </div>
-    
+
   </form>
   
   <!-- Buttons for different actions -->
@@ -90,7 +117,8 @@
         <label>Documento</label>
       </div>
     </div>
-    <button class="custom-button" (click)="searchData()"> Cifin</button>
+    
+    <button [disabled]="!documento" class="custom-button" (click)="searchData()"> GET DATA</button>
  
  </form>
  </div>

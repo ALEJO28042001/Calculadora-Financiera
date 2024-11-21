@@ -11,12 +11,12 @@ import { FormsModule } from '@angular/forms';
 })
 export class LoginComponent {
   
-  email: string = '';
+  cedula: string = '';
   password: string = '';
 
   onSubmit() {
-    if (this.email && this.password) {
-      console.log('Login Details:', { email: this.email, password: this.password });
+    if (this.cedula && this.password) {
+      console.log('Login Details:', { email: this.cedula, password: this.password });
       // Handle login logic here (e.g., call a service to authenticate)
     }
   }

@@ -16,48 +16,47 @@ export class FieldsManagerComponent implements OnInit{
   
   isRef: boolean = false;
   isTarjeta: boolean = false;
-  isCoop: boolean = false;
   productList: Array<{ [key: string]: string }> = [];
   selectedProductIndex: number | null = null; // For editing/deleting selected product
   showAllProducts = false; // To toggle product display
 
   ngOnInit() { 
     this.productList = this.DataService.getData();
+    this.documento=this.DataService.documento;
   }
   
   @Input() product: { [key: string]: string } = {
     "Nombre Producto": "",
     "Tarjeta":"false",
-    "Coop": "false",
     "Refinanciamiento": "true",
     "Deuda Actual": "",
     "Plazo Actual": "",
     "Pago Mensual": "",
     "Tasa Entidad": "",
-    "Tasa Beneficiar":"",
     "Tasa Real": "",
     "Diferencia Tasas": "",
     "Interes Actual": "",
     "Interes Beneficiar": "",
     "Diferencia Interes": "",
+    "Tasa Beneficiar":"",
   };   
   
   keys = ["Nombre Producto",
     "Tarjeta",
-    "Coop",
     "Refinanciamiento",
     "Deuda Actual",
     "Plazo Actual",
     "Pago Mensual",
     "Tasa Entidad",
-    "Tasa Beneficiar",
     "Tasa Real",
+    "Tasa Beneficiar",
     "Diferencia Tasas",
     "Interes Actual",
     "Interes Beneficiar",
-    "Diferencia Interes",];
+    "Diferencia Interes",
+  ];
 
-  addProduct() {    
+  addProduct() {   
     this.showInputValues();
     if (this.selectedProductIndex === null) {
       // Add a new product
@@ -72,7 +71,6 @@ export class FieldsManagerComponent implements OnInit{
   // Function to show all products
   toggleProductList() {
     this.showAllProducts = !this.showAllProducts;
-    this.showInputValues();
   }
   
   num(s:string){
@@ -85,7 +83,6 @@ export class FieldsManagerComponent implements OnInit{
     this.selectedProductIndex = index;
     this.product = { ...this.productList[index] }; 
     this.isTarjeta=this.product['Tarjeta']==='true';
-    this.isCoop=this.product['Coop']==='true';
     this.isRef=this.product['Refinanciamiento']==='true';
   }
 
@@ -99,7 +96,6 @@ export class FieldsManagerComponent implements OnInit{
     this.product = {
       "Nombre Producto": "",
       "Tarjeta": "false",
-      "Coop": "false",
       "Refinanciamiento": "true",
       "Deuda Actual": "",
       "Plazo Actual": "",
@@ -114,7 +110,6 @@ export class FieldsManagerComponent implements OnInit{
     };
     this.selectedProductIndex=null;
     this.isTarjeta = false;
-    this.isCoop = false;
     this.isRef = false;
   }
 
@@ -123,10 +118,6 @@ export class FieldsManagerComponent implements OnInit{
   this.product['Tarjeta']=String(this.isTarjeta);
   }
 
-  tipoDeEntidad(e:any){
-    this.isCoop = (e.target as HTMLInputElement).checked;
-    this.product['Coop']=String(this.isCoop);
-  }
 
   eleccionRef(e:any){
     this.isRef = (e.target as HTMLInputElement).checked;
@@ -169,8 +160,7 @@ export class FieldsManagerComponent implements OnInit{
         this.product['Tasa Real']=tasaReal.toFixed(2);
         this.product['Diferencia Tasas'] = (Number(this.product['Tasa Beneficiar'])-Number(this.product['Tasa Real'])).toFixed(2);
         this.product['Interes Actual'] = ((months*pago)-amount).toFixed(0);
-      }
-      
+      }      
     }   
 
   saveData() {
@@ -178,7 +168,31 @@ export class FieldsManagerComponent implements OnInit{
   }
 
   searchData(){
+    this.resetForm();
     this.DataService.pullData(this.documento);
-    this.ngOnInit();
+    this.productList = this.DataService.getData();
+    this.DataService.documento=this.documento;
+  }
+
+  allowNumbers(event:any) {
+    const charCode = event.charCode || event.keyCode;
+    // Allow numbers (0-9), and control keys like backspace
+    if ((charCode >= 48 && charCode <= 57) || charCode === 8 || charCode === 46) {
+        if(this.product[this.keys[8]].length>0){
+          return this.validateRange(this.product[this.keys[8]]+event.key);
+        }
+        else
+        return true;
+    }    
+    return false; // Block other characters
+}
+
+  validateRange(input:string){
+    const value=parseFloat(input);
+
+    if (value >= 6 && value <=  30) {
+      return true;
+    }
+    return false;
   }
 }

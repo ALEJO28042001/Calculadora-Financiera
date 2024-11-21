@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { TestApiComponent } from '../test-api/test-api.component';
 import { ApiService } from '../Services/api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -7,7 +6,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-page-not-found',
   standalone: true,
-  imports: [TestApiComponent,CommonModule,FormsModule],
+  imports: [CommonModule,FormsModule],
   templateUrl: './page-not-found.component.html',
   styleUrl: './page-not-found.component.css'
 })

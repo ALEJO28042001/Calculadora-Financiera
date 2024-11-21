@@ -6,20 +6,20 @@
   <div class="form-row">
     <div class="input-data">
     <input
-      type="email"
-      id="email"
-      name="email"
+      type="number"
+      id="cedula"
+      name="cedula"
       required
-      [(ngModel)]="email"
-      #emailModel="ngModel"
+      [(ngModel)]="cedula"
+      #cedulaModel="ngModel"
       placeholder=""
     />
     <div class="underline"></div>
-        <label>Email</label>
+        <label>Cedula</label>
 
-      <div *ngIf="emailModel.invalid && emailModel.touched" class="error">
-        <span *ngIf="emailModel.errors?.['required']">Email is required.</span>
-        <span *ngIf="emailModel.errors?.['email']">Invalid email format.</span>
+      <div *ngIf="cedulaModel.invalid && cedulaModel.touched" class="error">
+        <span *ngIf="cedulaModel.errors?.['required']">Cedula is required.</span>
+        <span *ngIf="cedulaModel.errors?.['cedula']">Invalid cedula format.</span>
       </div>
     </div>
   </div>

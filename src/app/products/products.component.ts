@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { GenerateChartComponent } from '../generate-chart/generate-chart.component';
-import { FieldsManagerComponent } from '../fields-manager/fields-manager.component';
 import { ViewChild } from '@angular/core';
-import { Page3Component } from "../page3/page3.component";
 import { DataService } from '../Services/data.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,12 +8,12 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [GenerateChartComponent, FieldsManagerComponent, Page3Component, CommonModule,FormsModule],
+  imports: [GenerateChartComponent, CommonModule,FormsModule],
   templateUrl: './products.component.html',
   styleUrl: './products.component.css'
 })
 
-export class ProductsComponent{
+export class ProductsComponent {
   constructor(private DataService: DataService) { }
 
   showCharts=false;
@@ -55,7 +53,6 @@ export class ProductsComponent{
   }
 
   getData(){
-    console.log(this.DataService.getData());
     if(this.DataService.getData().length>0)
       this.divisionProductos(this.DataService.getData());    
   }

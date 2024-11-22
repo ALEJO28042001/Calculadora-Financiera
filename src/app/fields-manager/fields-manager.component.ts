@@ -24,6 +24,10 @@ export class FieldsManagerComponent implements OnInit{
     this.productList = this.DataService.getData();
     this.documento=this.DataService.documento;
   }
+  upProduct(p:any){
+    this.product=p;
+    this.addProduct();
+  }
   
   @Input() product: { [key: string]: string } = {
     "Nombre Producto": "",
@@ -57,6 +61,10 @@ export class FieldsManagerComponent implements OnInit{
   ];
 
   addProduct() {   
+    for(let field of 
+      ["Deuda Actual", "Plazo Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar"]){
+      this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
+    }
     this.showInputValues();
     if (this.selectedProductIndex === null) {
       // Add a new product
@@ -64,7 +72,9 @@ export class FieldsManagerComponent implements OnInit{
     } else {
       // Update existing product
       this.productList[this.selectedProductIndex] = { ...this.product };
+      this.chooseProduct(this.selectedProductIndex);
     }
+    
     // this.resetForm();      
   }
 
@@ -84,6 +94,10 @@ export class FieldsManagerComponent implements OnInit{
     this.product = { ...this.productList[index] }; 
     this.isTarjeta=this.product['Tarjeta']==='true';
     this.isRef=this.product['Refinanciamiento']==='true';
+    for(let field of 
+      ["Deuda Actual", "Plazo Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar"]){
+      this.product[field]=this.formatNumber(Number(this.product[field]));
+    }
   }
 
   // Function to delete a product
@@ -148,7 +162,7 @@ export class FieldsManagerComponent implements OnInit{
     return r;
   }
   showInputValues() {  
-      let amount = Number(this.product['Deuda Actual']);
+      let amount = Number(this.product['Deuda Actual']);;
       let months = Number(this.product['Plazo Actual']);
       let pago = Number(this.product['Pago Mensual']);
       
@@ -163,15 +177,12 @@ export class FieldsManagerComponent implements OnInit{
       }      
     }   
 
-  saveData() {
-    this.DataService.setData(this.productList);
-  }
-
   searchData(){
-    this.resetForm();
+    this.productList=[];
     this.DataService.pullData(this.documento);
-    this.productList = this.DataService.getData();
+    this.DataService.getData().map(p=>this.upProduct(p));
     this.DataService.documento=this.documento;
+    this.resetForm();
   }
 
   allowNumbers(event:any) {
@@ -194,5 +205,11 @@ export class FieldsManagerComponent implements OnInit{
       return true;
     }
     return false;
+  }
+
+
+  formatNumber(n:number) {
+    return Number(n).
+      toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });   
   }
 }

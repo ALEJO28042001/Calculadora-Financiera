@@ -11,7 +11,10 @@ export class DataService {
   nombreCliente:string='';
   apalancamiento=0;
   documento='';
-  
+
+  getApalancamiento(){
+    return this.apalancamiento;
+  }
 
   setData(data:Array<{ [key: string]: string }>){
     this.productList=data;
@@ -22,6 +25,12 @@ export class DataService {
   addProduct(product: {[key: string]:string}){
     this.productList.push(product);
     }
+  updateProduct(product :{[key: string]:string},index:number){
+    this.productList[index]=product;
+  }
+  deleteProduct(index:number){
+    this.productList.slice(index,1);
+  }
   pullData(documento:string){
     //Se consulta la info del asociado
     const basicClientInfo=this.apiService.getBeneficiarInfo(documento);
@@ -38,7 +47,7 @@ export class DataService {
             Number(basicClientInfo.Registros[1].VALORCONSOLIDADO));  
 
     this.setData(this.convertData(cifinProducts,cifinKeys));
-    beneficiarProducts.map((item: any) => this.addProduct(this.renameKeys(item, beneficiarKeys)));      
+    beneficiarProducts.map((item: any) => this.addProduct(this.renameKeys(item, beneficiarKeys)));  
     }
   convertData(registros:any ,newKeysMapping:any){
     return registros.map((item: any) => this.renameKeys(item, newKeysMapping));

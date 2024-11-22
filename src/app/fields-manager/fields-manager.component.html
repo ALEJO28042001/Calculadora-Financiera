@@ -36,15 +36,16 @@
 ]; let i = index">
 <div class="input-data">
   <input 
-    type="text" 
+    type="chart"
     required 
     class="input" 
     placeholder=" " 
     [name]="'input' + i" 
     [(ngModel)]="product[field]"
     onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || 
-          event.charCode == 46 && !this.value.includes('.')"
-    [ngStyle]="{'color': num(product[field]) < 0 ? 'red' : 'green'}" />
+      event.charCode == 46 && !this.value.includes('.')"
+      [ngStyle]="{'color': num(product[field]) < 0 ? 'red' : 'green'}"
+     />
   <div class="underline"></div>
   <label>{{ field }}</label>
 </div>
@@ -56,10 +57,8 @@
         <input type="chart" required class="input" 
        placeholder=" " name="Tasa Beneficiar" 
        [(ngModel)]="product['Tasa Beneficiar']"
-       (keypress)="allowNumbers($event)" 
-       
+       (keypress)="allowNumbers($event)"       
        [ngStyle]="{'color': num(product['Tasa Beneficiar']) < 0 ? 'red' : 'green'}">
-
         <div class="underline"></div>
         <label>Tasa Beneficiar</label>
       </div>
@@ -75,9 +74,7 @@
     <button *ngIf="productList.length > 0" class="custom-button" (click)="resetForm()">Nuevo Producto  </button>
     <button *ngIf="productList.length > 0" class="custom-button" (click)="toggleProductList() ">Mostrar Productos</button> 
     <button *ngIf="productList.length > 0" class="custom-button delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
-  
-    <button *ngIf="productList.length > 0" class="custom-button" (click)="saveData()">Guardar Productos</button>
-  
+    
   <!-- Dropdown to choose a product for edit/delete -->
   <div *ngIf="productList.length > 0" class="dropdown-group">
     <select [(ngModel)]="selectedProductIndex" class="dropdown"

@@ -1,4 +1,3 @@
-// Import necessary modules in your Angular service
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -49,15 +48,16 @@ export class ApiService {
     }
     }
   getBeneficiarProducts(codAsociado:string){
-    const consultaBeneficiar = this.creditosBeneficiar[codAsociado];////////////////// Cambiar al service
+    const consultaCreditosBeneficiar = this.creditosBeneficiar[codAsociado];////////////////// Cambiar al service
 
-    if (consultaBeneficiar) {
-    return consultaBeneficiar.result[0].Registros;
-    } else {
-    // Handle the case where the key is not found
-    console.error(`Asociado ID "${codAsociado}" not found in cifin.`);
-    return null; // Or throw an error, return a default value, etc.
-    }
+    if (consultaCreditosBeneficiar) {
+        return consultaCreditosBeneficiar.result[0].Registros;
+        } 
+    else {
+        // Handle the case where the key is not found
+        console.error(`Asociado ID "${codAsociado}" not found in Beneficiar.`);
+        return null; // Or throw an error, return a default value, etc.
+        }
     }  
   getCifinProducts(documento:string){
     const consultaCifin = this.cifin[documento];////////////////// Cambiar al service
@@ -70,6 +70,18 @@ export class ApiService {
     return null; // Or throw an error, return a default value, etc.
     }
     }
+  getLoginInfo(documento:string,clave:string){
+    const consultaLogin = this.login[documento];////////////////// Cambiar al service
+    //cod error ; nombres y apellidos
+    if (consultaLogin) {
+
+    return consultaLogin.result[0];
+    } else {
+    // Handle the case where the key is not found
+    console.error(`Document ID "${documento}" not found in cifin.`);
+    return ""; // Or throw an error, return a default value, etc.
+    }
+  }
 cifin:Info={
   "3167398":{
     "result": {
@@ -1916,8 +1928,55 @@ creditosBeneficiar:Info={
         }
     
     }
+rotativoBeneficiar:Info={
+    "40160":{
+    "result": [
+        {
+            "CodError": 0,
+            "Registros": [
+                {
+                    "TARJETA": "16406",
+                    "LINEA": "CREDITO ROTATIVO",
+                    "MONTO": "10000000",
+                    "FREC": "M",
+                    "PX": "C",
+                    "TASA": "21",
+                    "SALDO": "9513542"
+                }
+            ]
+        }
+    ]
+    }
+    }
+login:Info={
+    "3167398":
+    {
+        "result": [
+            {
+                "CAMBIARCLAVE": "",
+                "CODAFILIADO": "40160",
+                "NOMBRES": "PRUEBAS  BENEFICIAR",
+                "APELLIDOS": "AMBIENTE DE",
+                "TIPDOCUMENTO": "C",
+                "CODESTADOAFILIADO": "2",
+                "EMAILPERSONAL": "analistarequerimientosoym@beneficiar.com.co",
+                "EMAILEMPRESA": "analistarequerimientosoym@beneficiar.com.co",
+                "CELULAR": "3058124180",
+                "DIRECCION": "Carrera 30 A 90 B 20 Norte",
+                "TELEFONO": "7777777",
+                "CODOFICINA": "3",
+                "CODENTIDAD": "4",
+                "ENTIDAD": "BENEFICIAR ENTIDAD COOPERATIVA",
+                "BARRIO": "BARRIO PRUEBA",
+                "CIUDADRESIDENCIA": "11001",
+                "TIPOUSUARIO": "1",
+                "CodError": -1,
+                "DESCRIPCION": "OK"
+            }
+        ]
+    }
 }
-
+}
 interface Info {
     [key: string]:any;
 }

@@ -42,12 +42,10 @@
     placeholder=" " 
     [name]="'input' + i" 
     [(ngModel)]="product[field]"
-    onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || 
-      event.charCode == 46 && !this.value.includes('.')"
-      [ngStyle]="{'color': num(product[field]) < 0 ? 'red' : 'green'}"
-     />
+    (keyup)="fNumber(field)"
+    >
   <div class="underline"></div>
-  <label>{{ field }}</label>
+  <label>{{ field | titlecase }}</label>
 </div>
 </div>
  
@@ -101,15 +99,14 @@
   </div>
   
 <div>
-  <form class="form">
-  
-
-    <!-- Informacion del Producto -->
-    <div class="form-row">
+  <form class="form" *ngIf="access">
+      <div class="form-row">
       <div class="input-data">
         <input type="chart" required class="input" 
                placeholder=" " name="documento" 
-               [(ngModel)]="documento">
+               [(ngModel)]="documento"
+               (keyup)="documentoNumber()"
+               >
         <div class="underline"></div>
         <label>Documento</label>
       </div>

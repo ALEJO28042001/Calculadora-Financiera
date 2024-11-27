@@ -78,7 +78,7 @@ export class ApiService {
     return consultaLogin.result[0];
     } else {
     // Handle the case where the key is not found
-    console.error(`Document ID "${documento}" not found in cifin.`);
+    console.error("Bad Info");
     return ""; // Or throw an error, return a default value, etc.
     }
   }

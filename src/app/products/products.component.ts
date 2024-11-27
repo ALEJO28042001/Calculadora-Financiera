@@ -12,138 +12,282 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './products.component.html',
   styleUrl: './products.component.css'
 })
+export class ProductsComponent implements OnInit {
+  info: Info = {
+    'todosLosProductosList': [],
+    'tarjetasRefinanciamientoList': [],
+    'creditosRefinanciamientoList': [],
+    'showCharts': false,
+    'tasaUsura': 28.8,
+    'tasaCreditoBeneficiar': 13,
+    'tasaRotativoBeneficiar': 20,
+    'totalCreditos': '',
+    'totalTarjetas': '',
+    'liquidez': '',
+    'ingresos': '',
+    'plazoCredito': null,
+    'plazoRotativo': null,
+    'pagoCreditoBeneficiar': '',
+    'pagoRotativoBeneficiar': '',
+    'pagoCreditoActual': '',
+    'pagoRotativoActual': '',
+    'interesCreditoActual': '',
+    'interesTarjetaActual': '',
+    'interesCreditoBeneficiar': '',
+    'interesRotativoBeneficiar': '',
+    'apalancamiento': '',
+    'nombreCliente': '',
+  };
 
-export class ProductsComponent implements OnInit{
-  ngOnInit() {     
-    if(this.DataService.getData().length>0)
-      this.divisionProductos(this.DataService.getData());    
-      this.apalancamiento = this.formatNumber(this.DataService.getApalancamiento());
+  @ViewChild('todosLosProductos') todosLosProductos!: GenerateChartComponent;
+  @ViewChild('tarjetasRefinanciamiento') tarjetasRefinanciamiento!: GenerateChartComponent;
+  @ViewChild('creditosRefinanciamiento') creditosRefinanciamiento!: GenerateChartComponent;
+  @ViewChild('resumenInteres') resumenInteres!: GenerateChartComponent;
+  @ViewChild('resumenFlujoCaja') resumenFlujoCaja!: GenerateChartComponent;
+
+  constructor(private DataService: DataService) {}
+
+  ngOnInit() {
+    if (this.DataService.getData().length > 0) {
+      this.info["apalancamiento"] = this.formatNumber(this.DataService.getApalancamiento());
+      this.info["nombreCliente"] = this.DataService.getNombreCliente();
+      this.divisionProductos(this.DataService.getData());
+    }
   }
-  constructor(private DataService: DataService) { }
 
-    // Todos los Productos
-    @ViewChild('todosLosProductos') todosLosProductos!: GenerateChartComponent;
-    todosLosProductosList = Array<{ [key: string]: string }>;
-    // Productos a Refinanciar
-    // @ViewChild('productosRefinanciamiento') productosRefinanciamiento!: GenerateChartComponent;
-    // productosRefinanciamientoList = Array<{ [key: string]: string }>;
-    @ViewChild('tarjetasRefinanciamiento') tarjetasRefinanciamiento!: GenerateChartComponent;
-    tarjetasRefinanciamientoList: any;
-    @ViewChild('creditosRefinanciamiento') creditosRefinanciamiento!: GenerateChartComponent; // Corrected variable name
-    creditosRefinanciamientoList : any;
-  
-    // Productos con Beneficiar
-    // @ViewChild('productosBeneficiar') productosBeneficiar!: GenerateChartComponent;
-    // productosBeneficiarList = Array<{ [key: string]: string }>;
-  
-    // Propuestas
-    // @ViewChild('creditosBeneficiar') creditosBeneficiar!: GenerateChartComponent;
-    // creditosBeneficiarList = Array<{ [key: string]: string }>;
-    // @ViewChild('tarjetasBeneficiar') tarjetasBeneficiar!: GenerateChartComponent;
-    // tarjetasBeneficiarList = Array<{ [key: string]: string }>;
-  
-    @ViewChild('resumenInteres') resumenInteres!:GenerateChartComponent;
-    @ViewChild('resumenFlujoCaja') resumenFlujoCaja!:GenerateChartComponent;
+  getKeys(){return  Object.keys(this.info);}
 
-  showCharts=false;
-  tasaUsura = 28.8;
-  tasaCreditoBeneficiar=13;
-  tasaRotativoBeneficiar=20;
-  totalCreditos='';
-  totalTarjetas='';
-  liquidez = '';
-  ingresos = '';
-  plazoCredito = 0;
-  plazoRotativo = 0;
-  pagoCredito = '';
-  pagoRotativo = '';
-  interesCreditoActual = ''; 
-  interesTarjetaActual = ''; 
-  interesCreditoBeneficiar = ''; 
-  interesRotativoBeneficiar = '';
-  apalancamiento=''; 
+  calculate() {
+    this.info["pagoCreditoBeneficiar"] = this.formatNumber(
+      this.calculateMonthlyPayment(
+        this.info["plazoCredito"],
+        this.info["tasaCreditoBeneficiar"],
+        Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
+          Number(this.info["liquidez"].replace(/[^0-9]/g, ''))
+      )
+    );
 
-  calculate(){
-    // Liquidación pagos, nuevos productos beneficiar
-    this.pagoCredito=this.formatNumber(this.calculateMonthlyPayment(this.plazoCredito, 
-      this.tasaCreditoBeneficiar,
-      Number(this.totalCreditos.replace(/[^0-9]/g, ''))+Number(this.liquidez.replace(/[^0-9]/g, ''))));
+    this.info["pagoRotativoBeneficiar"] = this.formatNumber(
+      this.calculateMonthlyPayment(
+        this.info["plazoRotativo"],
+        this.info["tasaRotativoBeneficiar"],
+        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
+      )
+    );
 
-    this.pagoRotativo=this.formatNumber(this.calculateMonthlyPayment(this.plazoRotativo,
-      this.tasaRotativoBeneficiar,Number(this.totalTarjetas.replace(/[^0-9]/g, ''))));
+    this.info["interesCreditoBeneficiar"] = this.formatNumber(
+      Number(this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoCredito"] -
+        (Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
+          Number(this.info["liquidez"].replace(/[^0-9]/g, '')))
+    );
 
-    // Calculo de los intereses
-    this.interesCreditoBeneficiar=this.formatNumber(
-      (Number(this.pagoCredito.replace(/[^0-9]/g, ''))*this.plazoCredito)
-      -(Number(this.totalCreditos.replace(/[^0-9]/g, ''))+
-      Number(this.liquidez.replace(/[^0-9]/g, '')))); 
+    this.info["interesRotativoBeneficiar"] = this.formatNumber(
+      Number(this.info["pagoRotativoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoRotativo"] -
+        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
+    );
 
-    this.interesRotativoBeneficiar=this.formatNumber(
-      (Number(this.pagoRotativo.replace(/[^0-9]/g, ''))*this.plazoRotativo)
-      -(Number(this.totalTarjetas.replace(/[^0-9]/g, ''))));  
-      
-    this.interesTarjetaActual=this.formatNumber(
-        (Number(this.calculateMonthlyPayment(
-        this.plazoRotativo,this.tasaUsura,
-        (Number(this.totalTarjetas.replace(/[^0-9]/g, ''))))
-      ))
-        *this.plazoRotativo);
-        -Number(this.totalTarjetas.replace(/[^0-9]/g, ''));
-        console.log(this.interesTarjetaActual);
+    this.info["interesTarjetaActual"] = this.formatNumber(
+      Number(
+        this.calculateMonthlyPayment(
+          this.info["plazoRotativo"],
+          this.info["tasaUsura"],
+          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
+        )
+      ) *
+        this.info["plazoRotativo"] -
+        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
+    );
+
+    this.generateResume();
+  }
+
+  calcularTotalesRef() {
+    let totalCreditos = 0;
+    let interesCreditos = 0;
+    let totalTarjetas = 0;
+
+    for (const index in this.info["creditosRefinanciamientoList"]) {
+      totalCreditos += Number(
+        this.info["creditosRefinanciamientoList"][index]["Deuda Actual"].replace(/[^0-9]/g, '')
+      );
+      interesCreditos += Number(
+        this.info["creditosRefinanciamientoList"][index]["Interes Actual"].replace(/[^0-9]/g, '')
+      );
+    }
+
+    for (const index in this.info["tarjetasRefinanciamientoList"]) {
+      totalTarjetas += Number(
+        this.info["tarjetasRefinanciamientoList"][index]["Deuda Actual"].replace(/[^0-9]/g, '')
+      );
+    }
+    this.info["totalCreditos"] = this.formatNumber(totalCreditos);
+    this.info["totalTarjetas"] = this.formatNumber(totalTarjetas);
+    this.info["interesCreditoActual"] = this.formatNumber(interesCreditos);
+  }
+
+  interestChart() {
+    this.resumenInteres.chartData.labels = ['Creditos', 'Rotativo'];
+    this.resumenInteres.chartData.datasets[0].data = [
+      this.info["totalCreditos"].replace(/[^0-9]/g, ''),
+      this.info["totalTarjetas"].replace(/[^0-9]/g, ''),
+    ];
+    this.resumenInteres.chartData.datasets[1].data = [
+      this.info["interesCreditoActual"].replace(/[^0-9]/g, ''),
+      this.info["interesTarjetaActual"].replace(/[^0-9]/g, ''),
+    ];
+    this.resumenInteres.chartData.datasets[2].data = [      
+      this.info["totalCreditos"].replace(/[^0-9]/g, ''),
+      this.info["totalTarjetas"].replace(/[^0-9]/g, ''),
+    ];
     
-        this.generateResume();
+    this.resumenInteres.chartData.datasets[3].data = [
+      this.info["interesCreditoBeneficiar"].replace(/[^0-9]/g, ''),
+      this.info["interesRotativoBeneficiar"].replace(/[^0-9]/g, ''),
+    ];
+
+
+    this.resumenInteres.chartData.datasets.push({
+      label: 'Liquidez',
+      data: [
+        this.info["liquidez"].replace(/[^0-9]/g, ''),
+      ],
+      backgroundColor: 'rgba(0  , 109, 27, 0.6)',
+      borderColor: 'rgba(235, 109, 27, 0.6)',
+      borderWidth: 1,
+      stack: 'Stack 1',
+    })
+    this.resumenInteres.chart.update();
   }
 
+  paymentChart() {
+    let pagoActualCreditos = 0;
+    
+    for (let i = 0; i < this.info["creditosRefinanciamientoList"].length; i++) {
+      pagoActualCreditos += Number(
+        this.info["creditosRefinanciamientoList"][i]["Pago Mensual"].replace(/[^0-9]/g, '')
+      );
+    }
 
+    let pagoActualTarjetas = 0;
+    for (let i = 0; i < this.info["tarjetasRefinanciamientoList"].length; i++) {
+      pagoActualTarjetas += Number(
+        this.info["tarjetasRefinanciamientoList"][i]["Pago Mensual"].replace(/[^0-9]/g, '')
+      );
+    }
 
+    this.info["pagoCreditoActual"] = this.formatNumber(pagoActualCreditos);
+    this.info["pagoRotativoActual"] = this.formatNumber(pagoActualTarjetas);
 
-// Function to filter products based on multiple key-value conditions
-filterProducts = (filters: Array<{ key: string, value: string }>, productList: Array<{ [key: string]: string }>) => {
-  return productList.filter(product =>
-      filters.every(filter => product[filter.key] === filter.value)
-  );
-};
+    this.resumenFlujoCaja.chartData.labels = ['Creditos', 'Rotativo'];
+    this.resumenFlujoCaja.chartData.datasets = [
+      {
+        label: 'Pago Beneficiar',
+        data: [
+          this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, ''),
+          this.info["pagoRotativoBeneficiar"].replace(/[^0-9]/g, ''),
+        ],
+        backgroundColor: 'rgba(235, 109, 27, 0.6)',
+        borderColor: 'rgba(235, 109, 27, 0.6)',
+        borderWidth: 1,
+        stack: 'Stack 0',
+      },
+      {
+        label: 'Ahorro',
+        data: [
+          this.info["ingresos"].replace(/[^0-9]/g, ''),
+        ],
+        backgroundColor: 'rgba(0, 255, 0, 0.6)',
+        borderColor: 'rgba(235, 109, 27, 0.6)',
+        borderWidth: 1,
+        stack: 'Stack 0',
+      },
+      {
+        label: 'Pago Actual',
+        data: [pagoActualCreditos, pagoActualTarjetas],
+        backgroundColor: 'rgba(75, 192, 192, 1)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+        stack: 'Stack 1',
+      },
+    ];
 
-divisionProductos(productList: Array<{ [key: string]: string }>) {
-  console.log("Todos los Productos:",productList);
-
-  // this.updateChartWithProducts(this.todosLosProductos, productList);
-  // this.updateChartWithProducts(this.productosRefinanciamiento,
-  //     this.filterProducts([{ key: 'Refinanciamiento', value: 'true' }], productList));
-  // this.updateChartWithProducts(this.productosBeneficiar,
-  //     this.filterProducts([{ key: 'Coop', value: 'true' }], productList));
+    this.resumenFlujoCaja.chart.update();
+  }
+  formatNumber(value: number): string {
+    return value.toLocaleString('en-US', {maximumFractionDigits:0});
+  }
+  fNumber(key:string) {
+    let p=this.info[key].replace(/[^0-9]/g, '');
+    this.info[key] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }  
+  calculateMonthlyPayment(plazo: number, tasa: number, monto: number): number {
+    const monthlyRate = tasa / 100 / 12; // Convert annual rate to monthly rate
+    if (plazo === 0 || monto === 0) {
+      return 0;
+    }
+    return (monto * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -plazo));
+  }
+  divisionProductos(data: any[]): void {
+    this.info["creditosRefinanciamientoList"] = data.filter(
+      (item) => item['Tarjeta'] === 'false' && item['Refinanciamiento'] === 'true');
+    this.info["tarjetasRefinanciamientoList" ] = data.filter(
+      (item) => item['Tarjeta'] === 'true' && item['Refinanciamiento'] === 'true');
   
-  this.tarjetasRefinanciamientoList=
-  this.filterProducts([
-        { key: 'Refinanciamiento', value: 'true' },
-        { key: 'Tarjeta', value: 'true' }]
-        , productList);
-  // this.updateChartWithProducts(this.tarjetasRefinanciamiento,
-  //   this.tarjetasRefinanciamientoList);
+    // Update "todosLosProductosList" with all items
+    this.info["todosLosProductosList"] = data;
+  
+    // Update charts or related components if necessary
+    // this.todosLosProductos.chartData = { labels: [], datasets: [] };
+    this.calcularTotalesRef();
+  }
+  generateResume(): void {
+    this.paymentChart();
+    this.interestChart();
+  }     
 
-  this.creditosRefinanciamientoList=
-  this.filterProducts([
-          { key: 'Refinanciamiento', value: 'true' },
-          { key: 'Tarjeta', value: 'false' }
-      ], productList);
-
-  // this.updateChartWithProducts(this.creditosRefinanciamiento,
-  //   this.creditosRefinanciamientoList);
-
-  this.calcularTotalesRef();
-}
-
-  formatNumber(n:number) {
-    return Number(n).
-      toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });    
+  displayName(n:string):string{
+    n= n
+    // Insert a space before each uppercase letter
+    .replace(/([A-Z])/g, ' $1')
+    // Capitalize the first letter of each word
+    return n;
   }
 
-  allowNumbers(event:any,tasa:number) {
+  getCategorizedKeys() {
+    return {
+      general: [
+        'liquidez', 
+        'ingresos', 
+        'apalancamiento', 
+        'nombreCliente'
+      ],
+      credit: [
+        'totalCreditos', 
+        'plazoCredito', 
+        'pagoCreditoActual', 
+        'pagoCreditoBeneficiar',
+        'interesCreditoActual', 
+        'interesCreditoBeneficiar', 
+        // 'tasaCreditoBeneficiar'
+      ],
+      rotativo: [
+        'totalTarjetas', 
+        'plazoRotativo', 
+        'pagoRotativoActual', 
+        'pagoRotativoBeneficiar',
+        'interesTarjetaActual', 
+        'interesRotativoBeneficiar', 
+        // 'tasaRotativoBeneficiar'
+      ]
+    };
+  }  
+
+  allowNumbers(event:any,key:string) {
     const charCode = event.charCode || event.keyCode;
     // Allow numbers (0-9), and control keys like backspace
     if ((charCode >= 48 && charCode <= 57) || charCode === 8 || charCode === 46) {
-        if(tasa){
-          return this.validateRange(tasa+event.key);
+        if(this.info[key].length>0){
+          return this.validateRange(this.info[key]+event.key);
         }
         else
         return true;
@@ -159,129 +303,11 @@ divisionProductos(productList: Array<{ [key: string]: string }>) {
     }
     return false;
   }
+}
 
-  calcularTotalesRef(){
-    let totalCreditos=0;
-    let interesCreditos=0;    
-    let totalTarjetas=0;
-
-    for(const index in this.creditosRefinanciamientoList){
-      totalCreditos+=Number(this.creditosRefinanciamientoList[index]
-        ['Deuda Actual'].replace(/[^0-9]/g, ''));
-      interesCreditos+=Number(this.creditosRefinanciamientoList[index]
-        ['Interes Actual'].replace(/[^0-9]/g, ''));
-    }
-
-    for(const index in this.tarjetasRefinanciamientoList){
-      totalTarjetas+=Number(this.tarjetasRefinanciamientoList[index]
-        ['Deuda Actual'].replace(/[^0-9]/g, ''));
-    }
-
-    this.totalCreditos=this.formatNumber(totalCreditos);
-    this.totalTarjetas=this.formatNumber(totalTarjetas);
     
-    this.interesCreditoActual=this.formatNumber(interesCreditos);
-    
-  }
-  
-  calculateMonthlyPayment(months: number, annualInterestRate: number, loanAmount: number): number {
-    if(months>0 && annualInterestRate>0 && loanAmount>0){
-      // Convert annual interest rate to a monthly rate (decimal form)
-      const monthlyInterestRate = annualInterestRate / 100 / 12;
-    
-      // Calculate the monthly payment using the amortization formula
-      const monthlyPayment = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) /
-                            (Math.pow(1 + monthlyInterestRate, months) - 1);
-      return monthlyPayment;
-    }
-    return 0;
-  }
-
-  generateResume(){
-    this.interestChart();
-    this.paymentChart();
-  }
-
-  interestChart(){
-    this.resumenInteres.chartData.labels = ['Creditos','Tarjetas'];
-    this.resumenInteres.chartData.datasets[0].data = [this.totalCreditos,this.totalTarjetas];
-    this.resumenInteres.chartData.datasets[1].data = [this.interesCreditoActual,this.interesTarjetaActual];
-    this.resumenInteres.chartData.datasets[2].data = [this.totalCreditos,this.totalTarjetas]; 
-    this.resumenInteres.chartData.datasets[3].data = [this.interesCreditoBeneficiar,this.interesRotativoBeneficiar];
-    this.resumenInteres.chart.update();
-  }
-
-  paymentChart(){
-    let pagoActualCreditos = 0;
-    for(let i=0;i<this.creditosRefinanciamientoList.length;i++)
-    {
-      pagoActualCreditos+=Number(this.creditosRefinanciamientoList[i]['Pago Mensual'].replace(/[^0-9]/g, ''));
-    }
-    let pagoActualTarjetas = 0;
-    for(let i=0;i<this.tarjetasRefinanciamientoList.length;i++)
-    {
-      pagoActualTarjetas+=Number(this.tarjetasRefinanciamientoList[i]['Pago Mensual'].replace(/[^0-9]/g, ''));
-    }
-
-    this.resumenFlujoCaja.chartData.labels = ['Creditos','Tarjetas'];
-    this.resumenFlujoCaja.chartData.datasets = [{
-      label: 'Pago Beneficiar',
-      data: [this.pagoCredito,this.pagoRotativo],
-      backgroundColor: 'rgba(235, 109, 27, 0.6)',
-      borderColor: 'rgba(235, 109, 27, 0.6)',
-      borderWidth: 1,
-      stack: 'Stack 0'
-      },
-      {
-      label: 'Ahorro Beneficiar',
-      data: [this.ingresos],
-      backgroundColor: 'rgba(0, 255, 0, 0.6)',
-      borderColor: 'rgba(0, 255, 0, 0.6)',
-      borderWidth: 1,
-      stack: 'Stack 0'
-      },
-      {
-        label: 'Pago Actual',
-        data: [pagoActualCreditos,pagoActualTarjetas],
-        backgroundColor: 'rgba(75, 192, 192, 1)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-        stack: 'Stack 1'
-      },
-    ];
-    
-    this.resumenFlujoCaja.chart.update();
-  }
-
-  updateChartWithProducts(chart:GenerateChartComponent,productList: Array<{ [key: string]: string }>) {
-
-    const interesActual = productList.map(product => 
-      Number(product["Interes Actual"]|| 0));
-    const interesBeneficiar = productList.map(product => 
-      Number(product["Interes Beneficiar"].replace || 0));
-    const deudaActual = productList.map(product => Number(product["Deuda Actual"] || 0));
-
-    const totalActual = interesActual.reduce((sum, currentValue) => sum + currentValue, 0);
-    const totalBeneficiar = interesBeneficiar.reduce((sum, currentValue) => sum + currentValue, 0);
-    const diferenciaTotal = totalActual - totalBeneficiar;
-
-    chart.chartData.labels = productList.map(product => product["Nombre Producto"] || '');
-    
-    chart.chartData.datasets[0].data = deudaActual;
-    chart.chartData.datasets[1].data = interesActual;
-    chart.chartData.datasets[2].data = deudaActual; 
-    chart.chartData.datasets[3].data = interesBeneficiar;
-
-    chart.chartData.labels.push('Total');
-    chart.chartData.datasets[0].data.push(deudaActual.reduce((sum, current) => sum + current, 0)); 
-    chart.chartData.datasets[2].data.push(totalBeneficiar); 
-    chart.chartData.datasets[1].data.push(totalActual); 
-    chart.chartData.datasets[3].data.push(totalBeneficiar); 
-
-    chart.chartData.datasets[4].data.push(diferenciaTotal);
-
-    chart.chart.update();
-  }
+interface Info {
+  [key: string]:any;
 }
 
 

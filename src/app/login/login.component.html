@@ -1,52 +1,43 @@
-<div class="component">
+<div class="component" *ngIf="!access">
 <form class="form">
   <div class="form-row">
   <img class="img" src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" alt="">
   </div>
   <div class="form-row">
     <div class="input-data">
-    <input
-      type="number"
-      id="cedula"
-      name="cedula"
-      required
-      [(ngModel)]="cedula"
-      #cedulaModel="ngModel"
-      placeholder=""
-    />
-    <div class="underline"></div>
-        <label>Cedula</label>
-
-      <div *ngIf="cedulaModel.invalid && cedulaModel.touched" class="error">
-        <span *ngIf="cedulaModel.errors?.['required']">Cedula is required.</span>
-        <span *ngIf="cedulaModel.errors?.['cedula']">Invalid cedula format.</span>
+      <input
+        type="chart"
+        required
+        class="input"
+        placeholder=" "
+        [name]="'input cedula'"
+        [(ngModel)]="cedula"
+        (keyup)="fNumber('')"
+      >
+      <div class="underline"></div>
+          <label>Cedula</label>
       </div>
+  </div>  
+     
+  <div class="form-row">
+    <div class="input-data">
+    <input
+      type="password"
+      id="password"
+      class="input"
+      name="password"
+      required
+      [(ngModel)]="password"
+      placeholder=""
+    >
+    <div class="underline"></div>
+        <label>Password</label>
     </div>
   </div>
-  
-      <!-- Password Input -->
-      <div class="form-row">
-        <div class="input-data">
-        <input
-          type="password"
-          id="password"
-          name="password"
-          required
-          [(ngModel)]="password"
-          #passwordModel="ngModel"
-          placeholder=""
-        />
-        <div class="underline"></div>
-            <label>Password</label>
-
-        <div *ngIf="passwordModel.invalid && passwordModel.touched" class="error">
-          <span *ngIf="passwordModel.errors?.['required']">Password is required.</span>
-          <span *ngIf="passwordModel.errors?.['minlength']">
-            Password must be at least 6 characters long.
-          </span>
-        </div>
-        </div>
-      </div>
       <button class="custom-button" (click)="onSubmit()">Ingresar</button>
 </form>
+</div>
+
+<div *ngIf="access" routerLink="/Products">
+  <div>Welcome {{nombreFuncionario}}</div>
 </div>

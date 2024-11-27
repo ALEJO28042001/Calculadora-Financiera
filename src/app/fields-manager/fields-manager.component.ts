@@ -19,10 +19,12 @@ export class FieldsManagerComponent implements OnInit{
   productList: Array<{ [key: string]: string }> = [];
   selectedProductIndex: number | null = null; // For editing/deleting selected product
   showAllProducts = false; // To toggle product display
+  access=false;
 
   ngOnInit() { 
     this.productList = this.DataService.getData();
     this.documento=this.DataService.documento;
+    this.access = this.DataService.getAccess();
   }
   upProduct(p:any){
     this.product=p;
@@ -94,9 +96,10 @@ export class FieldsManagerComponent implements OnInit{
     this.product = { ...this.productList[index] }; 
     this.isTarjeta=this.product['Tarjeta']==='true';
     this.isRef=this.product['Refinanciamiento']==='true';
+    
     for(let field of 
       ["Deuda Actual", "Plazo Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar"]){
-      this.product[field]=this.formatNumber(Number(this.product[field]));
+      this.product[field]=this.formatNumber(Number(this.product[field].replace(/[^0-9]/g, '')));
     }
   }
 
@@ -179,9 +182,9 @@ export class FieldsManagerComponent implements OnInit{
 
   searchData(){
     this.productList=[];
-    this.DataService.pullData(this.documento);
+    this.DataService.pullData(this.documento.replace(/[^0-9]/g, ''));
     this.DataService.getData().map(p=>this.upProduct(p));
-    this.DataService.documento=this.documento;
+    this.DataService.documento=this.documento.replace(/[^0-9]/g, '');
     this.resetForm();
   }
 
@@ -189,10 +192,10 @@ export class FieldsManagerComponent implements OnInit{
     const charCode = event.charCode || event.keyCode;
     // Allow numbers (0-9), and control keys like backspace
     if ((charCode >= 48 && charCode <= 57) || charCode === 8 || charCode === 46) {
-        if(this.product[this.keys[8]].length>0){
-          return this.validateRange(this.product[this.keys[8]]+event.key);
-        }
-        else
+        // if(this.product[this.keys[8]].length>0){
+        //   return this.validateRange(this.product[this.keys[8]]+event.key);
+        // }
+        // else
         return true;
     }    
     return false; // Block other characters
@@ -207,9 +210,15 @@ export class FieldsManagerComponent implements OnInit{
     return false;
   }
 
-
-  formatNumber(n:number) {
-    return Number(n).
-      toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });   
+  fNumber(key:string) {
+    let p=this.product[key].replace(/[^0-9.]/g, '');
+    this.product[key] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  documentoNumber() {
+    let p=this.documento.replace(/[^0-9.]/g, '');
+    this.documento = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+  formatNumber(value: number): string {
+    return value.toLocaleString('en-US', {});
   }
 }

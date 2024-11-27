@@ -1,163 +1,105 @@
-<!-- Fields Manager to handle product input -->
+<!-- Calculate Button -->
+<button class="custom-button" (click)="calculate()">Calculate</button>
 
-<!-- <button class="custom-button" (click)="this.getData()">Get Data</button> -->
-<button class="custom-button" (click)="calculate()">calculate</button>
-
+<!-- Form Start -->
 <form class="form">
-    <div class="form-row">
-        <div class="input-data">
-        <input type="chart" required class="input" inputmode="decimal"
-            placeholder=" " name="Liquidez" 
-            [(ngModel)]="liquidez"
-            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-            <div class="underline"></div>
-        <label>Liquidez</label>
+    <form class="form">
+        <div class="form-row" *ngFor="let key of getCategorizedKeys().general">
+            <div class="input-data">
+                <input 
+                    type="chart" 
+                    required 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="'input' + key" 
+                    [(ngModel)]="info[key]" 
+                    (keyup)="fNumber(key)"
+                    >
+                <div class="underline"></div>
+                <label >{{displayName(key) | titlecase}}</label>
+            </div>
+        </div>
+</form>
+    <form class="form">
+    <!-- Credit Details -->
+    <div *ngFor="let key of getCategorizedKeys().credit">
+        <div class="form-row">
+            <div class="input-data">
+                <input 
+                    required 
+                    type="text" 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="key" 
+                    [(ngModel)]="info[key]" 
+                    (keyup)="fNumber(key)">
+                <div class="underline"></div>
+                <label >{{displayName(key) | titlecase}}</label>
+            </div>
         </div>
     </div>
-    <div class="form-row">
-        <div class="input-data">
-        <input type="chart" required class="input" inputmode="decimal"
-            placeholder="" name="Ahorro Mensual" 
-            [(ngModel)]="ingresos"
-            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-            <div class="underline"></div>
-        <label>Ahorro Mensual</label>
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="input-data">
-        <input type="chart" required class="input"
-            placeholder=" " name="Apalancamiento" 
-            [(ngModel)]="apalancamiento"
-            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-            <div class="underline"></div>
-        <label>Apalancamiento</label>
+    <div>
+        <div class="form-row">
+            <div class="input-data">
+                <input 
+                    required 
+                    type="text" 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="'tasaCreditoBeneficiar'" 
+                    [(ngModel)]="info['tasaCreditoBeneficiar']" 
+                    (keypress)="allowNumbers($event,'tasaCreditoBeneficiar')">
+                <div class="underline"></div>
+                <label >{{displayName('tasaCreditoBeneficiar') | titlecase}}</label>
+            </div>
         </div>
     </div>
 </form>
 
+    <form class="form">
+    <!-- Rotativo Details -->
+    <div *ngFor="let key of getCategorizedKeys().rotativo">
+        <div class="form-row">
+            <div class="input-data">
+                <input 
+                    required 
+                    type="text" 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="key" 
+                    [(ngModel)]="info[key]" 
+                    (keyup)="fNumber(key)">
+                <div class="underline"></div>   
+                <label >{{displayName(key) | titlecase}}</label>
 
-
-<form class="form">
-    <div class="form-row">
-        <form class="form">
-
-        <div class="input-data">
-        <input type="chart" required class="input" inputmode="decimal"
-            placeholder=" " name="Deuda Creditos" 
-            [(ngModel)]="totalCreditos"
-            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-            <div class="underline"></div>
-        <label>Deuda Creditos</label>
+            </div>
         </div>
-        <div class="input-data">
-            <input type="chart" required class="input" inputmode="decimal"
-                placeholder=" " name="Plazo Credito" 
-                [(ngModel)]="plazoCredito"
-                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
+    </div>
+    <div>
+        <div class="form-row">
+            <div class="input-data">
+                <input 
+                    required 
+                    type="text" 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="'tasaRotativoBeneficiar'" 
+                    [(ngModel)]="info['tasaRotativoBeneficiar']" 
+                    >
                 <div class="underline"></div>
-            <label>Plazo Credito</label>
+                <label >{{displayName('tasaRotativoBeneficiar') | titlecase}}</label>
+            </div>
         </div>
-        <div class="input-data">
-            <input type="chart" required class="input" inputmode="decimal"
-                placeholder=" " name="Pago Mensual" 
-                [(ngModel)]="pagoCredito"
-                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-                <div class="underline"></div>
-            <label>Pago Credito</label>
-        </div>
-        <div class="input-data">
-            <input type="chart" required class="input" inputmode="decimal"
-                placeholder=" " name="Interes Credito Actual" 
-                [(ngModel)]="interesCreditoActual"
-                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-                <div class="underline"></div>
-            <label>Interes Credito Actual</label>
-        </div>
-        <div class="input-data">
-            <input type="chart" required class="input" inputmode="decimal"
-                placeholder=" " name="Interes Credito Beneficiar" 
-                [(ngModel)]="interesCreditoBeneficiar"
-                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-                <div class="underline"></div>
-            <label>Interes Credito Beneficiar</label>
-        </div>
-        <div class="input-data">
-            <input type="chart" required class="input"
-                placeholder=" " name="Tasa Credito Beneficiar" 
-                (keypress)="allowNumbers($event,tasaCreditoBeneficiar)"
-                [(ngModel)]="tasaCreditoBeneficiar"
-                >
-            <label>Tasa Credito Beneficiar</label>
-        </div>
-    
+    </div>
+    </form>
 </form>
 
-    <div class="form-row">
-        <form class="form">
+<app-generate-chart 
+    #resumenInteres 
+    title="Resumen Interes">
+</app-generate-chart>
+<app-generate-chart 
+    #resumenFlujoCaja 
+    title="Resumen Flujo de Caja">
+</app-generate-chart> 
 
-        <div class="input-data">
-        <input type="chart" required class="input" inputmode="decimal"
-            placeholder="" name="Deuda Tarjetas" 
-            [(ngModel)]="totalTarjetas"
-            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-            <div class="underline"></div>
-        <label>Deuda Tarjetas</label>
-        </div>
-        <div class="input-data">
-            <input type="chart" required class="input" inputmode="decimal"
-                placeholder="" name="Plazo Rotativo" 
-                [(ngModel)]="plazoRotativo"
-                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-                <div class="underline"></div>
-            <label>Plazo Rotativo</label>
-        </div>
-        <div class="input-data">
-            <input type="chart" required class="input" inputmode="decimal"
-                placeholder="" name="Pago Rotativo" 
-                [(ngModel)]="pagoRotativo"
-                onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-                <div class="underline"></div>
-            <label>Pago Rotativo</label>
-        </div>
-    <div class="input-data">
-        <input type="chart" required class="input" inputmode="decimal"
-            placeholder=" " name="Interes Tarjetas Actual" 
-            [(ngModel)]="interesTarjetaActual"
-            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-            <div class="underline"></div>
-        <label>Interes Tarjeta Actual</label>
-    </div>
-    <div class="input-data">
-        <input type="chart" required class="input" inputmode="decimal"
-            placeholder=" " name="Interes Rotativo Beneficiar" 
-            [(ngModel)]="interesRotativoBeneficiar"
-            onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 && !this.value.includes('.')">
-            <div class="underline"></div>
-        <label>Interes Rotativo Beneficiar</label>
-    </div>
-
-    <div class="input-data">
-        <input type="chart" required class="input"
-            placeholder=" " name="Tasa Rotativo Beneficiar" 
-            [(ngModel)]="tasaRotativoBeneficiar"
-            (keypress)="allowNumbers($event,tasaRotativoBeneficiar)"
-            >
-            <div class="underline"></div>
-        <label>Tasa Rotativo Beneficiar</label>
-    </div>
-        
-</form>
-
-<!-- First instance of GenerateChartComponent -->
-<app-generate-chart #resumenInteres title="Resumen Interes"></app-generate-chart>
-<app-generate-chart #resumenFlujoCaja title="Resumen Flujo de Caja"></app-generate-chart>
-<!-- <div [ngStyle]="{ 'visibility': false ? 'visible' : 'hidden' }">
-<app-generate-chart #todosLosProductos title="Todos los Productos"></app-generate-chart>
-<app-generate-chart #productosRefinanciamiento title="Productos a Refinanciar"></app-generate-chart>
-<app-generate-chart #tarjetasRefinanciamiento title="Tarjetas a Refinanciar"></app-generate-chart>
-<app-generate-chart #creditosRefinanciamiento title="Creditos a Refinanciar"></app-generate-chart>
-<app-generate-chart #productosBeneficiar title="Productos Beneficiar"></app-generate-chart>
-<app-generate-chart #creditosBeneficiar title="Creditos Beneficiar"></app-generate-chart>
-<app-generate-chart #tarjetasBeneficiar title="Tarjetas Beneficiar"></app-generate-chart>
-</div> -->

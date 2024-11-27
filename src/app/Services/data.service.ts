@@ -11,11 +11,26 @@ export class DataService {
   nombreCliente:string='';
   apalancamiento=0;
   documento='';
+  nombreFuncionario="";
+  access=true;
 
+  getNombreCliente(){return this.nombreCliente;}
+  getAccess(){return this.access;}  
+  getNombreFuncionario(){
+    return this.nombreCliente;
+  }
   getApalancamiento(){
     return this.apalancamiento;
   }
-
+  getLogin(documento:string,clave:string){
+    const validacionFuncionario = this.apiService.getLoginInfo(documento,clave);
+    if(validacionFuncionario){
+      this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
+      this.access=true;
+    }
+    else
+      console.log("Información invalida");
+  }
   setData(data:Array<{ [key: string]: string }>){
     this.productList=data;
     }

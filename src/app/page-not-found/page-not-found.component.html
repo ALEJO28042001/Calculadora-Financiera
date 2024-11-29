@@ -2,16 +2,5 @@
 <p>We couldn't find that page! Not even with x-ray vision.</p>
 <!-- <app-test-api></app-test-api> -->
 <button (click)="tes()"> Service</button>
-<button (click)="loadJson()"> Json</button>
-<form class="form">
-    <input type="chart" required class="input" 
-placeholder=" " [(ngModel)]="cc" name="cc">
-</form>
-  <!-- Informacion del Producto -->
-<div class="form-row" *ngFor="let producto of productos; let i = index">
-    <div>Producto # {{i+1}}</div>
-    <div class="form-row" *ngFor="let key of keys">
-        <div>{{key}} : {{producto[key]}}</div>
-    </div>
-</div>
+<button (click)="tes2()"> Service</button>
 

@@ -10,5 +10,4 @@ import { NavBarComponent } from "./nav-bar/nav-bar.component";
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'Charts';
 }

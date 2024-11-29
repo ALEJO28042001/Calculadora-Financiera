@@ -17,8 +17,7 @@ export class LoginComponent implements OnInit{
 
   ngOnInit(): void {
     this.nombreFuncionario=this.DataService.nombreFuncionario;
-    this.access=this.DataService.getAccess();
-    
+    this.access=this.DataService.getAccess();    
   }
   cedula='';
   password: string = '';

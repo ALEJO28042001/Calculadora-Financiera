@@ -12,6 +12,10 @@ export class DataService {
   apalancamiento=0;
   documento='';
   nombreFuncionario="";
+  infoCliente:any='';
+
+  getInfoCliente(){return this.infoCliente}
+
   access=true;
 
   getNombreCliente(){return this.nombreCliente;}
@@ -23,13 +27,16 @@ export class DataService {
     return this.apalancamiento;
   }
   getLogin(documento:string,clave:string){
-    const validacionFuncionario = this.apiService.getLoginInfo(documento,clave);
-    if(validacionFuncionario){
-      this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
-      this.access=true;
-    }
-    else
-      console.log("Información invalida");
+    
+    // const validacionFuncionario = this.apiService.getLoginInfo(documento,clave).result[0];
+    // console.log(validacionFuncionario);
+    // if(validacionFuncionario){
+    //   this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
+    //   this.access=true;
+    // }
+    // else
+    //   {console.log("Información invalida");}
+    
   }
   setData(data:Array<{ [key: string]: string }>){
     this.productList=data;
@@ -48,21 +55,24 @@ export class DataService {
   }
   pullData(documento:string){
     //Se consulta la info del asociado
-    const basicClientInfo=this.apiService.getBeneficiarInfo(documento);
-    this.nombreCliente=basicClientInfo.Nombre;
-    var cifinProducts=this.apiService.getCifinProducts(documento);
+    // const basicClientInfo=this.apiService.getBeneficiarInfo(documento);
+    // this.infoCliente=basicClientInfo;
+    // console.log("Info: ",this.infoCliente);
+    // this.nombreCliente=basicClientInfo.Nombre;
+    // var cifinProducts=
+    // this.apiService.getCifinProducts(documento).result.JAObligaciones;
+    // cifinProducts=cifinProducts.filter((item: any) => 
+    //   item["CALIDAD"] === 'PRIN'
+    // && item["NOMBREENTIDAD"] != 'BENEFICIAR- COOP. DE AHORRO Y');
 
-    cifinProducts=cifinProducts.filter((item: any) => 
-      item["CALIDAD"] === 'PRIN'
-    && item["NOMBREENTIDAD"] != 'BENEFICIAR- COOP. DE AHORRO Y');
+    // const beneficiarProducts=
+    // this.apiService.getBeneficiarProducts(basicClientInfo.CodAsociado).result[0].Registros;
+    // console.log(beneficiarProducts);
+    // this.apalancamiento=(Number(basicClientInfo.Registros[0].VALORCONSOLIDADO)+
+    //         Number(basicClientInfo.Registros[1].VALORCONSOLIDADO));  
 
-    const beneficiarProducts=this.apiService.getBeneficiarProducts(basicClientInfo.CodAsociado);
-
-    this.apalancamiento=(Number(basicClientInfo.Registros[0].VALORCONSOLIDADO)+
-            Number(basicClientInfo.Registros[1].VALORCONSOLIDADO));  
-
-    this.setData(this.convertData(cifinProducts,cifinKeys));
-    beneficiarProducts.map((item: any) => this.addProduct(this.renameKeys(item, beneficiarKeys)));  
+    // this.setData(this.convertData(cifinProducts,cifinKeys));
+    // beneficiarProducts.map((item: any) => this.addProduct(this.renameKeys(item, beneficiarKeys)));  
     }
   convertData(registros:any ,newKeysMapping:any){
     return registros.map((item: any) => this.renameKeys(item, newKeysMapping));
@@ -71,8 +81,9 @@ export class DataService {
       const renamedObj: any = {};
       for (const key in keyMap) {      
         if (key === "Nombre Producto") {
-          renamedObj[key] = (obj["TIPOENTIDAD"] || "Beneficiar" )+ 
-          " "+obj[keyMap[key]] + " " + (obj["NUMEROOBLIGACION"]||obj["PAGARE"]);
+          renamedObj[key] = (obj["TIPOENTIDAD"] || "BENEFICIAR" )+ 
+          " "+obj[keyMap[key]] + " " + (obj["NUMEROOBLIGACION"]||obj["PAGARE"]) 
+          +" SALDO:$" +formatNumber(obj["SALDOOBLIGACION"]*1000||Number(obj["SALDO"]));
         } 
         else if (key === "Plazo Actual") {
           renamedObj[key] = String(obj[keyMap[key]] - (obj["CUOTASCANCELADAS"] || obj["ALTURA"]));
@@ -117,3 +128,6 @@ const beneficiarKeys=
   "Deuda Actual": "SALDO"
 }
  
+function formatNumber(value: number): string {
+  return value.toLocaleString('en-US', {maximumFractionDigits:0});
+}

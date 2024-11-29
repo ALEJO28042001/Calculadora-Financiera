@@ -18,22 +18,22 @@
       <div class="checkbox-wrapper">
         <label>Tarjeta</label>
         <input type="checkbox" name="tipo de producto" [(ngModel)]="isTarjeta" (change)="tipoDeProducto($event)">
-        <label>Ref</label>
+        <label>Refinanciar</label>
         <input type="checkbox" name="refinanciamiento" [(ngModel)]="isRef" (change)="eleccionRef($event)"/>
       </div>
   </div>
   
-  <div class="form-row" *ngFor="let field of [
-  'Deuda Actual',
-  'Plazo Actual',
-  'Pago Mensual',
-  'Tasa Entidad',
-  'Tasa Real',
-  'Diferencia Tasas',
-  'Interes Actual',
-  'Interes Beneficiar',
-  'Diferencia Interes'
-]; let i = index">
+<div class="form-row" *ngFor="let field of [
+    'Deuda Actual',
+    'Plazo Actual',
+    'Pago Mensual',
+    'Tasa Entidad',
+    'Tasa Real',
+    'Diferencia Tasas',
+    'Interes Actual',
+    'Interes Beneficiar',
+    'Diferencia Interes'
+    ]; let i = index">
 <div class="input-data">
   <input 
     type="chart"

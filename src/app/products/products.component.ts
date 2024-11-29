@@ -17,14 +17,13 @@ export class ProductsComponent implements OnInit {
     'todosLosProductosList': [],
     'tarjetasRefinanciamientoList': [],
     'creditosRefinanciamientoList': [],
-    'showCharts': false,
     'tasaUsura': 28.8,
     'tasaCreditoBeneficiar': 13,
     'tasaRotativoBeneficiar': 20,
     'totalCreditos': '',
     'totalTarjetas': '',
     'liquidez': '',
-    'ingresos': '',
+    'aportes': '',
     'plazoCredito': null,
     'plazoRotativo': null,
     'pagoCreditoBeneficiar': '',
@@ -36,7 +35,7 @@ export class ProductsComponent implements OnInit {
     'interesCreditoBeneficiar': '',
     'interesRotativoBeneficiar': '',
     'apalancamiento': '',
-    'nombreCliente': '',
+    'nombreAsociado': '',
   };
 
   @ViewChild('todosLosProductos') todosLosProductos!: GenerateChartComponent;
@@ -47,11 +46,13 @@ export class ProductsComponent implements OnInit {
 
   constructor(private DataService: DataService) {}
 
+  calcularAhorro(salario:number){return this.formatNumber(salario*0.06)}
   ngOnInit() {
     if (this.DataService.getData().length > 0) {
       this.info["apalancamiento"] = this.formatNumber(this.DataService.getApalancamiento());
-      this.info["nombreCliente"] = this.DataService.getNombreCliente();
+      this.info["nombreAsociado"] = this.DataService.getNombreCliente();
       this.divisionProductos(this.DataService.getData());
+      this.info['aportes'] = this.calcularAhorro(this.DataService.getInfoCliente()['Salario']);
     }
   }
 
@@ -192,9 +193,9 @@ export class ProductsComponent implements OnInit {
         stack: 'Stack 0',
       },
       {
-        label: 'Ahorro',
+        label: 'Aportes',
         data: [
-          this.info["ingresos"].replace(/[^0-9]/g, ''),
+          this.info["aportes"].replace(/[^0-9]/g, ''),
         ],
         backgroundColor: 'rgba(0, 255, 0, 0.6)',
         borderColor: 'rgba(235, 109, 27, 0.6)',
@@ -257,9 +258,9 @@ export class ProductsComponent implements OnInit {
     return {
       general: [
         'liquidez', 
-        'ingresos', 
+        'aportes', 
         'apalancamiento', 
-        'nombreCliente'
+        'nombreAsociado'
       ],
       credit: [
         'totalCreditos', 

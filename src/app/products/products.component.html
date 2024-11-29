@@ -85,7 +85,8 @@
                     placeholder=" " 
                     [name]="'tasaRotativoBeneficiar'" 
                     [(ngModel)]="info['tasaRotativoBeneficiar']" 
-                    >
+                    (keypress)="allowNumbers($event,'tasaCreditoBeneficiar')">
+                    
                 <div class="underline"></div>
                 <label >{{displayName('tasaRotativoBeneficiar') | titlecase}}</label>
             </div>

@@ -7,43 +7,38 @@ import { HttpClient } from '@angular/common/http';
 
 export class DataService {
   constructor(private apiService: ApiService, private http: HttpClient) {}  
-  productList: Array<{ [key: string]: string }> = [];
-  nombreCliente:string='';
-  apalancamiento=0;
-  documento='';
-  nombreFuncionario="";
-  infoCliente:any='';
+  private productList: Array<{ [key: string]: string }> = [];
+  private nombreCliente:string='';
+  private apalancamiento=0;
+  private documentoAsociado='';
+  private nombreFuncionario="";
+  private infoCliente:any='';
+  private interestRange=[];
+  private access=false;
 
+  getDocumentoAsociado(){return this.documentoAsociado}
+  setDocumentoAsociado(documento:string){this.documentoAsociado=documento}
+  setNombreFuncionario(nombre:string){this.nombreFuncionario=nombre}
   getInfoCliente(){return this.infoCliente}
-
-  access=true;
-
   getNombreCliente(){return this.nombreCliente;}
   getAccess(){return this.access;}  
-  getNombreFuncionario(){
-    return this.nombreCliente;
-  }
-  getApalancamiento(){
-    return this.apalancamiento;
-  }
-  getLogin(documento:string,clave:string){
-    
-    // const validacionFuncionario = this.apiService.getLoginInfo(documento,clave).result[0];
-    // console.log(validacionFuncionario);
-    // if(validacionFuncionario){
-    //   this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
-    //   this.access=true;
-    // }
-    // else
-    //   {console.log("Información invalida");}
-    
-  }
-  setData(data:Array<{ [key: string]: string }>){
-    this.productList=data;
+  getNombreFuncionario(){return this.nombreFuncionario}
+  getApalancamiento(){return this.apalancamiento}
+
+  async askLogin(documentoFuncionario:string,clave:string){   
+    var validacionFuncionario = await
+    this.apiService.getLoginInfo(documentoFuncionario,clave);
+    validacionFuncionario = validacionFuncionario.result[0];
+    if(validacionFuncionario['CodError']===-1){
+      this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
+      this.access=true;
     }
-  getData() {
-    return this.productList;
-    }
+    return this.access;    
+  }
+
+  logOut(){this.access=false}
+  setData(data:Array<{ [key: string]: string }>){this.productList=data}
+  getData() {return this.productList}
   addProduct(product: {[key: string]:string}){
     this.productList.push(product);
     }
@@ -53,26 +48,28 @@ export class DataService {
   deleteProduct(index:number){
     this.productList.slice(index,1);
   }
-  pullData(documento:string){
+  async pullData(documento:string){
     //Se consulta la info del asociado
-    // const basicClientInfo=this.apiService.getBeneficiarInfo(documento);
-    // this.infoCliente=basicClientInfo;
-    // console.log("Info: ",this.infoCliente);
-    // this.nombreCliente=basicClientInfo.Nombre;
-    // var cifinProducts=
-    // this.apiService.getCifinProducts(documento).result.JAObligaciones;
-    // cifinProducts=cifinProducts.filter((item: any) => 
-    //   item["CALIDAD"] === 'PRIN'
-    // && item["NOMBREENTIDAD"] != 'BENEFICIAR- COOP. DE AHORRO Y');
+    const basicClientInfo= await this.apiService.getBeneficiarInfo(documento);
+    this.infoCliente=basicClientInfo.result[0];
+    this.nombreCliente=this.infoCliente.Nombre;
+    var cifinProducts= await this.apiService.getCifinProducts(documento);
+    cifinProducts=cifinProducts.JAObligaciones;
+    
+    cifinProducts=cifinProducts.filter((item: any) => 
+      item["CALIDAD"] === 'PRIN'
+    && item["NOMBREENTIDAD"] != 'BENEFICIAR- COOP. DE AHORRO Y');
 
-    // const beneficiarProducts=
-    // this.apiService.getBeneficiarProducts(basicClientInfo.CodAsociado).result[0].Registros;
-    // console.log(beneficiarProducts);
-    // this.apalancamiento=(Number(basicClientInfo.Registros[0].VALORCONSOLIDADO)+
-    //         Number(basicClientInfo.Registros[1].VALORCONSOLIDADO));  
+    var beneficiarProducts= await
+    this.apiService.getBeneficiarProducts(this.infoCliente.CodAsociado);
+    beneficiarProducts=beneficiarProducts.result[0].Registros;
+    this.apalancamiento=(Number(this.infoCliente.Registros[0].VALORCONSOLIDADO)+
+            Number(this.infoCliente.Registros[1].VALORCONSOLIDADO));  
 
-    // this.setData(this.convertData(cifinProducts,cifinKeys));
-    // beneficiarProducts.map((item: any) => this.addProduct(this.renameKeys(item, beneficiarKeys)));  
+    this.setData(this.convertData(cifinProducts,cifinKeys));
+    beneficiarProducts.map((item: any) => this.addProduct(this.renameKeys(item, beneficiarKeys)));  
+    this.documentoAsociado = documento;
+    return this.productList;
     }
   convertData(registros:any ,newKeysMapping:any){
     return registros.map((item: any) => this.renameKeys(item, newKeysMapping));

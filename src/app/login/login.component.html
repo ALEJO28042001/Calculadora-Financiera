@@ -3,6 +3,10 @@
   <div class="form-row">
   <img class="img" src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" alt="">
   </div>
+  <div clas="form-row" *ngIf="error">
+    <p class="error-message">Info invalida</p>
+  </div>
+
   <div class="form-row">
     <div class="input-data">
       <input
@@ -34,7 +38,14 @@
         <label>Password</label>
     </div>
   </div>
-      <button class="custom-button" (click)="onSubmit()">Ingresar</button>
+  <div *ngIf="isLoading" class="spinner-container">
+    <div class="spinner"></div>
+    <p>Loading, please wait...</p>
+  </div>
+      <button class="custom-button" (click)="onSubmit()" routerLink="/Login" >Ingresar</button>
+      
+
+
 </form>
 </div>
 
@@ -42,3 +53,5 @@
   <div>Welcome {{nombreFuncionario}}</div>
   <!-- <app-productsComponent></app-productsComponent> -->
 </div>
+
+        

@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../Services/data.service';
-import { ProductsComponent } from '../products/products.component';
 
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProductsComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -16,29 +15,36 @@ export class LoginComponent implements OnInit{
   constructor(private DataService: DataService) { }
 
   ngOnInit(): void {
-    this.nombreFuncionario=this.DataService.nombreFuncionario;
+    this.nombreFuncionario=this.DataService.getNombreFuncionario();
     this.access=this.DataService.getAccess();    
   }
+  isLoading=false;
   cedula='';
   password: string = '';
   nombreFuncionario="";
-  access=false
+  access=false;
+  error=false;
 
 
-  onSubmit() {
+  async onSubmit() {
+    this.isLoading=true;
+    console.log(this.access);
     if (this.cedula && this.password) {
       let cc = this.cedula.replace(/[^0-9]/g, '');
-      console.log('Login Details:', { cedula: cc, password: this.password });
-      this.DataService.getLogin(cc,this.encrypt(this.password));
-      if(this.DataService.nombreFuncionario!=""){
-        // routerLink="/Products";
-        this.nombreFuncionario=this.DataService.nombreFuncionario;
-        this.access=this.DataService.getAccess();
-        
+      var token = await this.DataService.askLogin(cc,this.encrypt(this.password));
+      if(token){
+        this.nombreFuncionario=this.DataService.getNombreFuncionario();
+        this.access=this.DataService.getAccess();   
+        this.error=false;
       }
-      else
-        console.log("Info Invalida");
+      else{console.log("Info Invalida");
+        this.error=true;
+      }
     }
+    console.log(this.access);
+
+    this.isLoading=false; 
+
   }
 
   encrypt(clave:string):string{

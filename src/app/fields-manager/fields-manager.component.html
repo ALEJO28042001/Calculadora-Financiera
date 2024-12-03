@@ -55,7 +55,9 @@
         <input type="chart" required class="input" 
        placeholder=" " name="Tasa Beneficiar" 
        [(ngModel)]="product['Tasa Beneficiar']"
-       (keypress)="allowNumbers($event)"       
+       (keyup)="calcularInteresBeneficiar()"
+       (keypress)="allowNumbers($event,'Tasa Beneficiar')"
+
        [ngStyle]="{'color': num(product['Tasa Beneficiar']) < 0 ? 'red' : 'green'}">
         <div class="underline"></div>
         <label>Tasa Beneficiar</label>
@@ -104,15 +106,19 @@
       <div class="input-data">
         <input type="chart" required class="input" 
                placeholder=" " name="documento" 
-               [(ngModel)]="documento"
+               [(ngModel)]="documentoAsociado"
                (keyup)="documentoNumber()"
                >
         <div class="underline"></div>
         <label>Documento</label>
       </div>
     </div>
+    <div *ngIf="isLoading" class="spinner-container">
+      <div class="spinner"></div>
+      <p>Loading, please wait...</p>
+    </div>
     
-    <button [disabled]="!documento" class="custom-button" (click)="searchData()"> GET DATA</button>
+    <button [disabled]="!documentoAsociado" class="custom-button" (click)="searchData()"> GET DATA</button>
  
  </form>
  </div>

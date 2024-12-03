@@ -19,9 +19,9 @@ export class PageNotFoundComponent {
   productos:any;
   cc="";  
   async tes(){
+    let a = await this.apiService.getBeneficiarInfo('316738')
     // this.apiService.getBeneficiarInfo('3167398');
-    console.log("en tes: ",await this.apiService.getBeneficiarInfo('3167398'));
-    
+    console.log("en tes: ",a.result[0]);
   }
   async tes2(){
     console.log("asdasdas");

@@ -12,8 +12,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class FieldsManagerComponent implements OnInit{
   constructor(private DataService: DataService) { }
-  documento='';
-  
+  isLoading=false;
+  documentoAsociado='';  
   isRef: boolean = false;
   isTarjeta: boolean = false;
   productList: Array<{ [key: string]: string }> = [];
@@ -23,12 +23,9 @@ export class FieldsManagerComponent implements OnInit{
 
   ngOnInit() { 
     this.productList = this.DataService.getData();
-    this.documento=this.DataService.documento;
+    this.documentoAsociado=this.DataService.getDocumentoAsociado();
+    this.documentoNumber();
     this.access = this.DataService.getAccess();
-  }
-  upProduct(p:any){
-    this.product=p;
-    this.addProduct();
   }
   
   @Input() product: { [key: string]: string } = {
@@ -60,9 +57,12 @@ export class FieldsManagerComponent implements OnInit{
     "Interes Actual",
     "Interes Beneficiar",
     "Diferencia Interes",
-  ];
+];
 
-  addProduct() {   
+  addProduct(product?: any | null) {  
+    if(product){
+      this.product=product;
+    }   
     for(let field of 
       ["Deuda Actual", "Plazo Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar"]){
       this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
@@ -74,10 +74,7 @@ export class FieldsManagerComponent implements OnInit{
     } else {
       // Update existing product
       this.productList[this.selectedProductIndex] = { ...this.product };
-      this.chooseProduct(this.selectedProductIndex);
-    }
-    
-    // this.resetForm();      
+    }    
   }
 
   // Function to show all products
@@ -103,7 +100,6 @@ export class FieldsManagerComponent implements OnInit{
     }
   }
 
-  // Function to delete a product
   deleteProduct(index: number) {
     this.productList.splice(index, 1);
     this.resetForm();
@@ -135,7 +131,6 @@ export class FieldsManagerComponent implements OnInit{
   this.product['Tarjeta']=String(this.isTarjeta);
   }
 
-
   eleccionRef(e:any){
     this.isRef = (e.target as HTMLInputElement).checked;
     this.product['Refinanciamiento']=String(this.isRef);
@@ -164,7 +159,7 @@ export class FieldsManagerComponent implements OnInit{
     }
     return r;
   }
-  showInputValues() {  
+  showInputValues(){
       let amount = Number(this.product['Deuda Actual']);;
       let months = Number(this.product['Plazo Actual']);
       let pago = Number(this.product['Pago Mensual']);
@@ -176,26 +171,28 @@ export class FieldsManagerComponent implements OnInit{
           * 100 * 12));
         this.product['Tasa Real']=tasaReal.toFixed(2);
         this.product['Diferencia Tasas'] = (Number(this.product['Tasa Beneficiar'])-Number(this.product['Tasa Real'])).toFixed(2);
-        this.product['Interes Actual'] = ((months*pago)-amount).toFixed(0);
+        this.product['Interes Actual'] = (tasaReal*amount/1200).toFixed(0);
       }      
-    }   
+  }   
 
-  searchData(){
+  async searchData(){
+    this.isLoading=true;
     this.productList=[];
-    this.DataService.pullData(this.documento.replace(/[^0-9]/g, ''));
-    this.DataService.getData().map(p=>this.upProduct(p));
-    this.DataService.documento=this.documento.replace(/[^0-9]/g, '');
     this.resetForm();
+    const listaProductos = await this.DataService.pullData(this.documentoAsociado.replace(/[^0-9]/g, ''));
+    listaProductos.map(p=>this.addProduct(p));
+    this.resetForm();
+    this.isLoading=false;
   }
 
-  allowNumbers(event:any) {
+  allowNumbers(event:any,key:string) {
     const charCode = event.charCode || event.keyCode;
     // Allow numbers (0-9), and control keys like backspace
     if ((charCode >= 48 && charCode <= 57) || charCode === 8 || charCode === 46) {
-        // if(this.product[this.keys[8]].length>0){
-        //   return this.validateRange(this.product[this.keys[8]]+event.key);
-        // }
-        // else
+        if(this.product[key].length>0){
+          return this.validateRange(this.product[key]+event.key);
+        }
+        else
         return true;
     }    
     return false; // Block other characters
@@ -210,13 +207,22 @@ export class FieldsManagerComponent implements OnInit{
     return false;
   }
 
+
+  calcularInteresBeneficiar(){
+    this.product['Interes Beneficiar']= this.formatNumber(
+    Number(
+      (Number(this.product['Deuda Actual'].replace(/[^0-9]/g, ''))*
+      Number(this.product['Tasa Beneficiar'].replace(/[^0-9.]/g, ''))/
+      1200).toFixed(0)));
+  }
+
   fNumber(key:string) {
     let p=this.product[key].replace(/[^0-9.]/g, '');
     this.product[key] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   documentoNumber() {
-    let p=this.documento.replace(/[^0-9.]/g, '');
-    this.documento = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    let p=this.documentoAsociado.replace(/[^0-9]/g, '');
+    this.documentoAsociado = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
   formatNumber(value: number): string {
     return value.toLocaleString('en-US', {});

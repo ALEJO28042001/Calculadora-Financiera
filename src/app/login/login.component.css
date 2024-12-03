@@ -142,4 +142,32 @@ li{
     font-size: 14px;
     margin-top: 5px;
   }
-  
+  /* loading-example.component.css */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* error-feedback.component.css */
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}

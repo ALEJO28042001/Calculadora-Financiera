@@ -34,8 +34,8 @@ form{
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
   background-color: aliceblue;  
-  margin:8px;
-  margin-top: 15px;
+  padding-top: 10px;
+  margin-top: 20px;
   gap: 15px;
 }
 
@@ -57,6 +57,9 @@ form{
 }
 .dropdown{
   border-radius: 10px;
+}
+.form-row{
+  margin-top: 10px;
 }
 .form-row .input-data{
   height: 40px;
@@ -184,4 +187,58 @@ li{
   to {
     transform: rotate(360deg);
   }
+}
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+
+
+.form-row .output-data {
+  height: 40px;
+  position: relative;
+  border-radius: 15px;
+  align-content: center;
+}
+
+.output-data .output {
+  width: 100%;
+  height: 100%;
+  font-size: 17px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: 15px;
+  padding: 15px;
+  color: #333; /* Text color */
+  background: transparent; /* Transparent background */
+  pointer-events: none; /* Prevent interaction */
+  overflow: hidden; /* Hide overflowing text */
+  white-space: nowrap; /* Prevent line breaks */
+  text-overflow: ellipsis; /* Show ellipsis for truncated text */
+}
+
+.output-data label {
+  position: absolute;
+  pointer-events: none;
+  bottom: 2px;
+  font-size: 16px;
+  left: 13px;
+  transition: all 0.3s ease;
+}
+
+.output-data .output:not(:empty) + label {
+  transform: translateY(-28px); /* Move the label up */
+  font-size: 14px;
+  color: #3498db;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.output-data .underline {
+  position: flex;
+  bottom: 0;
+  height: 2px;
+  width: 92%;
+  left: 13px;
 }

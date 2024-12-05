@@ -257,28 +257,25 @@ export class ProductsComponent implements OnInit {
   getCategorizedKeys() {
     return {
       general: [
-        'liquidez', 
         'aportes', 
         'apalancamiento', 
         'nombreAsociado'
       ],
       credit: [
+        // 'plazoCredito',
         'totalCreditos', 
-        'plazoCredito', 
         'pagoCreditoActual', 
         'pagoCreditoBeneficiar',
         'interesCreditoActual', 
         'interesCreditoBeneficiar', 
-        // 'tasaCreditoBeneficiar'
       ],
       rotativo: [
+        // 'plazoRotativo', 
         'totalTarjetas', 
-        'plazoRotativo', 
         'pagoRotativoActual', 
         'pagoRotativoBeneficiar',
         'interesTarjetaActual', 
         'interesRotativoBeneficiar', 
-        // 'tasaRotativoBeneficiar'
       ]
     };
   }  
@@ -294,6 +291,14 @@ export class ProductsComponent implements OnInit {
         return true;
     }    
     return false; // Block other characters
+}
+allowNumbers2(event:any) {
+  const charCode = event.charCode || event.keyCode;
+  // Allow numbers (0-9), and control keys like backspace
+  if (charCode >= 48 && charCode <= 57) {
+      return true;
+  }    
+  return false; // Block other characters
 }
 
   validateRange(input:string){

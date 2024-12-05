@@ -1,10 +1,52 @@
-<!-- Form for product details -->
-<div></div>
-<form class="form">
-  
+<!-- Datos del Asociado y consulta --> 
+<form class="form" *ngIf="access">
+      <div class="form-row">
+      <div class="input-data">
+        <input type="chart" required class="input" 
+               placeholder=" " name="documento" 
+               [(ngModel)]="documentoAsociado"
+               (keyup)="documentoNumber()"
+               >
+        <div class="underline"></div>
+        <label>Documento Asociado</label>
+      </div>
+    </div>
+    <div clas="form-row" *ngIf="error">
+      <p class="error-message">Info invalida</p>
+    </div>
+    <div class="form-row" *ngIf="!error && nombreAsociado!=='' &&!isLoading ">
+      <div class="input-data">
+        <input type="chart" required class="" 
+               placeholder=" " name="nombreAsociado" 
+               [(ngModel)]="nombreAsociado"
+               >
+        <div class="underline"></div>
+        <label>Nombre Asociado</label>
+      </div>
+    </div>
+    <div class="form-row" *ngIf="isLoading">
+    <div  class="spinner-container">
+      <div class="spinner"></div>
+      <p>Loading, please wait...</p>
+    </div>
+  </div>
+    <button [disabled]="!documentoAsociado || isLoading " 
+      class="custom-button" (click)="searchData()"> GET DATA</button>
+ 
+</form>
 
-  <!-- Informacion del Producto -->
-  <div class="form-row">
+<!-- Lista de Productos -->
+<div *ngIf="productList.length > 0" class="dropdown-group">
+<select [(ngModel)]="selectedProductIndex" class="dropdown"
+  (change)="chooseProduct(selectedProductIndex!)">
+  <option *ngFor="let product of productList; let i = index" [value]="i" >
+    {{ product['Nombre Producto'] }} </option>
+</select>
+</div>
+
+<!-- Informacion del Producto -->
+<form class="form">
+<div class="form-row">
     <div class="input-data">
       <input type="chart" required class="input" 
              placeholder=" " name="Nombre Producto"
@@ -12,27 +54,22 @@
       <div class="underline"></div>
       <label>Nombre Producto</label>
     </div>
-  </div>
-  
-  <div class="form-row">
+</div>  
+
+<div class="form-row">
       <div class="checkbox-wrapper">
         <label>Tarjeta</label>
         <input type="checkbox" name="tipo de producto" [(ngModel)]="isTarjeta" (change)="tipoDeProducto($event)">
         <label>Refinanciar</label>
         <input type="checkbox" name="refinanciamiento" [(ngModel)]="isRef" (change)="eleccionRef($event)"/>
       </div>
-  </div>
+</div>
   
 <div class="form-row" *ngFor="let field of [
     'Deuda Actual',
     'Plazo Actual',
     'Pago Mensual',
     'Tasa Entidad',
-    'Tasa Real',
-    'Diferencia Tasas',
-    'Interes Actual',
-    'Interes Beneficiar',
-    'Diferencia Interes'
     ]; let i = index">
 <div class="input-data">
   <input 
@@ -48,9 +85,22 @@
   <label>{{ field | titlecase }}</label>
 </div>
 </div>
- 
 
-    <div class="form-row">
+<div class="form-row" *ngFor="let field of [
+    'Tasa Real',
+    'Diferencia Tasas',
+    'Interes Actual',
+    'Interes Beneficiar',
+    'Diferencia Interes'
+    ]; let i = index">
+<div class="output-data">
+  <div class="output">{{ product[field] }}</div>
+  <label class="chart">{{ field | titlecase }}</label>
+  <div class="underline"></div>
+</div>
+</div>
+
+<div class="form-row">
       <div class="input-data">
         <input type="chart" required class="input" 
        placeholder=" " name="Tasa Beneficiar" 
@@ -62,12 +112,12 @@
         <div class="underline"></div>
         <label>Tasa Beneficiar</label>
       </div>
-    </div>
+</div>
 
-  </form>
-  
-  <!-- Buttons for different actions -->
-  <div class="form">
+</form>
+
+<!-- Modificar Lista de Productos -->
+<div class="form">
     <button class="custom-button" (click)="addProduct()">
       {{ selectedProductIndex === null ? 'Agregar Producto' : 'Actualizar Producto' }}
     </button>
@@ -75,50 +125,18 @@
     <button *ngIf="productList.length > 0" class="custom-button" (click)="toggleProductList() ">Mostrar Productos</button> 
     <button *ngIf="productList.length > 0" class="custom-button delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
     
-  <!-- Dropdown to choose a product for edit/delete -->
-  <div *ngIf="productList.length > 0" class="dropdown-group">
-    <select [(ngModel)]="selectedProductIndex" class="dropdown"
-      (change)="chooseProduct(selectedProductIndex!)">
-      <option *ngFor="let product of productList; let i = index" [value]="i" >
-        {{ product['Nombre Producto'] }} </option>
-    </select>
-  </div>
+
   
-  </div>
+</div>
+
+
   <!-- Display all products -->
-  <div *ngIf="showAllProducts && productList.length > 0">
+  <!-- <div *ngIf="showAllProducts && productList.length > 0">
     <h2>Product List</h2>
     <ul>selectedProductIndex
       <li *ngFor="let item of productList; let idx = index">
         <strong>Product {{ item['Nombre Producto']}}:</strong> {{ item | json }}
       </li>
     </ul>
-  </div>
+  </div> -->
   
-  <!-- Message if no products are present -->
-  <div *ngIf="showAllProducts && productList.length === 0">
-    <p>No products entered yet.</p>
-  </div>
-  
-<div>
-  <form class="form" *ngIf="access">
-      <div class="form-row">
-      <div class="input-data">
-        <input type="chart" required class="input" 
-               placeholder=" " name="documento" 
-               [(ngModel)]="documentoAsociado"
-               (keyup)="documentoNumber()"
-               >
-        <div class="underline"></div>
-        <label>Documento</label>
-      </div>
-    </div>
-    <div *ngIf="isLoading" class="spinner-container">
-      <div class="spinner"></div>
-      <p>Loading, please wait...</p>
-    </div>
-    
-    <button [disabled]="!documentoAsociado" class="custom-button" (click)="searchData()"> GET DATA</button>
- 
- </form>
- </div>

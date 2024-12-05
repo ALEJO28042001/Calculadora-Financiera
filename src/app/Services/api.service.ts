@@ -48,8 +48,6 @@ export class ApiService {
           
           return resp;
         } catch (error) {
-          console.error("Error in consultarBD:", error);
-          throw error; // Re-throw the error to handle it elsewhere
         }
     }     
     

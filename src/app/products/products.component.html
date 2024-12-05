@@ -3,76 +3,92 @@
 
 <!-- Form Start -->
 <form class="form">
+    <!-- Inforcación del asociado -->
     <form class="form">
+        <div class="form-row">
+            <div class="input-data">
+                <input 
+                    required 
+                    type="text" 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="'liquidez'" 
+                    [(ngModel)]="info['liquidez']" 
+                    (keyup)="fNumber('liquidez')">
+                <div class="underline"></div>
+                <label >Liquidez</label>
+            </div>
+        </div>
         <div class="form-row" *ngFor="let key of getCategorizedKeys().general">
-            <div class="input-data">
-                <input 
-                    type="chart" 
-                    required 
-                    class="input" 
-                    placeholder=" " 
-                    [name]="'input' + key" 
-                    [(ngModel)]="info[key]" 
-                    (keyup)="fNumber(key)"
-                    >
-                <div class="underline"></div>
-                <label >{{displayName(key) | titlecase}}</label>
+            <div class="output-data">
+              <div class="output">{{ info[key] }}</div>
+              <label class="chart">{{ displayName(key) | titlecase }}</label>
+              <div class="underline"></div>
             </div>
-        </div>
-</form>
-    <form class="form">
-    <!-- Credit Details -->
-    <div *ngFor="let key of getCategorizedKeys().credit">
-        <div class="form-row">
-            <div class="input-data">
-                <input 
-                    required 
-                    type="text" 
-                    class="input" 
-                    placeholder=" " 
-                    [name]="key" 
-                    [(ngModel)]="info[key]" 
-                    (keyup)="fNumber(key)">
-                <div class="underline"></div>
-                <label >{{displayName(key) | titlecase}}</label>
-            </div>
-        </div>
-    </div>
-    <div>
-        <div class="form-row">
-            <div class="input-data">
-                <input 
-                    required 
-                    type="text" 
-                    class="input" 
-                    placeholder=" " 
-                    [name]="'tasaCreditoBeneficiar'" 
-                    [(ngModel)]="info['tasaCreditoBeneficiar']" 
-                    (keypress)="allowNumbers($event,'tasaCreditoBeneficiar')">
-                <div class="underline"></div>
-                <label >{{displayName('tasaCreditoBeneficiar') | titlecase}}</label>
-            </div>
-        </div>
-    </div>
-</form>
+        </div>        
+    </form>
 
+<div>
     <form class="form">
+    <!-- Información Creditos -->
+    <div class="form-row">
+        <div class="input-data">
+            <input 
+                required 
+                type="text" 
+                class="input" 
+                placeholder=" " 
+                [name]="'tasaCreditoBeneficiar'" 
+                [(ngModel)]="info['tasaCreditoBeneficiar']" 
+                (keypress)="allowNumbers($event,'tasaCreditoBeneficiar')">
+            <div class="underline"></div>
+            <label >{{displayName('tasaCreditoBeneficiar') | titlecase}}</label>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="input-data">
+            <input 
+                required 
+                type="number" 
+                class="input" 
+                placeholder=" " 
+                [name]="'plazoCredito'" 
+                [(ngModel)]="info['plazoCredito']"
+                min="0"
+                (keypress)="allowNumbers2($event)">
+                <div class="underline"></div>
+            <label >{{displayName('plazoCredito') | titlecase}}</label>
+        </div>
+    </div>
+        <!-- Credit Details -->
+        <div *ngFor="let key of getCategorizedKeys().credit">
+            <div class="form-row">
+                <div class="output-data">
+                  <div class="output">{{ info[key] }}</div>
+                  <label class="chart">{{ displayName(key) | titlecase }}</label>
+                  <div class="underline"></div>
+                </div>
+            </div>
+        </div>        
+    </form>
+</div>
+
+    
+
+<form class="form">
     <!-- Rotativo Details -->
-    <div *ngFor="let key of getCategorizedKeys().rotativo">
-        <div class="form-row">
-            <div class="input-data">
-                <input 
-                    required 
-                    type="text" 
-                    class="input" 
-                    placeholder=" " 
-                    [name]="key" 
-                    [(ngModel)]="info[key]" 
-                    (keyup)="fNumber(key)">
-                <div class="underline"></div>   
-                <label >{{displayName(key) | titlecase}}</label>
-
-            </div>
+    <div class="form-row">
+        <div class="input-data">
+            <input 
+                required 
+                type="text" 
+                class="input" 
+                placeholder=" " 
+                [name]="'tasaRotativoBeneficiar'" 
+                [(ngModel)]="info['tasaRotativoBeneficiar']" 
+                (keypress)="allowNumbers($event,'tasaRotativoBeneficiar')">
+            <div class="underline"></div>
+            <label >{{displayName('tasaRotativoBeneficiar') | titlecase}}</label>
         </div>
     </div>
     <div>
@@ -80,18 +96,26 @@
             <div class="input-data">
                 <input 
                     required 
-                    type="text" 
+                    type="number" 
                     class="input" 
                     placeholder=" " 
-                    [name]="'tasaRotativoBeneficiar'" 
-                    [(ngModel)]="info['tasaRotativoBeneficiar']" 
-                    (keypress)="allowNumbers($event,'tasaRotativoBeneficiar')">
-                    
+                    [name]="'plazoRotativo'" 
+                    [(ngModel)]="info['plazoRotativo']" 
+                    min="0"
+                    (keypress)="allowNumbers2($event)">
                 <div class="underline"></div>
-                <label >{{displayName('tasaRotativoBeneficiar') | titlecase}}</label>
+                <label >{{displayName('plazoRotativo') | titlecase}}</label>
             </div>
         </div>
     </div>
+    <div *ngFor="let key of getCategorizedKeys().rotativo">
+        <div class="output-data">
+            <div class="output">{{ info[key] }}</div>
+            <label class="chart">{{ displayName(key) | titlecase }}</label>
+            <div class="underline"></div>
+          </div>
+    </div>
+    
     </form>
 </form>
 

@@ -12,7 +12,9 @@ import { FormsModule } from '@angular/forms';
 })
 export class FieldsManagerComponent implements OnInit{
   constructor(private DataService: DataService) { }
+  error=false;
   isLoading=false;
+  nombreAsociado='';
   documentoAsociado='';  
   isRef: boolean = false;
   isTarjeta: boolean = false;
@@ -20,6 +22,10 @@ export class FieldsManagerComponent implements OnInit{
   selectedProductIndex: number | null = null; // For editing/deleting selected product
   showAllProducts = false; // To toggle product display
   access=false;
+  moneyKeys=[
+    "Deuda Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar",
+    "Diferencia Interes"
+  ]
 
   ngOnInit() { 
     this.productList = this.DataService.getData();
@@ -63,11 +69,10 @@ export class FieldsManagerComponent implements OnInit{
     if(product){
       this.product=product;
     }   
-    for(let field of 
-      ["Deuda Actual", "Plazo Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar"]){
+    for(let field of this.moneyKeys){
       this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
     }
-    this.showInputValues();
+    this.calculateRealRate();
     if (this.selectedProductIndex === null) {
       // Add a new product
       this.productList.push({ ...this.product });
@@ -75,8 +80,13 @@ export class FieldsManagerComponent implements OnInit{
       // Update existing product
       this.productList[this.selectedProductIndex] = { ...this.product };
     }    
+    this.DataService.setData(this.productList);
+    for(let field of this.moneyKeys){
+      this.product[field]=this.product[field].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
   }
 
+  
   // Function to show all products
   toggleProductList() {
     this.showAllProducts = !this.showAllProducts;
@@ -94,8 +104,7 @@ export class FieldsManagerComponent implements OnInit{
     this.isTarjeta=this.product['Tarjeta']==='true';
     this.isRef=this.product['Refinanciamiento']==='true';
     
-    for(let field of 
-      ["Deuda Actual", "Plazo Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar"]){
+    for(let field of this.moneyKeys){
       this.product[field]=this.formatNumber(Number(this.product[field].replace(/[^0-9]/g, '')));
     }
   }
@@ -159,20 +168,18 @@ export class FieldsManagerComponent implements OnInit{
     }
     return r;
   }
-  showInputValues(){
-      let amount = Number(this.product['Deuda Actual']);;
+  calculateRealRate(){
+      let amount = Number(this.product['Deuda Actual']);
       let months = Number(this.product['Plazo Actual']);
       let pago = Number(this.product['Pago Mensual']);
-      
-      if(amount>0 && months>0 && pago>0)
+      if(amount>0 && months>0 && pago>0 && this.product['Tasa Real']==='')
       {
-         let tasaReal=((this.findInterestRate(pago,
-          amount, months) 
-          * 100 * 12));
-        this.product['Tasa Real']=tasaReal.toFixed(2);
-        this.product['Diferencia Tasas'] = (Number(this.product['Tasa Beneficiar'])-Number(this.product['Tasa Real'])).toFixed(2);
-        this.product['Interes Actual'] = (tasaReal*amount/1200).toFixed(0);
-      }      
+        this.product['Tasa Real']=((this.findInterestRate(pago,amount, months)*1200)).toFixed(2);  
+      }    
+      this.product['Diferencia Tasas'] = (Number(this.product['Tasa Beneficiar'])-Number(this.product['Tasa Real'])).toFixed(2);
+      this.product['Interes Actual'] = (Number(this.product['Tasa Real'])*amount/1200).toFixed(0);  
+      this.product['Interes Beneficiar'] = (Number(this.product['Tasa Beneficiar'])*amount/1200).toFixed(0); 
+      this.product['Diferencia Interes'] = (Number(this.product['Interes Actual'])-Number(this.product['Interes Beneficiar'])).toFixed(0);
   }   
 
   async searchData(){
@@ -180,14 +187,21 @@ export class FieldsManagerComponent implements OnInit{
     this.productList=[];
     this.resetForm();
     const listaProductos = await this.DataService.pullData(this.documentoAsociado.replace(/[^0-9]/g, ''));
-    listaProductos.map(p=>this.addProduct(p));
-    this.resetForm();
+    if(listaProductos.length>0){
+      listaProductos.map(p=>this.addProduct(p));
+      this.resetForm();
+      this.error=false;
+      this.nombreAsociado=this.DataService.getNombreCliente();
+    }
+    else{
+        this.error=true;
+        this.nombreAsociado='';
+    }
     this.isLoading=false;
   }
 
   allowNumbers(event:any,key:string) {
     const charCode = event.charCode || event.keyCode;
-    // Allow numbers (0-9), and control keys like backspace
     if ((charCode >= 48 && charCode <= 57) || charCode === 8 || charCode === 46) {
         if(this.product[key].length>0){
           return this.validateRange(this.product[key]+event.key);
@@ -195,7 +209,7 @@ export class FieldsManagerComponent implements OnInit{
         else
         return true;
     }    
-    return false; // Block other characters
+    return false;
 }
 
   validateRange(input:string){

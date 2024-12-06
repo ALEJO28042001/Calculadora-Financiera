@@ -24,8 +24,8 @@ export class ProductsComponent implements OnInit {
     'totalTarjetas': '',
     'liquidez': '',
     'aportes': '',
-    'plazoCredito': null,
-    'plazoRotativo': null,
+    'plazoCredito': '',
+    'plazoRotativo': '',
     'pagoCreditoBeneficiar': '',
     'pagoRotativoBeneficiar': '',
     'pagoCreditoActual': '',
@@ -53,53 +53,86 @@ export class ProductsComponent implements OnInit {
       this.info["nombreAsociado"] = this.DataService.getNombreCliente();
       this.divisionProductos(this.DataService.getData());
       this.info['aportes'] = this.calcularAhorro(this.DataService.getInfoCliente()['Salario']);
+      this.pagosActuales();
+      
+    }
+  }
+  pagosActuales(){
+    let pagoActualTarjetas = 0;
+    if(this.info['totalTarjetas']!==''){
+        for (let i = 0; i < this.info["tarjetasRefinanciamientoList"].length; i++) {
+          pagoActualTarjetas += Number(
+            this.info["tarjetasRefinanciamientoList"][i]["Pago Mensual"].replace(/[^0-9]/g, '')
+          );
+        }  
+      this.info["pagoRotativoActual"] = this.formatNumber(pagoActualTarjetas);
+    }
+    if(this.info['totalCreditos']!==''){
+      let pagoActualCreditos = 0;    
+      for (let i = 0; i < this.info["creditosRefinanciamientoList"].length; i++) {
+        pagoActualCreditos += Number(
+          this.info["creditosRefinanciamientoList"][i]["Pago Mensual"].replace(/[^0-9]/g, ''));
+      }
+      this.info["pagoCreditoActual"] = this.formatNumber(pagoActualCreditos);
     }
   }
 
   getKeys(){return  Object.keys(this.info);}
 
   calculate() {
-    this.info["pagoCreditoBeneficiar"] = this.formatNumber(
-      this.calculateMonthlyPayment(
-        this.info["plazoCredito"],
-        this.info["tasaCreditoBeneficiar"],
-        Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
-          Number(this.info["liquidez"].replace(/[^0-9]/g, ''))
-      )
-    );
+    if(Number(this.info['plazoCredito'])>0 && this.info["tasaCreditoBeneficiar"]!=='' && 
+      (this.info["totalCreditos"]!=='' || this.info["liquidez"]!=='')){
+        this.info["pagoCreditoBeneficiar"] = this.formatNumber(
+          this.calculateMonthlyPayment(
+            this.info["plazoCredito"],
+            this.info["tasaCreditoBeneficiar"],
+            Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
+              Number(this.info["liquidez"].replace(/[^0-9]/g, ''))
+          )
+        );   
+        this.info["interesCreditoBeneficiar"] = this.formatNumber(
+          Number(this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoCredito"] -
+            (Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
+              Number(this.info["liquidez"].replace(/[^0-9]/g, '')))
+        );
+      
+    }
+    else{
+      this.info["interesCreditoBeneficiar"]= '';
+      this.info["pagoCreditoBeneficiar"] = '';
+    } 
+  
+    if(Number(this.info['plazoRotativo'])>0 && this.info["tasaRotativoBeneficiar"]!=='' && 
+      this.info["totalTarjetas"]!==''){
+      
+      this.info["pagoRotativoBeneficiar"] = 
+      this.formatNumber(this.calculateMonthlyPayment(
+          this.info["plazoRotativo"],
+          this.info["tasaRotativoBeneficiar"],
+          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))));  
 
-    this.info["pagoRotativoBeneficiar"] = this.formatNumber(
-      this.calculateMonthlyPayment(
-        this.info["plazoRotativo"],
-        this.info["tasaRotativoBeneficiar"],
-        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
-      )
-    );
+      this.info["interesRotativoBeneficiar"] = this.formatNumber(
+        Number(this.info["pagoRotativoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoRotativo"] -
+        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')));
 
-    this.info["interesCreditoBeneficiar"] = this.formatNumber(
-      Number(this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoCredito"] -
-        (Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
-          Number(this.info["liquidez"].replace(/[^0-9]/g, '')))
-    );
-
-    this.info["interesRotativoBeneficiar"] = this.formatNumber(
-      Number(this.info["pagoRotativoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoRotativo"] -
-        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
-    );
-
-    this.info["interesTarjetaActual"] = this.formatNumber(
-      Number(
-        this.calculateMonthlyPayment(
+      this.info["interesTarjetaActual"] = 
+        this.formatNumber(Number(this.calculateMonthlyPayment(
           this.info["plazoRotativo"],
           this.info["tasaUsura"],
-          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
-        )
-      ) *
-        this.info["plazoRotativo"] -
-        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))
-    );
+          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')))
+          ) * this.info["plazoRotativo"] -
+          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')));
 
-    this.generateResume();
+      
+    }
+    else{
+      this.info["interesRotativoBeneficiar"]= '';
+      this.info["pagoRotativoBeneficiar"] = '';
+      this.info["interesTarjetaActual"]='';
+    }   
+
+    
+    // this.generateResume();
   }
 
   calcularTotalesRef() {
@@ -161,23 +194,7 @@ export class ProductsComponent implements OnInit {
   }
 
   paymentChart() {
-    let pagoActualCreditos = 0;
     
-    for (let i = 0; i < this.info["creditosRefinanciamientoList"].length; i++) {
-      pagoActualCreditos += Number(
-        this.info["creditosRefinanciamientoList"][i]["Pago Mensual"].replace(/[^0-9]/g, '')
-      );
-    }
-
-    let pagoActualTarjetas = 0;
-    for (let i = 0; i < this.info["tarjetasRefinanciamientoList"].length; i++) {
-      pagoActualTarjetas += Number(
-        this.info["tarjetasRefinanciamientoList"][i]["Pago Mensual"].replace(/[^0-9]/g, '')
-      );
-    }
-
-    this.info["pagoCreditoActual"] = this.formatNumber(pagoActualCreditos);
-    this.info["pagoRotativoActual"] = this.formatNumber(pagoActualTarjetas);
 
     this.resumenFlujoCaja.chartData.labels = ['Creditos', 'Rotativo'];
     this.resumenFlujoCaja.chartData.datasets = [
@@ -204,7 +221,7 @@ export class ProductsComponent implements OnInit {
       },
       {
         label: 'Pago Actual',
-        data: [pagoActualCreditos, pagoActualTarjetas],
+        data: [this.info['pagoActualCreditos'], this.info['pagoActualTarjetas']],
         backgroundColor: 'rgba(75, 192, 192, 1)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,

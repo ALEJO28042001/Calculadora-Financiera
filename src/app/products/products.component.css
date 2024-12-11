@@ -36,6 +36,7 @@ form{
   background-color: aliceblue;  
   margin:8px;
   gap: 15px;
+  row-gap: 20px;
   padding: 10px;
   padding-top: 20px;
 }

@@ -53,11 +53,10 @@ export class ProductsComponent implements OnInit {
       this.info["nombreAsociado"] = this.DataService.getNombreCliente();
       this.divisionProductos(this.DataService.getData());
       this.info['aportes'] = this.calcularAhorro(this.DataService.getInfoCliente()['Salario']);
-      this.pagosActuales();
-      
+      this.getPagosActuales();      
     }
   }
-  pagosActuales(){
+  getPagosActuales(){
     let pagoActualTarjetas = 0;
     if(this.info['totalTarjetas']!==''){
         for (let i = 0; i < this.info["tarjetasRefinanciamientoList"].length; i++) {
@@ -76,7 +75,6 @@ export class ProductsComponent implements OnInit {
       this.info["pagoCreditoActual"] = this.formatNumber(pagoActualCreditos);
     }
   }
-
   getKeys(){return  Object.keys(this.info);}
 
   calculate() {
@@ -121,18 +119,13 @@ export class ProductsComponent implements OnInit {
           this.info["tasaUsura"],
           Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')))
           ) * this.info["plazoRotativo"] -
-          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')));
-
-      
+          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')));      
     }
     else{
       this.info["interesRotativoBeneficiar"]= '';
       this.info["pagoRotativoBeneficiar"] = '';
       this.info["interesTarjetaActual"]='';
-    }   
-
-    
-    // this.generateResume();
+    }       
   }
 
   calcularTotalesRef() {
@@ -179,58 +172,83 @@ export class ProductsComponent implements OnInit {
       this.info["interesRotativoBeneficiar"].replace(/[^0-9]/g, ''),
     ];
 
-
-    this.resumenInteres.chartData.datasets.push({
-      label: 'Liquidez',
-      data: [
-        this.info["liquidez"].replace(/[^0-9]/g, ''),
-      ],
-      backgroundColor: 'rgba(0  , 109, 27, 0.6)',
-      borderColor: 'rgba(235, 109, 27, 0.6)',
-      borderWidth: 1,
-      stack: 'Stack 1',
-    })
-    this.resumenInteres.chart.update();
-  }
-
-  paymentChart() {
-    
-
-    this.resumenFlujoCaja.chartData.labels = ['Creditos', 'Rotativo'];
-    this.resumenFlujoCaja.chartData.datasets = [
-      {
-        label: 'Pago Beneficiar',
+    if(!this.resumenInteres.chartData.datasets[5]){
+      this.resumenInteres.chartData.datasets.push({
+        label: 'Liquidez',
         data: [
-          this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, ''),
-          this.info["pagoRotativoBeneficiar"].replace(/[^0-9]/g, ''),
+          this.info["liquidez"].replace(/[^0-9]/g, ''),
         ],
-        backgroundColor: 'rgba(235, 109, 27, 0.6)',
+        backgroundColor: 'rgba(0  , 109, 27, 0.6)',
         borderColor: 'rgba(235, 109, 27, 0.6)',
         borderWidth: 1,
-        stack: 'Stack 0',
+        stack: 'Stack 1',
+      })
+    }
+    else{
+      this.resumenInteres.chartData.datasets[5].data = 
+      [this.info["liquidez"].replace(/[^0-9]/g, '')];
+    }
+    
+    this.resumenInteres.chart.update();
+  }
+  
+  paymentChart() {
+    this.resumenFlujoCaja.chartData.labels = ['Pago Mensual'];
+    this.resumenFlujoCaja.chartData.datasets = [
+      {
+        label: 'Aportes',
+        data: [this.info["aportes"].replace(/[^0-9]/g, '')],
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        borderColor: 'rgba(235, 109, 27, 0.6)',
+        borderWidth: 1,
+        stack: 'Beneficiar',
       },
       {
         label: 'Aportes',
-        data: [
-          this.info["aportes"].replace(/[^0-9]/g, ''),
-        ],
-        backgroundColor: 'rgba(0, 255, 0, 0.6)',
+        data: [this.info["aportes"].replace(/[^0-9]/g, '')],
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         borderColor: 'rgba(235, 109, 27, 0.6)',
         borderWidth: 1,
-        stack: 'Stack 0',
+        stack: 'Actual',
       },
       {
-        label: 'Pago Actual',
-        data: [this.info['pagoActualCreditos'], this.info['pagoActualTarjetas']],
+        label: 'Pago Beneficiar Credito',
+        data: [this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, ''), 0],
+        backgroundColor: 'rgba(235, 0, 27, 0.6)',
+        borderColor: 'rgba(235, 109, 27, 0.6)',
+        borderWidth: 1,
+        stack: 'Beneficiar',
+      },
+      {
+        label: 'Pago Beneficiar Rotativo',
+        data: [this.info["pagoRotativoBeneficiar"].replace(/[^0-9]/g, ''), 0],
+        backgroundColor: 'rgba(235, 109, 27, 0.6)',
+        borderColor: 'rgba(235, 109, 27, 0.6)',
+        borderWidth: 1,
+        stack: 'Beneficiar',
+      },
+      
+      {
+        label: 'Pago Actual Creditos',
+        data: [this.info['pagoCreditoActual'].replace(/[^0-9]/g, '')],
+        backgroundColor: 'rgba(0, 192, 0, 1)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+        stack: 'Actual',
+      },
+      {
+        label: 'Pago Actual Tarjetas',
+        data: [this.info['pagoRotativoActual'].replace(/[^0-9]/g, '')],
         backgroundColor: 'rgba(75, 192, 192, 1)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
-        stack: 'Stack 1',
+        stack: 'Actual',
       },
     ];
-
+    
     this.resumenFlujoCaja.chart.update();
   }
+
   formatNumber(value: number): string {
     return value.toLocaleString('en-US', {maximumFractionDigits:0});
   }
@@ -251,12 +269,8 @@ export class ProductsComponent implements OnInit {
     this.info["tarjetasRefinanciamientoList" ] = data.filter(
       (item) => item['Tarjeta'] === 'true' && item['Refinanciamiento'] === 'true');
   
-    // Update "todosLosProductosList" with all items
     this.info["todosLosProductosList"] = data;
-  
-    // Update charts or related components if necessary
-    // this.todosLosProductos.chartData = { labels: [], datasets: [] };
-    this.calcularTotalesRef();
+      this.calcularTotalesRef();
   }
   generateResume(): void {
     this.paymentChart();

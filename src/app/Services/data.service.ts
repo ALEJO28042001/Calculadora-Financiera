@@ -14,7 +14,7 @@ export class DataService {
   private nombreFuncionario="";
   private infoCliente:any='';
   private interestRange=[];
-  private access=true;
+  private access=false;
 
   getDocumentoAsociado(){return this.documentoAsociado}
   setDocumentoAsociado(documento:string){this.documentoAsociado=documento}

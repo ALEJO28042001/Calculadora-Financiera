@@ -1,5 +1,5 @@
 <!-- Calculate Button -->
-<button class="custom-button" (click)="calculate()">Calculate</button>
+<button class="custom-button" (click)="generateResume()">Calculate</button>
 
 <!-- Form Start -->
 <form class="form">
@@ -29,7 +29,6 @@
         </div>        
     </form>
 
-<div>
     <form class="form">
     <!-- Información Creditos -->
     <div class="form-row">
@@ -75,54 +74,52 @@
         </div>
     </div>        
     </form>
-</div>
 
-    
-<div>
-<form class="form">
-    <!-- Rotativo Details -->
-    <div class="form-row">
-        <div class="input-data">
-            <input 
-                required 
-                type="text" 
-                class="input" 
-                placeholder=" " 
-                [name]="'tasaRotativoBeneficiar'" 
-                [(ngModel)]="info['tasaRotativoBeneficiar']" 
-                (keypress)="allowNumbers($event,'tasaRotativoBeneficiar')"
-                (input)="calculate()"
-                >
-            <div class="underline"></div>
-            <label >{{displayName('tasaRotativoBeneficiar') | titlecase}}</label>
+    <form class="form">
+        <!-- Rotativo Details -->
+        <div class="form-row">
+            <div class="input-data">
+                <input 
+                    required 
+                    type="text" 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="'tasaRotativoBeneficiar'" 
+                    [(ngModel)]="info['tasaRotativoBeneficiar']" 
+                    (keypress)="allowNumbers($event,'tasaRotativoBeneficiar')"
+                    (input)="calculate()"
+                    >
+                <div class="underline"></div>
+                <label >{{displayName('tasaRotativoBeneficiar') | titlecase}}</label>
+            </div>
         </div>
-    </div>
-    <div class="form-row">
-        <div class="input-data">
-            <input 
-                required 
-                type="number" 
-                class="input" 
-                placeholder=" " 
-                [name]="'plazoRotativo'" 
-                [(ngModel)]="info['plazoRotativo']" 
-                min="0"
-                (keypress)="allowNumbers2($event)"
-                (input)="calculate()">
-            <div class="underline"></div>
-            <label >{{displayName('plazoRotativo') | titlecase}}</label>
+        <div class="form-row">
+            <div class="input-data">
+                <input 
+                    required 
+                    type="number" 
+                    class="input" 
+                    placeholder=" " 
+                    [name]="'plazoRotativo'" 
+                    [(ngModel)]="info['plazoRotativo']" 
+                    min="0"
+                    (keypress)="allowNumbers2($event)"
+                    (input)="calculate()">
+                <div class="underline"></div>
+                <label >{{displayName('plazoRotativo') | titlecase}}</label>
+            </div>
         </div>
-    </div>
-    <div *ngFor="let key of getCategorizedKeys().rotativo">
-        <div class="output-data">
-            <div class="output">{{ info[key] }}</div>
-            <label class="chart">{{ displayName(key) | titlecase }}</label>
-            <div class="underline"></div>
-          </div>
-    </div>
-    
+        <div *ngFor="let key of getCategorizedKeys().rotativo">
+            <div class="form-row">
+
+            <div class="output-data">
+                <div class="output">{{ info[key] }}</div>
+                <label class="chart">{{ displayName(key) | titlecase }}</label>
+                <div class="underline"></div>
+            </div>
+        </div> 
+        </div>       
     </form>
-</div>
 </form>
 
 <app-generate-chart 

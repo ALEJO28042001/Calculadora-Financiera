@@ -4,6 +4,58 @@
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css');
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+img {
+  width: 100px;
+  height: 70px;
+}
+
+nav {
+  width: 100%;
+  background: #242526;
+  padding: 0px 0px 0px 10px;
+}
+
+nav .wrapper {  
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-links {
+  display: inline-flex;
+}
+
+.nav-links li {
+  list-style: none;
+}
+
+.nav-links li a {
+  color: #f2f2f2;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 9px 10px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.nav-links li a:hover {
+  background: #3A3B3C;
+}
+
+
+
+
 *{
   outline: none;
   font-weight: bold;
@@ -40,6 +92,7 @@ form{
 }
 
 
+
 .container .text{ /* Title: Gradient text*/
   text-align: center;
   font-size: 41px;
@@ -53,9 +106,13 @@ form{
   }
 }
 .dropdown-group{
-  padding: 5px;
+  padding: 20px;
+  padding-top: 35px;
+  min-height: 30px;
+
 }
 .dropdown{
+  min-height: 30px;
   border-radius: 10px;
 }
 .form-row{
@@ -134,7 +191,8 @@ select{
 }
 
 .custom-button {
-  border: none; /* Remove border */
+  min-height: 50px ;
+  border: 3px solid #000; /* Add solid border style */
   text-align: center; /* Center the text */
   display: inline-block; /* Inline-block display */
   font-weight: bold; /* Bold text */
@@ -155,6 +213,8 @@ select{
 li{
   padding: 10px;
 }
+
+
 
 
 
@@ -241,4 +301,36 @@ li{
   height: 2px;
   width: 92%;
   left: 13px;
+}
+
+
+.formB{
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  background-color: aliceblue;  
+  padding-top: 10px;
+  margin-top: 20px;
+  gap: 30px;
+  padding-bottom: 50px;
+}
+.custom-buttonB {
+  min-height: 50px ;
+  border: 3px solid #000; /* Add solid border style */
+  border-color: #000;
+  text-align: center; /* Center the text */
+  display: inline-block; /* Inline-block display */
+  font-weight: bold; /* Bold text */
+  border-radius: 15px; /* Rounded corners */
+  transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s ease-in-out; /* Add transition effects */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a slight shadow */
+  cursor: pointer; /* Add a pointer cursor on hover */
+  position: relative;
+  background-color: rgba(215, 255, 15, 0.748);
+}
+
+/* Hover and Active State */
+.custom-buttonB:hover {
+  background-color: rgb(26, 255, 0); /* Darker green on hover */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Increase shadow */
+  transform: scale(1.05); /* Slightly increase size */
 }

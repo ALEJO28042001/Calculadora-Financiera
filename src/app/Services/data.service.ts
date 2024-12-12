@@ -58,7 +58,7 @@ async pullData(documento:string){
         cifinProducts=cifinProducts.filter((item: any) => 
           item["CALIDAD"] === 'PRIN'
         && item["NOMBREENTIDAD"] != 'BENEFICIAR- COOP. DE AHORRO Y');
-        this.setData(this.convertData(cifinProducts,cifinKeys));
+        this.convertData(cifinProducts,cifinKeys);
       }
       if(basicClientInfo.result[0]['CodError']===0){
         this.infoCliente=basicClientInfo.result[0];
@@ -68,7 +68,7 @@ async pullData(documento:string){
         beneficiarProducts=beneficiarProducts.result[0].Registros;
         this.apalancamiento=(Number(this.infoCliente.Registros[0].VALORCONSOLIDADO)+
           Number(this.infoCliente.Registros[1].VALORCONSOLIDADO));  
-        beneficiarProducts.map((item: any) => this.addProduct(this.renameKeys(item, beneficiarKeys)));  
+        this.convertData(beneficiarProducts,beneficiarKeys);        
         this.documentoAsociado = documento;
       }
     }   
@@ -76,8 +76,8 @@ async pullData(documento:string){
     return this.productList;
   }
 convertData(registros:any ,newKeysMapping:any){
-    return registros.map((item: any) => this.renameKeys(item, newKeysMapping));
-  }
+    registros.map((item: any) => this.renameKeys(item, newKeysMapping));
+}
 renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
       const renamedObj: any = {};
       for (const key in keyMap) {      
@@ -95,16 +95,15 @@ renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
         else if (key === "Plazo Actual") {
           renamedObj[key] = String(obj[keyMap[key]] - (obj["CUOTASCANCELADAS"] || obj["ALTURA"]));
         }
-        else if (obj[keyMap[key]] === "VALORCUOTA" || keyMap[key] === "SALDOOBLIGACION") {
+        else if (keyMap[key] === "VALORCUOTA" || keyMap[key] === "SALDOOBLIGACION") {
           renamedObj[key] = obj[keyMap[key]] * 1000;
         } 
         else if (key === "Tarjeta"){
           renamedObj[key] = String(obj[keyMap[key]] === 'ROTA' ||
         obj[keyMap[key]] === 'TCR' || obj[keyMap[key]] === 'ROTATIVO');  }      
         
-        // Default case for all other keys
         else {
-        renamedObj[key]=obj[keyMap[key]];
+          renamedObj[key]=obj[keyMap[key]];
         }
       } 
       renamedObj["Refinanciamiento"]= "true";
@@ -112,7 +111,8 @@ renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
       renamedObj["Interes Actual"]= "";
       renamedObj["Interes Beneficiar"]= "";
       renamedObj["Diferencia Interes"]= "";
-      return renamedObj;
+      console.log(renamedObj);
+      this.addProduct(renamedObj);
   }    
 }
 
@@ -122,7 +122,8 @@ const cifinKeys=
   "Nombre Producto": "NOMBREENTIDAD",
   "Pago Mensual": "VALORCUOTA",
   "Plazo Actual": "NUMEROCUOTASPACTADAS",
-  "Deuda Actual": "SALDOOBLIGACION"  
+  "Deuda Actual": "SALDOOBLIGACION" ,
+  "Tasa Real":"",
 }
 const beneficiarKeys=
 {

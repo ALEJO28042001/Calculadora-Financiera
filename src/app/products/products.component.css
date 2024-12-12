@@ -4,6 +4,60 @@
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css');
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+img {
+  width: 100px;
+  height: 70px;
+}
+
+nav {
+  width: 100%;
+  background: #242526;
+  padding: 0px 0px 0px 10px;
+}
+
+nav .wrapper {  
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-links {
+  display: inline-flex;
+}
+
+.nav-links li {
+  list-style: none;
+}
+
+.nav-links li a {
+  color: #f2f2f2;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 9px 10px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.nav-links li a:hover {
+  background: #3A3B3C;
+}
+
+
+
+
+
+
 *{
   outline: none;
   font-weight: bold;
@@ -133,7 +187,10 @@ select{
 }
 
 .custom-button {
-  border: none; /* Remove border */
+  padding: 10px;
+
+  min-height: 50px ;
+  border: 3px solid #000; /* Add solid border style */
   text-align: center; /* Center the text */
   display: inline-block; /* Inline-block display */
   font-weight: bold; /* Bold text */

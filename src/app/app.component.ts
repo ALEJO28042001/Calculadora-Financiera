@@ -1,13 +1,17 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NavBarComponent } from "./nav-bar/nav-bar.component";
+import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { DataService } from './Services/data.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NavBarComponent],
+  imports: [RouterOutlet, RouterLink, CommonModule,RouterModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent{
+  constructor(private DataService: DataService) {}
+  gAccess(){return this.DataService.getAccess()}
+  logOut(){this.DataService.logOut()}
 }

@@ -2,11 +2,12 @@ import { DataService } from './../Services/data.service';
 import { Component, Input, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-fields-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,RouterOutlet],
   templateUrl: './fields-manager.component.html',
   styleUrl: './fields-manager.component.css'
 })
@@ -22,6 +23,7 @@ export class FieldsManagerComponent implements OnInit{
   selectedProductIndex: number | null = null; // For editing/deleting selected product
   showAllProducts = false; // To toggle product display
   access=false;
+  nombreFuncionario='';
   moneyKeys=[
     "Deuda Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar",
     "Diferencia Interes"
@@ -32,8 +34,9 @@ export class FieldsManagerComponent implements OnInit{
     this.documentoAsociado=this.DataService.getDocumentoAsociado();
     this.documentoNumber();
     this.access = this.DataService.getAccess();
+    this.nombreFuncionario=this.DataService.getNombreFuncionario();
   }
-  
+  gNombreFuncionario(){return this.DataService.getNombreFuncionario();}
   @Input() product: { [key: string]: string } = {
     "Nombre Producto": "",
     "Tarjeta":"false",
@@ -64,11 +67,13 @@ export class FieldsManagerComponent implements OnInit{
     "Interes Beneficiar",
     "Diferencia Interes",
 ];
+gAccess(){return this.DataService.getAccess()}
 
   addProduct(product?: any | null) {  
     if(product){
       this.product=product;
     }   
+    console.log(this.product);
     for(let field of this.moneyKeys){
       this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
     }
@@ -76,6 +81,7 @@ export class FieldsManagerComponent implements OnInit{
     if (this.selectedProductIndex === null) {
       // Add a new product
       this.productList.push({ ...this.product });
+      this.resetForm();
     } else {
       // Update existing product
       this.productList[this.selectedProductIndex] = { ...this.product };
@@ -169,18 +175,25 @@ export class FieldsManagerComponent implements OnInit{
     return r;
   }
   calculateRealRate(){
+    console.log(this.product['Tasa Real']);
+
       let amount = Number(this.product['Deuda Actual']);
       let months = Number(this.product['Plazo Actual']);
       let pago = Number(this.product['Pago Mensual']);
-      if(amount>0 && months>0 && pago>0 && this.product['Tasa Real']==='')
+      if(amount>0 && months>0 && pago>0 && this.product['Nombre Producto'].substring(0,10)!=='BENEFICIAR')
       {
         this.product['Tasa Real']=((this.findInterestRate(pago,amount, months)*1200)).toFixed(2);  
       }    
-      this.product['Diferencia Tasas'] = (Number(this.product['Tasa Beneficiar'])-Number(this.product['Tasa Real'])).toFixed(2);
       this.product['Interes Actual'] = (Number(this.product['Tasa Real'])*amount/1200).toFixed(0);  
-      this.product['Interes Beneficiar'] = (Number(this.product['Tasa Beneficiar'])*amount/1200).toFixed(0); 
-      this.product['Diferencia Interes'] = (Number(this.product['Interes Actual'])-Number(this.product['Interes Beneficiar'])).toFixed(0);
+      this.actualizarDiferencias();
   }   
+  actualizarDiferencias(){
+    this.product['Interes Beneficiar'] = this.formatNumber(Number((Number(this.product['Tasa Beneficiar'])*
+        Number(this.product['Deuda Actual'].replace(/[^0-9]/g, ''))/1200).toFixed(0))); 
+    this.product['Diferencia Interes'] = this.formatNumber(Number((Number(this.product['Interes Actual'].replace(/[^0-9]/g, ''))-
+        Number(this.product['Interes Beneficiar'].replace(/[^0-9]/g, ''))).toFixed(0)));
+    this.product['Diferencia Tasas'] = (Number(this.product['Tasa Beneficiar'])-Number(this.product['Tasa Real'])).toFixed(2);
+  }
 
   async searchData(){
     this.isLoading=true;
@@ -228,6 +241,7 @@ export class FieldsManagerComponent implements OnInit{
       (Number(this.product['Deuda Actual'].replace(/[^0-9]/g, ''))*
       Number(this.product['Tasa Beneficiar'].replace(/[^0-9.]/g, ''))/
       1200).toFixed(0)));
+    this.actualizarDiferencias();
   }
 
   fNumber(key:string) {

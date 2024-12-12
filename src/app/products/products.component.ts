@@ -1,3 +1,4 @@
+import { RouterOutlet } from '@angular/router';
 import { Component, numberAttribute, OnInit } from '@angular/core';
 import { GenerateChartComponent } from '../generate-chart/generate-chart.component';
 import { ViewChild } from '@angular/core';
@@ -8,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [GenerateChartComponent, CommonModule,FormsModule],
+  imports: [GenerateChartComponent, CommonModule,FormsModule, RouterOutlet],
   templateUrl: './products.component.html',
   styleUrl: './products.component.css'
 })
@@ -89,9 +90,10 @@ export class ProductsComponent implements OnInit {
           )
         );   
         this.info["interesCreditoBeneficiar"] = this.formatNumber(
-          Number(this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoCredito"] -
-            (Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
-              Number(this.info["liquidez"].replace(/[^0-9]/g, '')))
+          Number((Number(this.info['tasaCreditoBeneficiar'])*
+          (Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')) +
+          Number(this.info["liquidez"].replace(/[^0-9]/g, '')))/1200).toFixed(0))
+            
         );
       
     }

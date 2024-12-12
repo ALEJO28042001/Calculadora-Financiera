@@ -1,5 +1,8 @@
-<!-- Datos del Asociado y consulta --> 
-<form class="form" *ngIf="access">
+
+<div>Bienvenido {{gNombreFuncionario()}}</div>
+<router-outlet></router-outlet>
+
+<form class="form" *ngIf="gAccess()">
       <div class="form-row">
       <div class="input-data">
         <input type="chart" required class="input" 
@@ -30,7 +33,8 @@
       <p>Loading, please wait...</p>
     </div>
   </div>
-    <button [disabled]="!documentoAsociado || isLoading " 
+    <button 
+    [disabled]="isLoading " 
       class="custom-button" (click)="searchData()"> GET DATA</button>
  
 </form>
@@ -117,26 +121,12 @@
 </form>
 
 <!-- Modificar Lista de Productos -->
-<div class="form">
-    <button class="custom-button" (click)="addProduct()">
+<form class="formB">
+    <button class="custom-buttonB" (click)="addProduct()">
       {{ selectedProductIndex === null ? 'Agregar Producto' : 'Actualizar Producto' }}
     </button>
-    <button *ngIf="productList.length > 0" class="custom-button" (click)="resetForm()">Nuevo Producto  </button>
-    <button *ngIf="productList.length > 0" class="custom-button" (click)="toggleProductList() ">Mostrar Productos</button> 
-    <button *ngIf="productList.length > 0" class="custom-button delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
-    
+    <button *ngIf="productList.length > 0" class="custom-buttonB" (click)="resetForm()">Nuevo Producto  </button>
+    <button *ngIf="productList.length > 0" class="custom-buttonB" (click)="toggleProductList() ">Mostrar Productos</button> 
+    <button *ngIf="productList.length > 0" class="custom-buttonB delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
+</form>
 
-  
-</div>
-
-
-  <!-- Display all products -->
-  <!-- <div *ngIf="showAllProducts && productList.length > 0">
-    <h2>Product List</h2>
-    <ul>selectedProductIndex
-      <li *ngFor="let item of productList; let idx = index">
-        <strong>Product {{ item['Nombre Producto']}}:</strong> {{ item | json }}
-      </li>
-    </ul>
-  </div> -->
-  

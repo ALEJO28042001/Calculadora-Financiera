@@ -1,14 +1,15 @@
-<!-- <app-nav-bar></app-nav-bar> -->
-<nav>
-  <div class="wrapper">      
-    <a routerLink="/Home">
-      <img src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" img>
-    </a>
-      <div class="nav-links">
-        <li><a routerLink="/Login">Login</a></li>
-        <li><a routerLink="/Home">Input</a></li>
-        <li><a routerLink="/Products">Products</a></li>
-    </div>
+<div *ngIf="gAccess()">
+    <nav>
+      <div class="wrapper">      
+        <a routerLink="/Home">
+          <img src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" img>
+        </a>
+          <div class="nav-links">
+            <li><a routerLink="/Productos">Productos</a></li>
+            <li><a routerLink="/Resumen">Resumen</a></li>
+            <li><a routerLink="/Home" (click)="logOut()">Log Out</a></li>
+        </div>
+      </div>
+    </nav>
   </div>
-</nav>
 <router-outlet></router-outlet>

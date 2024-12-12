@@ -37,6 +37,9 @@ export class ProductsComponent implements OnInit {
     'interesRotativoBeneficiar': '',
     'apalancamiento': '',
     'nombreAsociado': '',
+    'totalPagoBeneficiar':0,
+    'totalPagoActual':0,
+    'diferenciaPagos':0
   };
 
   @ViewChild('todosLosProductos') todosLosProductos!: GenerateChartComponent;
@@ -111,17 +114,15 @@ export class ProductsComponent implements OnInit {
           this.info["tasaRotativoBeneficiar"],
           Number(this.info["totalTarjetas"].replace(/[^0-9]/g, ''))));  
 
-      this.info["interesRotativoBeneficiar"] = this.formatNumber(
-        Number(this.info["pagoRotativoBeneficiar"].replace(/[^0-9]/g, '')) * this.info["plazoRotativo"] -
-        Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')));
+      this.info["interesRotativoBeneficiar"] = 
+      this.formatNumber(
+        Number((Number(this.info['tasaRotativoBeneficiar'])*
+        (Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')))/1200).toFixed(0)));
 
       this.info["interesTarjetaActual"] = 
-        this.formatNumber(Number(this.calculateMonthlyPayment(
-          this.info["plazoRotativo"],
-          this.info["tasaUsura"],
-          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')))
-          ) * this.info["plazoRotativo"] -
-          Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')));      
+      this.formatNumber(
+        Number((Number(this.info['tasaUsura'])*
+        (Number(this.info["totalTarjetas"].replace(/[^0-9]/g, '')))/1200).toFixed(0)));      
     }
     else{
       this.info["interesRotativoBeneficiar"]= '';
@@ -156,47 +157,85 @@ export class ProductsComponent implements OnInit {
 
   interestChart() {
     this.resumenInteres.chartData.labels = ['Creditos', 'Rotativo'];
-    this.resumenInteres.chartData.datasets[0].data = [
-      this.info["totalCreditos"].replace(/[^0-9]/g, ''),
-      this.info["totalTarjetas"].replace(/[^0-9]/g, ''),
-    ];
-    this.resumenInteres.chartData.datasets[1].data = [
+    this.resumenInteres.chartData.datasets = [
+  {
+    label: 'Interes Actual Creditos',
+    data: [
       this.info["interesCreditoActual"].replace(/[^0-9]/g, ''),
       this.info["interesTarjetaActual"].replace(/[^0-9]/g, ''),
-    ];
-    this.resumenInteres.chartData.datasets[2].data = [      
-      this.info["totalCreditos"].replace(/[^0-9]/g, ''),
-      this.info["totalTarjetas"].replace(/[^0-9]/g, ''),
-    ];
-    
-    this.resumenInteres.chartData.datasets[3].data = [
-      this.info["interesCreditoBeneficiar"].replace(/[^0-9]/g, ''),
+    ],
+    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+    borderColor: 'rgba(75, 192, 192, 1)',
+    borderWidth: 1,
+    stack: 'Actual',
+  },
+  {
+    label: 'Interes Beneficiar Creditos',
+    data: [
+      Number(((this.info['tasaCreditoBeneficiar'] *
+        Number(this.info["totalCreditos"].replace(/[^0-9]/g, ''))) /1200).toFixed(0)
+      ),
       this.info["interesRotativoBeneficiar"].replace(/[^0-9]/g, ''),
-    ];
+    ],
+    backgroundColor: 'rgba(235, 109, 27, 0.6)',
+    borderColor: 'rgba(235, 109, 27, 0.6)',
+    borderWidth: 1,
+    stack: 'Beneficiar',
+  },
+  {
+    label: 'Interes Liquidez',
+    data: [
+      Number(
+        (
+          (this.info['tasaCreditoBeneficiar'] *
+            Number(this.info["liquidez"].replace(/[^0-9]/g, ''))) /
+          1200
+        ).toFixed(0)
+      ),
+      0,
+    ],
+    backgroundColor: 'rgba(0, 109, 27, 0.6)',
+    borderColor: 'rgba(0, 109, 27, 1)',
+    borderWidth: 1,
+    stack: 'Beneficiar',
+  },
+];
 
-    if(!this.resumenInteres.chartData.datasets[5]){
-      this.resumenInteres.chartData.datasets.push({
-        label: 'Liquidez',
-        data: [
-          this.info["liquidez"].replace(/[^0-9]/g, ''),
-        ],
-        backgroundColor: 'rgba(0  , 109, 27, 0.6)',
-        borderColor: 'rgba(235, 109, 27, 0.6)',
-        borderWidth: 1,
-        stack: 'Stack 1',
-      })
-    }
-    else{
-      this.resumenInteres.chartData.datasets[5].data = 
-      [this.info["liquidez"].replace(/[^0-9]/g, '')];
-    }
-    
+console.log(
+  "INTERES LIQUIDEZ:",
+  Number(
+    (
+      (this.info['tasaCreditoBeneficiar'] *
+        Number(this.info["liquidez"].replace(/[^0-9]/g, ''))) /
+      1200
+    ).toFixed(0)
+  )
+);
+
     this.resumenInteres.chart.update();
   }
   
   paymentChart() {
-    this.resumenFlujoCaja.chartData.labels = ['Pago Mensual'];
+
+    this.info['totalPagoBeneficiar'] = Number(this.info['aportes'].replace(/[^0-9]/g, ''))
+    +Number(this.info['pagoCreditoBeneficiar'].replace(/[^0-9]/g, ''))
+    +Number(this.info['pagoRotativoBeneficiar'].replace(/[^0-9]/g, ''));
+
+    this.info['totalPagoActual'] = Number(this.info['aportes'].replace(/[^0-9]/g, ''))
+        +Number(this.info['pagoCreditoActual'].replace(/[^0-9]/g, ''))
+        +Number(this.info['pagoRotativoActual'].replace(/[^0-9]/g, ''));
+
+    this.info['diferenciaPagos'] = this.info['totalPagoActual']-this.info['totalPagoBeneficiar'];
+
+    this.resumenFlujoCaja.chartData.labels = ['Pago Beneficiar','Pago Actual','Diferencia'];
     this.resumenFlujoCaja.chartData.datasets = [
+      {
+        label: 'Total Pago Beneficiar',
+        data: [this.info['totalPagoBeneficiar']],
+        backgroundColor: 'rgb(82, 204, 0)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
       {
         label: 'Aportes',
         data: [this.info["aportes"].replace(/[^0-9]/g, '')],
@@ -205,17 +244,26 @@ export class ProductsComponent implements OnInit {
         borderWidth: 1,
         stack: 'Beneficiar',
       },
+      
       {
-        label: 'Aportes',
-        data: [this.info["aportes"].replace(/[^0-9]/g, '')],
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        label: 'Pago Beneficiar Liquidez',
+        data: [this.calculateMonthlyPayment(
+          this.info["plazoCredito"],
+          this.info["tasaCreditoBeneficiar"],
+          Number(this.info["liquidez"].replace(/[^0-9]/g, '')))
+          , 0],
+        backgroundColor: 'rgba(235, 0, 27, 0.6)',
         borderColor: 'rgba(235, 109, 27, 0.6)',
         borderWidth: 1,
-        stack: 'Actual',
+        stack: 'Beneficiar',
       },
       {
         label: 'Pago Beneficiar Credito',
-        data: [this.info["pagoCreditoBeneficiar"].replace(/[^0-9]/g, ''), 0],
+        data: [this.calculateMonthlyPayment(
+          this.info["plazoCredito"],
+          this.info["tasaCreditoBeneficiar"],
+          Number(this.info["totalCreditos"].replace(/[^0-9]/g, '')))
+          , 0],
         backgroundColor: 'rgba(235, 0, 27, 0.6)',
         borderColor: 'rgba(235, 109, 27, 0.6)',
         borderWidth: 1,
@@ -229,10 +277,17 @@ export class ProductsComponent implements OnInit {
         borderWidth: 1,
         stack: 'Beneficiar',
       },
-      
+      {
+        label: 'Aportes',
+        data: [,this.info["aportes"].replace(/[^0-9]/g, '')],
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        borderColor: 'rgba(235, 109, 27, 0.6)',
+        borderWidth: 1,
+        stack: 'Actual',
+      },      
       {
         label: 'Pago Actual Creditos',
-        data: [this.info['pagoCreditoActual'].replace(/[^0-9]/g, '')],
+        data: [,this.info['pagoCreditoActual'].replace(/[^0-9]/g, '')],
         backgroundColor: 'rgba(0, 192, 0, 1)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
@@ -240,13 +295,30 @@ export class ProductsComponent implements OnInit {
       },
       {
         label: 'Pago Actual Tarjetas',
-        data: [this.info['pagoRotativoActual'].replace(/[^0-9]/g, '')],
+        data: [,this.info['pagoRotativoActual'].replace(/[^0-9]/g, '')],
         backgroundColor: 'rgba(75, 192, 192, 1)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
         stack: 'Actual',
       },
+      {
+        label: 'Total Pago Actual',
+        data: [,this.info['totalPagoActual']],
+        backgroundColor: 'rgb(0, 9, 133)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },      
+      {
+        label: 'Diferencia',
+        data: [,,this.info['diferenciaPagos']],
+        backgroundColor: 'rgb(170, 0, 128)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      }
+
     ];
+
+    
     
     this.resumenFlujoCaja.chart.update();
   }

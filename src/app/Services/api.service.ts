@@ -9,7 +9,9 @@ export class ApiService {
   private urlEstadoCuenta = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/ConsultaEstadoDeCuenta'
   private urlCartera = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/Cartera';
   private urlLogin = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethIngresoAsociado/IngresoEstadoCuentaAfiliado';
-
+  private urlAportes = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/AhorroAportes';
+  private urlPoblarDataCredito = 'https://test.beneficiar.com.co/testDataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaDatacredito';
+  private urlJsonDataCredito = 'https://test.beneficiar.com.co/testDataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaExistente';
 
   // Basic auth username and password
   private  usernameCifin = 'ServerAdmin';
@@ -34,10 +36,22 @@ export class ApiService {
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
     };
+
+    private  usernameDataCredito = 'becUsWeb';
+    private  passwordDataCredito = 'zkJlSPHA8m3GDTgza774G5X89ztJShR@9Sa3A$mrumhz@anb8uhkaDLzQDJY8Q3h';
+    private  credentialsDataCredito = 
+        btoa(`${this.usernameDataCredito}:${this.passwordDataCredito}`); // Encode credentials to base64
+    private headersDataCredito = {
+    'Authorization': `Basic ${this.credentialsDataCredito}`,
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin':'*',
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
+    };
   
   constructor(private http: HttpClient) {}
      
-    async consultarBD(body: any, url: string, headers: Record<string, string>): Promise<any> {
+  async consultarDB(body: any, url: string, headers: Record<string, string>): Promise<any> {
         try {
           const resp = await fetch(url, {
             method: "POST",
@@ -52,38 +66,70 @@ export class ApiService {
     }     
     
   async getBeneficiarInfo(documento:string){
-        return this.consultarBD({
+        return this.consultarDB({
             "FECHA":formattedDate,
             "DOC":documento,
             "TIPODOC":"C"            
         },this.urlEstadoCuenta,this.headersBeneficiar);
     }
   async  getBeneficiarProducts(codAsociado:string){
-        return this.consultarBD({
+        return this.consultarDB({
                 "FECHA":formattedDate,
                 "CODAFILIADO":codAsociado   
         },this.urlCartera,this.headersBeneficiar);        
     }  
-  async  getCifinProducts(documento:string){
-        return this.consultarBD({
-            "Tipo": "1",
-            "Numero": documento,
-            "Motivo": "24",
-            "Codigo": "154",
-            "FECHACONSULTA": formattedDate,
-            "IdCentralCred": "1"
-            },this.urlCifin,this.headersCifin).then((result) => result.result);
-    }
+
   async  getLoginInfo(documento:string,clave:string){
-        return this.consultarBD({
-            "IP":"1.1.1",
-            "NAVEGADOR":"",
-            "CEDULA":documento,
-            "CLAVEENC":clave,
-            "ORIGEN":"2",
-            "MAQUINA":""
-        },this.urlLogin,this.headersBeneficiar);
-    }
+      return this.consultarDB({
+          "IP":"1.1.1",
+          "NAVEGADOR":"",
+          "CEDULA":documento,
+          "CLAVEENC":clave,
+          "ORIGEN":"2",
+          "MAQUINA":""
+      },this.urlLogin,this.headersBeneficiar);
+  }
+  async  getAhorroAportes(codAsociado:string){
+    return this.consultarDB({
+        "FECHA":"09/30/2024",
+        "CODAFILIADO":codAsociado
+    },this.urlAportes,this.headersBeneficiar);
+}
+
+
+async  getCifinProducts(documento:string){
+  return this.consultarDB({
+      "Tipo": "1",
+      "Numero": documento,
+      "Motivo": "24",
+      "Codigo": "154",
+      "FECHACONSULTA": formattedDate,
+      "IdCentralCred": "1"
+      },this.urlCifin,this.headersCifin).then((result) => result.result);
+}
+
+
+async  consultaDataCredito(documento:number){
+  const poblarDataCredito = await this.poblarDataCredito(documento);
+  if(poblarDataCredito.CodError===0)
+  return this.getJsonDataCredito(documento);
+}
+async  poblarDataCredito(documento:number){
+  return this.consultarDB({
+    "User":"92",
+    "Origen":"Sistinfe",
+    "TipoDoc":"1",
+    "Documento":documento,
+    "LastName":""
+    },this.urlPoblarDataCredito,this.headersDataCredito).then((result) => result);
+}
+async  getJsonDataCredito(documento:number){
+  return this.consultarDB({
+      "TipoDoc": "1",
+      "Numero": documento
+      },this.urlJsonDataCredito,this.headersDataCredito).then((result) => result.Consulta);
+}
+  
   async getInterestRange(){return [6,30]}
 }
 const currentDate = new Date();

@@ -34,7 +34,6 @@ export class LoginComponent implements OnInit{
 
   async onSubmit() {
     this.isLoading=true;
-    console.log(this.access);
     if (this.cedula && this.password) {
       let cc = this.cedula.replace(/[^0-9]/g, '');
       var token = await this.DataService.askLogin(cc,this.encrypt(this.password));
@@ -48,7 +47,6 @@ export class LoginComponent implements OnInit{
         this.error=true;
       }
     }
-    console.log(this.access);
 
     this.isLoading=false; 
   }

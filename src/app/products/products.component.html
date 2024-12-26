@@ -1,35 +1,90 @@
 <!-- Calculate Button -->
-<button class="custom-button" (click)="generateResume()">Calculate</button>
+<button class="custom-button" (click)="generateCharts()">Calculate</button>
+<h2 class="chart-title"> {{info['nombre']}}</h2>
+
+<form class="form">
+    <div class="form-row">
+        <div class="input-data">
+            <input 
+                required 
+                type="text" 
+                class="input" 
+                placeholder=" " 
+                [name]="'valorRequerido'" 
+                [(ngModel)]="info['valorRequerido']" 
+                (keyup)="fNumber('valorRequerido')"
+                (input)="calculate()">
+            <div class="underline"></div>
+            <label >Valor Requerido</label>
+        </div>
+    </div>
+    <div class="form-row" *ngIf="!getEsAsociado()">
+        <div class="input-data">
+            <input 
+                required 
+                type="text" 
+                class="input" 
+                placeholder=" " 
+                [name]="'ingresos'" 
+                [(ngModel)]="info['ingresos']" 
+                (keyup)="fNumber('ingresos')"
+                (input)="calcularAportes()">
+            <div class="underline"></div>
+            <label >Ingresos</label>
+        </div>
+    </div>
+    <div class="form-row" *ngIf="getEsAsociado()">
+        <div class="output-data">
+            <div class="output">{{ info['ingresos'] }}</div>
+            <label class="chart">{{ displayName('ingresos') | titlecase }}</label>
+            <div class="underline"></div>
+          </div>
+    </div>
+    <!-- Información del asociado -->    
+    <div class="form-row" *ngFor="let key of getCategorizedKeys().general">
+        <div class="output-data">
+          <div class="output">{{ info[key] }}</div>
+          <label class="chart">{{ displayName(key) | titlecase }}</label>
+          <div class="underline"></div>
+        </div>
+    </div>            
+    <div class="form-row">
+        <div class="output-data">
+          <div class="output">{{ infoCliente['calificacion'] }}</div>
+          <label class="chart">{{ displayName('Calificacion') | titlecase }}</label>
+          <div class="underline"></div>
+        </div>
+    </div> 
+
+    <div class="form-row">
+        <div class="checkbox-wrapper">
+            <div *ngIf="!info['isApalancamiento']" >
+                <label class="chart">Apalancamiento</label>
+            </div>
+          <div *ngIf="info['isApalancamiento']" class="input-data" >
+            <input 
+                required 
+                type="text" 
+                class="input" 
+                placeholder=" " 
+                [name]="'valorApalancamiento'" 
+                [(ngModel)]="info['valorApalancamiento']" 
+                (keyup)="fNumber('valorApalancamiento')">
+            <div class="underline"></div>
+            <label >Apalancamiento</label>
+        </div>
+          <input type="checkbox" [(ngModel)]="info['isApalancamiento']"  name='isApalancamiento'>
+        </div>
+    </div>
+
+</form>
 
 <!-- Form Start -->
 <form class="form">
-    <!-- Información del asociado -->
-    <form class="form">
-        <div class="form-row">
-            <div class="input-data">
-                <input 
-                    required 
-                    type="text" 
-                    class="input" 
-                    placeholder=" " 
-                    [name]="'liquidez'" 
-                    [(ngModel)]="info['liquidez']" 
-                    (keyup)="fNumber('liquidez')"
-                    (input)="calculate()">
-                <div class="underline"></div>
-                <label >Liquidez</label>
-            </div>
-        </div>
-        <div class="form-row" *ngFor="let key of getCategorizedKeys().general">
-            <div class="output-data">
-              <div class="output">{{ info[key] }}</div>
-              <label class="chart">{{ displayName(key) | titlecase }}</label>
-              <div class="underline"></div>
-            </div>
-        </div>        
-    </form>
+    
 
     <form class="form">
+    <h2 class="chart-title"> Creditos</h2>
     <!-- Información Creditos -->
     <div class="form-row">
         <div class="input-data">
@@ -77,6 +132,8 @@
 
     <form class="form">
         <!-- Rotativo Details -->
+    <h2 class="chart-title"> Rotativos</h2>
+
         <div class="form-row">
             <div class="input-data">
                 <input 
@@ -122,6 +179,55 @@
     </form>
 </form>
 
+<form class="form">
+    <form class="form">
+        <!-- Rotativo Details -->
+    <h2 class="chart-title"> SITUACION ACTUAL</h2>
+
+        <div *ngFor="let key of getKeysObject(situacionActual)">
+            <div class="form-row">
+
+            <div class="output-data">
+                <div class="output">{{ situacionActual[key] }}</div>
+                <label class="chart">{{ displayName(key) | titlecase }}</label>
+                <div class="underline"></div>
+            </div>
+        </div> 
+        </div>       
+    </form>
+    <form class="form">
+        <!-- Rotativo Details -->
+    <h2 class="chart-title"> SITUACION FUTURA</h2>
+
+        <div *ngFor="let key of getKeysObject(situacionFutura)">
+            <div class="form-row">
+
+            <div class="output-data">
+                <div class="output">{{ situacionFutura[key] }}</div>
+                <label class="chart">{{ displayName(key) | titlecase }}</label>
+                <div class="underline"></div>
+            </div>
+        </div> 
+        </div>       
+    </form>
+
+    <form class="form">
+        <!-- Rotativo Details -->
+    <h2 class="chart-title">DIFERENCIAS</h2>
+
+        <div *ngFor="let key of getKeysObject(diferenciasSituaciones)">
+            <div class="form-row">
+
+            <div class="output-data">
+                <div class="output">{{ diferenciasSituaciones[key] }}</div>
+                <label class="chart">{{ displayName(key) | titlecase }}</label>
+                <div class="underline"></div>
+            </div>
+        </div> 
+        </div>       
+    </form>
+</form>
+
 <app-generate-chart 
     #resumenInteres 
     title="Resumen Interes">
@@ -129,6 +235,10 @@
 <app-generate-chart 
     #resumenFlujoCaja 
     title="Resumen Flujo de Caja">
+</app-generate-chart> 
+<app-generate-chart 
+    #comparacionSituaciones 
+    title="Comparacion Situaciones">
 </app-generate-chart> 
 
 

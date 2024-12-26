@@ -1,4 +1,4 @@
-<div *ngIf="gAccess()">
+<div *ngIf="getAccess()">
     <nav>
       <div class="wrapper">      
         <a routerLink="/Home">
@@ -11,5 +11,6 @@
         </div>
       </div>
     </nav>
+    <div> Bienvenido {{getNombreFuncionario()}}</div>
   </div>
 <router-outlet></router-outlet>

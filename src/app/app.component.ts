@@ -12,6 +12,7 @@ import { DataService } from './Services/data.service';
 })
 export class AppComponent{
   constructor(private DataService: DataService) {}
-  gAccess(){return this.DataService.getAccess()}
+  getAccess(){return this.DataService.getAccess()}
   logOut(){this.DataService.logOut()}
+  getNombreFuncionario(){return this.DataService.getNombreFuncionario()}
 }

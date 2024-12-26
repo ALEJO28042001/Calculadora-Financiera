@@ -1,5 +1,4 @@
 
-<div>Bienvenido {{gNombreFuncionario()}}</div>
 <router-outlet></router-outlet>
 
 <form class="form" *ngIf="gAccess()">
@@ -7,24 +6,30 @@
       <div class="input-data">
         <input type="chart" required class="input" 
                placeholder=" " name="documento" 
-               [(ngModel)]="documentoAsociado"
+               [(ngModel)]="infoCliente['documento']"
                (keyup)="documentoNumber()"
                >
         <div class="underline"></div>
-        <label>Documento Asociado</label>
+        <label>Documento</label>
       </div>
     </div>
-    <div clas="form-row" *ngIf="error">
-      <p class="error-message">Info invalida</p>
-    </div>
-    <div class="form-row" *ngIf="!error && nombreAsociado!=='' &&!isLoading ">
+      <p class="error-message" *ngIf="error && !autorizar">Documento no Autorizado</p>
+        <button [disabled]="isLoading " *ngIf="error && !autorizar"
+          class="custom-button" (click)="procesoAutorizacion(infoCliente['documento'])"
+          >Autorizar Consulta</button>
+      <p class="error-message" *ngIf="autorizar && getNombreCliente()==='' &&!isLoading" >Autorizado</p>
+
+      <p class="error-message" *ngIf="autorizar && getDocumentoAutorizado()===getDoc() 
+        &&!isLoading && !error" >Sin Informacion</p>
+
+    <div class="form-row" *ngIf="!error && getNombreCliente()!=='' &&!isLoading ">
       <div class="input-data">
         <input type="chart" required class="" 
-               placeholder=" " name="nombreAsociado" 
-               [(ngModel)]="nombreAsociado"
+               placeholder=" " name="nombre" 
+               [(ngModel)]="infoCliente['nombre']"
                >
         <div class="underline"></div>
-        <label>Nombre Asociado</label>
+        <label>Nombre</label>
       </div>
     </div>
     <div class="form-row" *ngIf="isLoading">
@@ -34,7 +39,7 @@
     </div>
   </div>
     <button 
-    [disabled]="isLoading " 
+    [disabled]="isLoading " *ngIf="!isLoading"
       class="custom-button" (click)="searchData()"> GET DATA</button>
  
 </form>
@@ -64,8 +69,8 @@
       <div class="checkbox-wrapper">
         <label>Tarjeta</label>
         <input type="checkbox" name="tipo de producto" [(ngModel)]="isTarjeta" (change)="tipoDeProducto($event)">
-        <label>Refinanciar</label>
-        <input type="checkbox" name="refinanciamiento" [(ngModel)]="isRef" (change)="eleccionRef($event)"/>
+        <label>Recoger</label>
+        <input type="checkbox" name="refinanciamiento" [(ngModel)]="isRef" (change)="eleccionRecoger($event)"/>
       </div>
 </div>
   
@@ -110,9 +115,7 @@
        placeholder=" " name="Tasa Beneficiar" 
        [(ngModel)]="product['Tasa Beneficiar']"
        (keyup)="calcularInteresBeneficiar()"
-       (keypress)="allowNumbers($event,'Tasa Beneficiar')"
-
-       [ngStyle]="{'color': num(product['Tasa Beneficiar']) < 0 ? 'red' : 'green'}">
+       (keypress)="allowNumbers($event,'Tasa Beneficiar')">
         <div class="underline"></div>
         <label>Tasa Beneficiar</label>
       </div>
@@ -126,7 +129,6 @@
       {{ selectedProductIndex === null ? 'Agregar Producto' : 'Actualizar Producto' }}
     </button>
     <button *ngIf="productList.length > 0" class="custom-buttonB" (click)="resetForm()">Nuevo Producto  </button>
-    <button *ngIf="productList.length > 0" class="custom-buttonB" (click)="toggleProductList() ">Mostrar Productos</button> 
     <button *ngIf="productList.length > 0" class="custom-buttonB delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
 </form>
 

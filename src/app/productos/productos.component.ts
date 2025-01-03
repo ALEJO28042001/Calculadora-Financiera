@@ -1,18 +1,18 @@
-import { CalculosService } from './../Services/calculos.service';
-import { DataService } from './../Services/data.service';
+import { CalculosService } from '../Services/calculos.service';
+import { DataService } from '../Services/data.service';
 import { Component, Input, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'app-fields-manager',
+  selector: 'app-productos',
   standalone: true,
   imports: [CommonModule, FormsModule,RouterOutlet],
-  templateUrl: './fields-manager.component.html',
-  styleUrl: './fields-manager.component.css'
+  templateUrl: './productos.component.html',
+  styleUrl: './productos.component.css'
 })
-export class FieldsManagerComponent implements OnInit{
+export class ProductosComponent implements OnInit{
   constructor(private DataService: DataService, private CalculosService: CalculosService) { }
   protected infoCliente:{ [key: string]: string } = {
   }
@@ -28,6 +28,7 @@ export class FieldsManagerComponent implements OnInit{
     "Deuda Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar",
     "Diferencia Interes"
   ]
+  primerApellido='';
 
 
   ngOnInit() { 
@@ -76,6 +77,13 @@ gAccess(){return this.DataService.getAccess()}
     for(let field of this.moneyKeys){
       this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
     }
+    
+    if (this.product['Pago Mensual']==='')
+      this.product['Pago Mensual']=
+        this.CalculosService.calculateMonthlyPayment(
+          Number(this.product['Plazo Actual']),
+          Number(this.product['Tasa Real']),
+          Number(this.product['Deuda Actual'])).toFixed(0);
     this.calculateRealRate();
     if (this.selectedProductIndex === null) {
       // Add a new product
@@ -168,7 +176,7 @@ gAccess(){return this.DataService.getAccess()}
     // agregar logica de validacion
 
     console.log('Autorizacion completa para el documento: ',documento.replace(/[^0-9]/g, ''));
-    this.autorizar = true;
+    this.autorizar = this.primerApellido!=='';
     this.error = false;
     
     this.DataService.setDocumentoAutorizado(documento.replace(/[^0-9]/g, ''));
@@ -183,6 +191,10 @@ gAccess(){return this.DataService.getAccess()}
     return this.DataService.getDocumentoAutorizado();
   }
 
+  getEsAsociado(){
+    return this.DataService.getEsAsociado();
+  }
+
   async searchData(){
     console.log(this.getDocumentoAutorizado(),' ',);
     this.isLoading=true;
@@ -190,6 +202,7 @@ gAccess(){return this.DataService.getAccess()}
     this.resetForm();
     const consulta = 
     await this.DataService.pullData(this.infoCliente['documento'].replace(/[^0-9]/g, ''));
+    console.log('COnsulta:',consulta);
       if(consulta){
         this.DataService.getProductList().map(p=>this.addProduct(p));
         this.resetForm();

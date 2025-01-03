@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FieldsManagerComponent } from './fields-manager.component';
+import { ResumenComponent } from './resumen.component';
 
-describe('FieldsManagerComponent', () => {
-  let component: FieldsManagerComponent;
-  let fixture: ComponentFixture<FieldsManagerComponent>;
+describe('ResumenComponent', () => {
+  let component: ResumenComponent;
+  let fixture: ComponentFixture<ResumenComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FieldsManagerComponent]
+      imports: [ResumenComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(FieldsManagerComponent);
+
+    fixture = TestBed.createComponent(ResumenComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,4 +1,5 @@
-<!-- Calculate Button -->
+
+  
 <button class="custom-button" (click)="generateCharts()">Calculate</button>
 <h2 class="chart-title"> {{info['nombre']}}</h2>
 
@@ -67,7 +68,7 @@
                 type="text" 
                 class="input" 
                 placeholder=" " 
-                [name]="'valorApalancamiento'" 
+                [name]="'valorApalancamiento' " 
                 [(ngModel)]="info['valorApalancamiento']" 
                 (keyup)="fNumber('valorApalancamiento')">
             <div class="underline"></div>
@@ -81,13 +82,25 @@
 
 <!-- Form Start -->
 <form class="form">
+    <h2 class="chart-title" > {{info['productoOfrecido']}}
+        <label class="switch">
+            <input type="checkbox" (change)="seleccionarProducto($event)" />
+            <span class="slider"></span>
+          </label>
+    </h2>
     
+    <div class="form-row">    
+        
+          
+    </div>
+    <div class="form-row">    
+        <div class="output-data" *ngIf="info['productoOfrecido']==='Rotativo' " >
+            <div class="output">{{ info['tasaCreditoBeneficiar'] }}</div>
+            <label class="chart">{{ displayName('tasaCreditoBeneficiar') | titlecase }}</label>
+            <div class="underline"></div>
+        </div>
 
-    <form class="form">
-    <h2 class="chart-title"> Creditos</h2>
-    <!-- Información Creditos -->
-    <div class="form-row">
-        <div class="input-data">
+        <div class="input-data" *ngIf="info['productoOfrecido']==='Consumo'">
             <input 
                 required 
                 type="text" 
@@ -102,6 +115,7 @@
             <label >{{displayName('tasaCreditoBeneficiar') | titlecase}}</label>
         </div>
     </div>
+
     <div class="form-row">
         <div class="input-data">
             <input 
@@ -128,55 +142,8 @@
             </div>
         </div>
     </div>        
-    </form>
 
-    <form class="form">
-        <!-- Rotativo Details -->
-    <h2 class="chart-title"> Rotativos</h2>
-
-        <div class="form-row">
-            <div class="input-data">
-                <input 
-                    required 
-                    type="text" 
-                    class="input" 
-                    placeholder=" " 
-                    [name]="'tasaRotativoBeneficiar'" 
-                    [(ngModel)]="info['tasaRotativoBeneficiar']" 
-                    (keypress)="allowNumbers($event,'tasaRotativoBeneficiar')"
-                    (input)="calculate()"
-                    >
-                <div class="underline"></div>
-                <label >{{displayName('tasaRotativoBeneficiar') | titlecase}}</label>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="input-data">
-                <input 
-                    required 
-                    type="number" 
-                    class="input" 
-                    placeholder=" " 
-                    [name]="'plazoRotativo'" 
-                    [(ngModel)]="info['plazoRotativo']" 
-                    min="0"
-                    (keypress)="allowNumbers2($event)"
-                    (input)="calculate()">
-                <div class="underline"></div>
-                <label >{{displayName('plazoRotativo') | titlecase}}</label>
-            </div>
-        </div>
-        <div *ngFor="let key of getCategorizedKeys().rotativo">
-            <div class="form-row">
-
-            <div class="output-data">
-                <div class="output">{{ info[key] }}</div>
-                <label class="chart">{{ displayName(key) | titlecase }}</label>
-                <div class="underline"></div>
-            </div>
-        </div> 
-        </div>       
-    </form>
+    
 </form>
 
 <form class="form">
@@ -230,15 +197,9 @@
 
 <app-generate-chart 
     #resumenInteres 
-    title="Resumen Interes">
+    title="Impacto Asesoria Financiera Variacion Costos">
 </app-generate-chart>
 <app-generate-chart 
     #resumenFlujoCaja 
-    title="Resumen Flujo de Caja">
+    title="Impacto Asesoria Financiera Flujo de Caja">
 </app-generate-chart> 
-<app-generate-chart 
-    #comparacionSituaciones 
-    title="Comparacion Situaciones">
-</app-generate-chart> 
-
-

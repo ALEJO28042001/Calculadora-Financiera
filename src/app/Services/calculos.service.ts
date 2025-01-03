@@ -43,6 +43,13 @@ export class CalculosService {
     // let p=this.infoCliente['documento'].replace(/[^0-9]/g, '');
     // this.infoCliente['documento'] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
+  calculateMonthlyPayment(plazo: number, tasa: number, monto: number): number {
+    const monthlyRate = tasa / 100 / 12; // Convert annual rate to monthly rate
+    if (plazo === 0 || monto === 0) {
+      return 0;
+    }
+    return (monto * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -plazo));
+  }
   formatNumber(value: number): string {
     return value.toLocaleString('en-US', {});
   }

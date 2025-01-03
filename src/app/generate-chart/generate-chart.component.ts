@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, AfterViewInit, ElementRef, ViewChild,Input,HostListener } from '@angular/core';
 import { Chart } from 'chart.js/auto';
-import { FieldsManagerComponent } from '../fields-manager/fields-manager.component';
+import { ProductosComponent } from '../productos/productos.component';
 
 @Component({
   selector: 'app-generate-chart',
   standalone: true,
-  imports:[CommonModule,FieldsManagerComponent],
+  imports:[CommonModule,ProductosComponent],
   templateUrl: './generate-chart.component.html',
   styleUrl: './generate-chart.component.css'
 })

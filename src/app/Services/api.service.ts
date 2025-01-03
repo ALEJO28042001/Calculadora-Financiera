@@ -12,7 +12,7 @@ export class ApiService {
   private urlAportes = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/AhorroAportes';
   private urlPoblarDataCredito = 'https://test.beneficiar.com.co/testDataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaDatacredito';
   private urlJsonDataCredito = 'https://test.beneficiar.com.co/testDataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaExistente';
-
+  private urlRotativo = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/Rotativo';
   // Basic auth username and password
   private  usernameCifin = 'ServerAdmin';
   private  passwordCifin = 'B3N3F1C14R_R3ST';
@@ -72,12 +72,18 @@ export class ApiService {
             "TIPODOC":"C"            
         },this.urlEstadoCuenta,this.headersBeneficiar);
     }
-  async  getBeneficiarProducts(codAsociado:string){
-        return this.consultarDB({
-                "FECHA":formattedDate,
-                "CODAFILIADO":codAsociado   
-        },this.urlCartera,this.headersBeneficiar);        
-    }  
+  async  getCreditosBeneficiar(codAsociado:string){
+    return this.consultarDB({
+            "FECHA":formattedDate,
+            "CODAFILIADO":codAsociado   
+    },this.urlCartera,this.headersBeneficiar);        
+  }  
+  async  getRotativosBeneficiar(codAsociado:string){
+    return this.consultarDB({
+            "FECHA":formattedDate,
+            "CODAFILIADO":codAsociado   
+    },this.urlRotativo,this.headersBeneficiar);        
+  } 
 
   async  getLoginInfo(documento:string,clave:string){
       return this.consultarDB({
@@ -109,25 +115,28 @@ async  getCifinProducts(documento:string){
 }
 
 
-async  consultaDataCredito(documento:number){
-  const poblarDataCredito = await this.poblarDataCredito(documento);
-  if(poblarDataCredito.CodError===0)
-  return this.getJsonDataCredito(documento);
+async  consultaDataCredito(documento:number,apellido:string){
+  const poblarDataCredito = await this.poblarDataCredito(documento,apellido);
+  if(poblarDataCredito.CodError===0){
+    const data = await this.getJsonDataCredito(documento)
+    return data;
+  }
+  return poblarDataCredito;
 }
-async  poblarDataCredito(documento:number){
+async  poblarDataCredito(documento:number,apellido:string){
   return this.consultarDB({
     "User":"92",
     "Origen":"Sistinfe",
     "TipoDoc":"1",
     "Documento":documento,
-    "LastName":""
+    "LastName":apellido
     },this.urlPoblarDataCredito,this.headersDataCredito).then((result) => result);
 }
 async  getJsonDataCredito(documento:number){
   return this.consultarDB({
       "TipoDoc": "1",
-      "Numero": documento
-      },this.urlJsonDataCredito,this.headersDataCredito).then((result) => result.Consulta);
+      "Documento": documento
+      },this.urlJsonDataCredito,this.headersDataCredito).then((result) => result);
 }
   
   async getInterestRange(){return [6,30]}

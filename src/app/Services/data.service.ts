@@ -8,8 +8,8 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({providedIn: 'root'})
 
 export class DataService {
-  constructor(private apiService: ApiService, private http: HttpClient,private CalculosService:CalculosService
-  ) {}  
+  constructor(private apiService: ApiService, private http: HttpClient,private CalculosService:CalculosService) {}  
+  private jsonFile='';
   private productList: Array<{ [key: string]: string }> = [];
   private nombreFuncionario="";
   private infoCliente:any={'documento':'',
@@ -24,6 +24,14 @@ export class DataService {
   private autoriza=false;
   private documentoAutorizado = '';
   private creditoOfrecidoEsRotativo = false;
+
+  getJsonFile(): string {
+    return this.jsonFile;
+  }
+  
+  setJsonFile(value: string) {
+    this.jsonFile = value;
+  }
 
   getCreditoOfrecidoEsRotativo(){return this.creditoOfrecidoEsRotativo}
   setCreditoOfrecidoEsRotativo(esRotativo:boolean){this.creditoOfrecidoEsRotativo = esRotativo}
@@ -184,8 +192,6 @@ async pullData(documento: string) {
 }
   return validar;
 }
-/// menor calificacion a,b,c, 
-////////////////     VALIDAR CALIFICACION (CADA PRODUCTO TIENE UNA DIFERENTE)  //////////////
 
 convertDataCreditoProducts(productos:any){  
   

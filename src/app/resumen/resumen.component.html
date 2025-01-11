@@ -1,6 +1,8 @@
 
   
 <button class="custom-button" (click)="generateCharts()">Calculate</button>
+<button class="custom-button" (click)="generateJsonData()">Generate JSON</button>
+
 <h2 class="chart-title"> {{info['nombre']}}</h2>
 
 <form class="form">
@@ -12,9 +14,9 @@
                 class="input" 
                 placeholder=" " 
                 [name]="'valorRequerido'" 
-                [(ngModel)]="info['valorRequerido']" 
-                (keyup)="fNumber('valorRequerido')"
-                (input)="calculate()">
+                [(ngModel)]="situacionFutura['valorRequerido']" 
+                (keyup)="fNumber2('valorRequerido')"
+                (input)="calcularSituacionFutura()">
             <div class="underline"></div>
             <label >Valor Requerido</label>
         </div>
@@ -42,7 +44,7 @@
           </div>
     </div>
     <!-- Información del asociado -->    
-    <div class="form-row" *ngFor="let key of getCategorizedKeys().general">
+    <div class="form-row" *ngFor="let key of ['cuotaAportes','saldoAportes']">
         <div class="output-data">
           <div class="output">{{ info[key] }}</div>
           <label class="chart">{{ displayName(key) | titlecase }}</label>
@@ -80,9 +82,9 @@
 
 </form>
 
-<!-- Form Start -->
+<!-- Form Producto Ofrecido -->
 <form class="form">
-    <h2 class="chart-title" > {{info['productoOfrecido']}}
+    <h2 class="chart-title" > {{situacionFutura['productoOfrecido']}}
         <label class="switch">
             <input type="checkbox" (change)="seleccionarProducto($event)" />
             <span class="slider"></span>
@@ -94,22 +96,25 @@
           
     </div>
     <div class="form-row">    
-        <div class="output-data" *ngIf="info['productoOfrecido']==='Rotativo' " >
-            <div class="output">{{ info['tasaCreditoBeneficiar'] }}</div>
+        <div class="output-data" *ngIf="situacionFutura['productoOfrecido']==='Rotativo' " >
+            <div class="output">{{ situacionFutura['tasa+Costos'] }}</div>
             <label class="chart">{{ displayName('tasaCreditoBeneficiar') | titlecase }}</label>
             <div class="underline"></div>
         </div>
 
-        <div class="input-data" *ngIf="info['productoOfrecido']==='Consumo'">
+        <!-- (keypress)="allowNumbers($event,'tasa+Costos')" -->
+
+        <div class="input-data" *ngIf="situacionFutura['productoOfrecido']==='Consumo'">
             <input 
                 required 
                 type="text" 
                 class="input" 
                 placeholder=" " 
                 [name]="'tasaCreditoBeneficiar'" 
-                [(ngModel)]="info['tasaCreditoBeneficiar']" 
-                (keypress)="allowNumbers($event,'tasaCreditoBeneficiar')"
-                (input)="calculate()"
+                [(ngModel)]="situacionFutura['tasa+Costos']" 
+                
+
+                (input)="calcularSituacionFutura()"
                 >
             <div class="underline"></div>
             <label >{{displayName('tasaCreditoBeneficiar') | titlecase}}</label>
@@ -124,76 +129,73 @@
                 class="input" 
                 placeholder=" " 
                 [name]="'plazoCredito'" 
-                [(ngModel)]="info['plazoCredito']"
+                [(ngModel)]="situacionFutura['plazo']"
                 min="0"
-                (input)="calculate()"
+                (input)="calcularSituacionFutura()"
                 >
                 <div class="underline"></div>
             <label >{{displayName('plazoCredito') | titlecase}}</label>
         </div>
     </div>
     <!-- Credit Details -->
-    <div *ngFor="let key of getCategorizedKeys().credit">
+    <!-- <div *ngFor="let key of dataComparacion.labels">
         <div class="form-row">
-            <div class="output-data">
-                <div class="output">{{ info[key] }}</div>
-                <label class="chart">{{ displayName(key) | titlecase }}</label>
-                <div class="underline"></div>
-            </div>
-        </div>
-    </div>        
-
-    
-</form>
-
-<form class="form">
-    <form class="form">
-        <!-- Rotativo Details -->
-    <h2 class="chart-title"> SITUACION ACTUAL</h2>
-
-        <div *ngFor="let key of getKeysObject(situacionActual)">
-            <div class="form-row">
-
-            <div class="output-data">
-                <div class="output">{{ situacionActual[key] }}</div>
-                <label class="chart">{{ displayName(key) | titlecase }}</label>
-                <div class="underline"></div>
-            </div>
-        </div> 
-        </div>       
-    </form>
-    <form class="form">
-        <!-- Rotativo Details -->
-    <h2 class="chart-title"> SITUACION FUTURA</h2>
-
-        <div *ngFor="let key of getKeysObject(situacionFutura)">
-            <div class="form-row">
-
             <div class="output-data">
                 <div class="output">{{ situacionFutura[key] }}</div>
                 <label class="chart">{{ displayName(key) | titlecase }}</label>
                 <div class="underline"></div>
             </div>
-        </div> 
+        </div>
+    </div>         -->
+
+    
+</form>
+
+<form class="form">
+
+    <form class="form">
+        <h2 class="chart-title"> SITUACION ACTUAL</h2>
+        <div *ngFor="let key of getKeysObject(situacionActual)">
+            <div class="form-row">
+                <div class="output-data">
+                    <div class="output">{{ situacionActual[key] }}</div>
+                    <label class="chart">{{ displayName(key) | titlecase }}</label>
+                    <div class="underline"></div>
+                </div>
+            </div> 
         </div>       
     </form>
 
     <form class="form">
-        <!-- Rotativo Details -->
-    <h2 class="chart-title">DIFERENCIAS</h2>
+        <h2 class="chart-title"> SITUACION FUTURA</h2>
+        <div *ngFor="let key of getKeysObject(situacionActual)">
+            <div class="form-row">
+                <div class="output-data">
+                    <div class="output">{{ situacionFutura[key] }}</div>
+                    <label class="chart">{{ displayName(key) | titlecase }}</label>
+                    <div class="underline"></div>
+                </div>
+            </div> 
+        </div>       
+    </form>
 
+    <form class="form">
+        <h2 class="chart-title">DIFERENCIAS</h2>
         <div *ngFor="let key of getKeysObject(diferenciasSituaciones)">
             <div class="form-row">
-
-            <div class="output-data">
-                <div class="output">{{ diferenciasSituaciones[key] }}</div>
-                <label class="chart">{{ displayName(key) | titlecase }}</label>
-                <div class="underline"></div>
-            </div>
-        </div> 
+                <div class="output-data">
+                    <div class="output">{{ diferenciasSituaciones[key] }}</div>
+                    <label class="chart">{{ displayName(key) | titlecase }}</label>
+                    <div class="underline"></div>
+                </div>
+            </div> 
         </div>       
     </form>
 </form>
+
+  
+<button class="custom-button" (click)="generateCharts()">Calculate</button>
+<button class="custom-button" (click)="generateJsonData()">Generate JSON</button>
 
 <app-generate-chart 
     #resumenInteres 

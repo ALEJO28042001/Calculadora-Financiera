@@ -58,4 +58,5 @@ export class LoginComponent implements OnInit{
     let p= this.cedula.replace(/[^0-9]/g, '');
     this.cedula = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
+  getJsonFile(){return this.DataService.getJsonFile()}
 }

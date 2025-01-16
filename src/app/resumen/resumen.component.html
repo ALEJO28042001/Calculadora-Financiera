@@ -6,26 +6,12 @@
 <h2 class="chart-title"> {{info['nombre']}}</h2>
 
 <form class="form">
-    <div class="form-row">
-        <div class="input-data">
-            <input 
-                required 
-                type="text" 
-                class="input" 
-                placeholder=" " 
-                [name]="'valorRequerido'" 
-                [(ngModel)]="situacionFutura['valorRequerido']" 
-                (keyup)="fNumber2('valorRequerido')"
-                (input)="calcularSituacionFutura()">
-            <div class="underline"></div>
-            <label >Valor Requerido</label>
-        </div>
-    </div>
     <div class="form-row" *ngIf="!getEsAsociado()">
         <div class="input-data">
             <input 
                 required 
                 type="text" 
+                inputmode="numeric"
                 class="input" 
                 placeholder=" " 
                 [name]="'ingresos'" 
@@ -68,6 +54,7 @@
             <input 
                 required 
                 type="text" 
+                inputmode="numeric"
                 class="input" 
                 placeholder=" " 
                 [name]="'valorApalancamiento' " 
@@ -80,44 +67,59 @@
         </div>
     </div>
 
+    <div class="form-row">
+        <div class="input-data">
+            <input 
+                required 
+                type="text" 
+                inputmode="numeric"
+                class="input" 
+                placeholder=" " 
+                [name]="'valorRequerido'" 
+                [(ngModel)]="situacionFutura['valorRequerido']" 
+                (keyup)="fNumber2('valorRequerido')"
+                (input)="calcularSituacionFutura()">
+            <div class="underline"></div>
+            <label >Valor Requerido</label>
+        </div>
+    </div>
+
 </form>
+
+<h2 class="chart-title" > {{situacionFutura['productoOfrecido']}}
+    <label class="switch">
+        <input type="checkbox" (change)="seleccionarProducto($event)" />
+        <span class="slider"></span>
+      </label>
+</h2>
 
 <!-- Form Producto Ofrecido -->
 <form class="form">
-    <h2 class="chart-title" > {{situacionFutura['productoOfrecido']}}
-        <label class="switch">
-            <input type="checkbox" (change)="seleccionarProducto($event)" />
-            <span class="slider"></span>
-          </label>
-    </h2>
     
-    <div class="form-row">    
-        
-          
-    </div>
     <div class="form-row">    
         <div class="output-data" *ngIf="situacionFutura['productoOfrecido']==='Rotativo' " >
             <div class="output">{{ situacionFutura['tasa+Costos'] }}</div>
-            <label class="chart">{{ displayName('tasaCreditoBeneficiar') | titlecase }}</label>
+            <label class="chart">{{ displayName('tasaBeneficiar') | titlecase }}</label>
             <div class="underline"></div>
         </div>
+    
 
         <!-- (keypress)="allowNumbers($event,'tasa+Costos')" -->
 
         <div class="input-data" *ngIf="situacionFutura['productoOfrecido']==='Consumo'">
             <input 
                 required 
-                type="text" 
+                type="number" 
                 class="input" 
                 placeholder=" " 
-                [name]="'tasaCreditoBeneficiar'" 
+                [name]="'tasaBeneficiar'" 
                 [(ngModel)]="situacionFutura['tasa+Costos']" 
                 
 
                 (input)="calcularSituacionFutura()"
                 >
             <div class="underline"></div>
-            <label >{{displayName('tasaCreditoBeneficiar') | titlecase}}</label>
+            <label >{{displayName('tasaBeneficiar') | titlecase}}</label>
         </div>
     </div>
 
@@ -154,7 +156,7 @@
 <form class="form">
 
     <form class="form">
-        <h2 class="chart-title"> SITUACION ACTUAL</h2>
+        <h2 class="chart-title">PRESENTE</h2>
         <div *ngFor="let key of getKeysObject(situacionActual)">
             <div class="form-row">
                 <div class="output-data">
@@ -167,7 +169,7 @@
     </form>
 
     <form class="form">
-        <h2 class="chart-title"> SITUACION FUTURA</h2>
+        <h2 class="chart-title">FUTURO</h2>
         <div *ngFor="let key of getKeysObject(situacionActual)">
             <div class="form-row">
                 <div class="output-data">

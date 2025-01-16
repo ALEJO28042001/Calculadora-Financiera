@@ -1,5 +1,4 @@
 import { CalculosService } from './calculos.service';
-import { ProductosComponent } from '../productos/productos.component';
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 
@@ -18,7 +17,7 @@ export class DataService {
     'rating':0
   };
   private interestRange=[];
-  private access=true;
+  private access=false;
   private esAsociado=false;
   private compraCartera=false;
   private autoriza=false;

@@ -86,12 +86,13 @@ nav .wrapper {
 }
 form{
   display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
   background-color: aliceblue;  
   margin:8px;
+  margin-left: 0px;
   gap: 15px;
   row-gap: 20px;
-  padding: 10px;
+  padding: 5px;
   padding-top: 20px;
 }
 
@@ -274,7 +275,7 @@ h2{
     font-size: 24px;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
     color: #333;
     font-family: 'Arial', sans-serif;
     letter-spacing: 1px;
@@ -282,32 +283,12 @@ h2{
     position: relative;
   }
   
-  .chart-title::before {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 3px;
-    background-color: #3498db;
-    margin: 10px auto 0;
-  }
   
-  .chart-title::after {
-    content: '';
-    display: block;
-    width: 40px;
-    height: 2px;
-    background-color: #2ecc71;
-    margin: 5px auto;
-  }
-  
-  
-
-
   .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 70px;
+  height: 40px;
 }
 
 .switch input {

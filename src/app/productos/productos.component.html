@@ -4,7 +4,9 @@
 <form class="form" *ngIf="gAccess()">
       <div class="form-row">
       <div class="input-data">
-        <input type="chart" required class="input" 
+        <input type="chart" 
+                inputmode="numeric"
+                required class="input" 
                placeholder=" " name="documento" 
                [(ngModel)]="infoCliente['documento']"
                (keyup)="documentoNumber()"
@@ -93,6 +95,7 @@
 <div class="input-data">
   <input 
     type="chart"
+    inputmode="numeric"
     required 
     class="input" 
     placeholder=" " 
@@ -122,6 +125,7 @@
 <div class="form-row">
       <div class="input-data">
         <input type="chart" required class="input" 
+        inputmode="numeric"
        placeholder=" " name="Tasa Beneficiar" 
        [(ngModel)]="product['Tasa Beneficiar']"
        (keyup)="calcularInteresBeneficiar()"

@@ -1,10 +1,12 @@
 
-  
+<html>
 <button class="custom-button" (click)="generateCharts()">Calculate</button>
-<button class="custom-button" (click)="generateJsonData()">Generate JSON</button>
+<p></p>
+<button class="custom-button" (click)="generateJsonData()">Generate JSON</button> 
+<!-- <button class="custom-button" (click)="generatePDF()">Generate PDF</button>  -->
 
 <h2 class="chart-title"> {{info['nombre']}}</h2>
-
+<!-- <div class="container"> -->
 <form class="form">
     <div class="form-row" *ngIf="!getEsAsociado()">
         <div class="input-data">
@@ -194,9 +196,10 @@
         </div>       
     </form>
 </form>
-
+<!-- </div> -->
   
 <button class="custom-button" (click)="generateCharts()">Calculate</button>
+<p></p>
 <button class="custom-button" (click)="generateJsonData()">Generate JSON</button>
 
 <app-generate-chart 
@@ -207,3 +210,4 @@
     #resumenFlujoCaja 
     title="Impacto Asesoria Financiera Flujo de Caja">
 </app-generate-chart> 
+</html>

@@ -5,8 +5,7 @@ import { ResumenComponent } from './resumen/resumen.component';
 import { ProductosComponent } from './productos/productos.component';
 import { DataService } from './Services/data.service';
 
-const isUserAdmin = false
-; // Replace with your actual condition logic.
+const isUserAdmin = true; // Replace with your actual condition logic.
 
 export 
     const routes: Routes = isUserAdmin

@@ -6,6 +6,10 @@ import { ViewChild } from '@angular/core';
 import { DataService } from '../Services/data.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { json } from 'express';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 
 @Component({
   selector: 'app-resumen',
@@ -33,7 +37,6 @@ export class ResumenComponent implements OnInit {
   seleccionarProducto(event: any) {
     this.situacionFutura['productoOfrecido'] = event.target.checked ? 'Rotativo' : 'Consumo';
     this.situacionFutura['tasa+Costos'] = event.target.checked ? 20 : 13 ;
-    console.log(this.situacionFutura['tasa+Costos']);
     this.calcularSituacionFutura();
   }
 
@@ -123,11 +126,6 @@ export class ResumenComponent implements OnInit {
   }
 
   calcularSituacionFutura() {
-    console.log(Number(this.situacionFutura['plazo'])>0);
-    console.log(this.situacionFutura["tasa+Costos"]>0);
-    console.log((this.situacionActual['deudaTotal']!=='' || this.situacionFutura["valorRequerido"]!==''));
-    console.log(this.situacionActual['deudaTotal']!=='');
-    console.log(this.situacionFutura["valorRequerido"]!=='');
 
     if(this.situacionFutura['plazo']>0 && this.situacionFutura["tasa+Costos"]>0 && 
       (this.situacionActual['deudaTotal']!=='' || this.situacionFutura["valorRequerido"]!=='')){
@@ -163,7 +161,6 @@ export class ResumenComponent implements OnInit {
       Number((this.situacionFutura[element]||'').replace(/[^0-9.]/g, ''))||0)
     });
 
-    console.log(this.situacionFutura);
 
   }
 
@@ -402,42 +399,75 @@ allowNumbers2(event:any) {
     return false;
   }
   generateJsonData() {
-    const jsonData = {
-      DatosAsociado: {
-        TipoDoc: 'BEC: C, DataCredito:1',
+    const jsonData:Info = {
+      DatosFuncionario:[{
+        Documento: this.DataService.getDocumentoFuncionario(),
+        Nombre: this.DataService.getNombreFuncionario()
+      }],
+      DatosAsociado: [{
+        TipoDoc: 'C',
         Documento: this.DataService.getDocumento() || 'N/A',
         Calificacion: this.DataService.getCalificacion() || 1,
-        SaldoAportes: (this.info['saldoAportes']?.replace(/[^0-9]/g, '') || '0'),
+        SaldoAportes: this.info['saldoAportes'] || '0',
         AutorizacionConsulta: {
           autorizacion: 'any',
           Fecha: new Date().toLocaleDateString(),
           Hora: new Date().toLocaleTimeString(),
         },
-      },
-      DatosSolicitud: {
+      }],
+      DatosSolicitud: [{
         Linea: this.situacionFutura['productoOfrecido'] || 'Consumo',
-        Monto: Number(this.situacionFutura['deudaTotal']?.replace(/[^0-9]/g, '') || 0),
-        ValorRequerido: Number(this.situacionFutura['valorRequerido']?.replace(/[^0-9]/g, '') || 0),
+        Monto: this.situacionFutura['deudaTotal'] || 0,
+        ValorRequerido: this.situacionFutura['valorRequerido'] || 0,
         Plazo: this.situacionFutura['plazo'] || 0,
         Tasa: this.situacionFutura['tasa+Costos'] || 0,
-        ValorCuota: Number(this.situacionFutura['pagoMensual']?.replace(/[^0-9]/g, '') || 0),
-        ValorCuotaAportes: Number(this.situacionFutura['aportes']?.replace(/[^0-9]/g, '') || 0),
-        Ingresos: Number(this.info['ingresos']?.replace(/[^0-9]/g, '') || 0),
-        Apalancamiento: this.info['valorApalancamiento']?.replace(/[^0-9]/g, '') || 0,
-      },
+        ValorCuota: this.situacionFutura['pagoMensual'] || 0,
+        ValorCuotaAportes: this.situacionFutura['aportes'] || 0,
+        Ingresos: this.info['ingresos'] || 0,
+        // Apalancamiento: this.info['valorApalancamiento'] || 0,
+      }],
       ProductosRecoger: (this.info['productosRefinanciamientoList'] || []).map((product: any) => ({
         Nombre: product['Nombre Producto'] || 'N/A',
         Tipo: product['Tarjeta'] === 'true' ? 'Rotativo' : 'Consumo',
-        SaldoActual: product['Deuda Actual'] || '0',
+        SaldoActual: this.formatNumber(Number(product['Deuda Actual']) || 0),
         Plazo: product['Plazo Actual'] || '0',
-        PagoMensual: product['Pago Mensual'] || '0',
+        PagoMensual: this.formatNumber(Number(product['Pago Mensual']) || 0),
         Tasa: product['Tasa Real'] || '0',
-      })),
+      }
+    ))
     };
   
   this.DataService.setJsonFile(JSON.stringify(jsonData, null, 2)); // You can replace this with a service call to save or send the data
-  }
-  
+  this.generatePDF(jsonData);
+}
+
+  generatePDF(jsonData:any) {
+
+      const doc = new jsPDF();
+      doc.setFont('helvetica');
+    
+      // Title
+      doc.setFontSize(16);
+      doc.text('Reporte de Datos', 10, 10);
+      let yLine=20;
+
+      Object.keys(jsonData).forEach((section:string) => {
+        doc.setFontSize(12);
+        doc.text(section, 10, yLine);
+        yLine +=5;
+
+        autoTable(doc, {
+          startY: yLine,
+          head: [Object.keys(jsonData[section][0])], // Dynamic headers
+          body:  Object.values(jsonData[section].map((product: any) => Object.values(product)))
+        });
+    
+          yLine += 25; // Move Y position for next section
+        });
+    
+      // Save the PDF
+      doc.save('ReporteDatos.pdf');
+    }
   
 }
 
@@ -445,5 +475,4 @@ allowNumbers2(event:any) {
 interface Info {
   [key: string]:any;
 }
-
 

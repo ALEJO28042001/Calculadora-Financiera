@@ -196,13 +196,13 @@ gAccess(){return this.DataService.getAccess()}
   }
 
   async searchData(){
-    console.log(this.getDocumentoAutorizado(),' ',);
+    // console.log(this.getDocumentoAutorizado(),' ',);
     this.isLoading=true;
     this.productList=[];
     this.resetForm();
     const consulta = 
-    await this.DataService.pullData(this.infoCliente['documento'].replace(/[^0-9]/g, ''));
-    console.log('COnsulta:',consulta);
+    await this.DataService.pullData(this.infoCliente['documento'].replace(/[^0-9]/g, ''),this.infoCliente['primerApellido']);
+    // console.log('COnsulta:',consulta);
       if(consulta){
         this.DataService.getProductList().map(p=>this.addProduct(p));
         this.resetForm();

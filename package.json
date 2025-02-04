@@ -28,6 +28,8 @@
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "express": "^4.21.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "ng-apexcharts": "^1.12.0",
     "ng2-charts": "^6.0.1",
     "rxjs": "~7.8.0",

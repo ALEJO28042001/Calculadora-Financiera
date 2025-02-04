@@ -87,12 +87,13 @@ export class ApiService {
 
   async  getLoginInfo(documento:string,clave:string){
       return this.consultarDB({
-          "IP":"1.1.1",
-          "NAVEGADOR":"",
-          "CEDULA":documento,
-          "CLAVEENC":clave,
-          "ORIGEN":"2",
-          "MAQUINA":""
+          "CEDULA": documento,
+          "CLAVEENC": "",
+          "MAQUINA": "",
+          "IP": "",
+          "NAVEGADOR": "",
+          "ORIGEN": "2",
+          "PASSWORD": clave
       },this.urlLogin,this.headersBeneficiar);
   }
   async  getAhorroAportes(codAsociado:string){

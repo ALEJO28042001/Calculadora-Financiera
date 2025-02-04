@@ -2,13 +2,15 @@
     <nav>
       <div class="wrapper">      
         <a routerLink="/Home">
-          <img src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" img>
+          <img width="100" height="60" src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" img>
         </a>
           <div class="nav-links">
             <li><a routerLink="/Productos">Productos</a></li>
             <li><a routerLink="/Resumen">Resumen</a></li>
-            <li><a routerLink="/Home" (click)="logOut()">Salir</a></li>
-        </div>
+          </div>
+        <a routerLink="/Home" (click)="logOut()">
+          <img width="50" height="40" src="https://img.icons8.com/sf-regular/48/FFFFFF/exit.png" alt="exit"/>
+        </a>
       </div>
     </nav>
     <div> Bienvenido {{getNombreFuncionario()}}</div>

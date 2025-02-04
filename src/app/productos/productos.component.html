@@ -15,11 +15,11 @@
         <label>Documento</label>
       </div>
     </div>
-    <div class="form-row" *ngIf="!getEsAsociado() && error">
+    <div class="form-row">
       <div class="input-data">
         <input type="chart" required class="" 
                placeholder=" " name="primerApellido" 
-               [(ngModel)]="primerApellido"
+               [(ngModel)]="infoCliente['primerApellido']"
                >
         <div class="underline"></div>
         <label>Apellido</label>

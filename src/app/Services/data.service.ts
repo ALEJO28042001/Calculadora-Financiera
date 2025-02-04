@@ -11,13 +11,14 @@ export class DataService {
   private jsonFile='';
   private productList: Array<{ [key: string]: string }> = [];
   private nombreFuncionario="";
+  private documentoFuncionario="";
   private infoCliente:any={'documento':'',
     'nombre':'',
     'calificacion':'NC',
     'rating':0
   };
   private interestRange=[];
-  private access=false;
+  private access=true;
   private esAsociado=false;
   private compraCartera=false;
   private autoriza=false;
@@ -31,6 +32,9 @@ export class DataService {
   setJsonFile(value: string) {
     this.jsonFile = value;
   }
+
+  getDocumentoFuncionario(){return this.documentoFuncionario}
+  setDocumentoFuncionario(documento:string){this.documentoFuncionario=documento}
 
   getCreditoOfrecidoEsRotativo(){return this.creditoOfrecidoEsRotativo}
   setCreditoOfrecidoEsRotativo(esRotativo:boolean){this.creditoOfrecidoEsRotativo = esRotativo}
@@ -74,6 +78,7 @@ export class DataService {
     if(validacionFuncionario['CodError']===-1){
       this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
       this.access=true;
+      this.documentoFuncionario = documentoFuncionario;
     }
     return this.access;    
   }
@@ -90,7 +95,7 @@ updateProduct(product :{[key: string]:string},index:number){
 deleteProduct(index:number){
   this.productList.slice(index,1);
 }
-async pullData(documento: string) {
+async pullData(documento: string,apellido:string) {
   this.productList = [];
   let basicClientInfo: any;
   this.infoCliente={'documento':documento}
@@ -135,31 +140,31 @@ async pullData(documento: string) {
       console.error('Error in getting basic client info:', error);
   }
  // Consulta SIFIN
-  if (this.esAsociado || (this.documentoAutorizado === documento)) {
-      try {
-          const cifinProductsResponse = await this.apiService.getCifinProducts(documento);
+    // if (this.esAsociado || (this.documentoAutorizado === documento)) {
+    //     try {
+    //         const cifinProductsResponse = await this.apiService.getCifinProducts(documento);
 
-          if (cifinProductsResponse['CodError'] === '0') {
-              // this.infoCliente['calificacion'] = cifinProductsResponse.CALIFICACION;
+    //         if (cifinProductsResponse['CodError'] === '0') {
+    //             // this.infoCliente['calificacion'] = cifinProductsResponse.CALIFICACION;
 
-              // Filter valid cifin products
-              let cifinProducts = cifinProductsResponse.JAObligaciones || [];
-              cifinProducts = cifinProducts.filter(
-                  (item: any) =>
-                      item['CALIDAD'] === 'PRIN' &&
-                      item['NOMBREENTIDAD'] !== 'BENEFICIAR- COOP. DE AHORRO Y'
-              );
-              this.convertData(cifinProducts, cifinKeys);
-              validar=true;
-          }
-      } catch (error) {
-          console.error('Error in getting CIFIN products:', error);
-      }
-  }
+    //             // Filter valid cifin products
+    //             let cifinProducts = cifinProductsResponse.JAObligaciones || [];
+    //             cifinProducts = cifinProducts.filter(
+    //                 (item: any) =>
+    //                     item['CALIDAD'] === 'PRIN' &&
+    //                     item['NOMBREENTIDAD'] !== 'BENEFICIAR- COOP. DE AHORRO Y'
+    //             );
+    //             this.convertData(cifinProducts, cifinKeys);
+    //             validar=true;
+    //         }
+    //     } catch (error) {
+    //         console.error('Error in getting CIFIN products:', error);
+    //     }
+    // }
   // Consulta Data Credito
   if (this.esAsociado || (this.documentoAutorizado === documento)) {
     try {
-      let dataCreditoResponse = await this.apiService.consultaDataCredito(Number(documento),'');
+      let dataCreditoResponse = await this.apiService.consultaDataCredito(Number(documento),apellido);
             if (dataCreditoResponse['CodError'] === 0) {
               const dataCreditoConsulta = JSON.parse(dataCreditoResponse.Consulta.replace('/','')).ReportHDCplus;
               if(this.getNombreCliente()===''){

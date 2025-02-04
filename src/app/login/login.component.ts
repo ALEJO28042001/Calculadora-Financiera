@@ -52,7 +52,8 @@ export class LoginComponent implements OnInit{
   }
 
   encrypt(clave:string):string{
-    return Md5.hashStr(clave);
+    // return Md5.hashStr(clave);
+    return clave;
   }
   fNumber(h:string) {
     let p= this.cedula.replace(/[^0-9]/g, '');

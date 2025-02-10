@@ -56,4 +56,29 @@ export class CalculosService {
   num(s:string){
     return Number(s) || 0;
   }
+  base64FromLocalImage(imagePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous'; // Prevents CORS issues
+      img.src = imagePath;
+  
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+  
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const base64String = canvas.toDataURL('image/png'); // Convert to PNG format
+          resolve(base64String);
+        } else {
+          reject(new Error('Could not create canvas context'));
+        }
+      };
+  
+      img.onerror = (err) => reject(err);
+    });
+  }
+  
 }

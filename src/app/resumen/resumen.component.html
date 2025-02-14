@@ -1,8 +1,8 @@
 
 <html>
-<button class="custom-button" (click)="generateCharts()">Calculate</button>
+<!-- <button class="custom-button" (click)="generateCharts()">Calculate</button> -->
 <p></p>
-<button class="custom-button" (click)="generateJsonData()">Generate JSON</button> 
+<button class="custom-button"  *ngIf="info['infoJson']" (click)="generateJsonData()">Generar Reporte</button>
 <!-- <button class="custom-button" (click)="generatePDF()">Generate PDF</button>  -->
 
 <h2 class="chart-title"> {{info['nombre']}}</h2>
@@ -10,14 +10,14 @@
 <form class="form">
     <div class="form-row" *ngIf="!getEsAsociado()">
         <div class="input-data">
-            <input 
-                required 
-                type="text" 
+            <input
+                required
+                type="text"
                 inputmode="numeric"
-                class="input" 
-                placeholder=" " 
-                [name]="'ingresos'" 
-                [(ngModel)]="info['ingresos']" 
+                class="input"
+                placeholder=" "
+                [name]="'ingresos'"
+                [(ngModel)]="info['ingresos']"
                 (keyup)="fNumber('ingresos')"
                 (input)="calcularAportes()">
             <div class="underline"></div>
@@ -31,21 +31,21 @@
             <div class="underline"></div>
           </div>
     </div>
-    <!-- Información del asociado -->    
+    <!-- Información del asociado -->
     <div class="form-row" *ngFor="let key of ['cuotaAportes','saldoAportes']">
         <div class="output-data">
           <div class="output">{{ info[key] }}</div>
           <label class="chart">{{ displayName(key) | titlecase }}</label>
           <div class="underline"></div>
         </div>
-    </div>            
+    </div>
     <div class="form-row">
         <div class="output-data">
           <div class="output">{{ infoCliente['calificacion'] }}</div>
           <label class="chart">{{ displayName('Calificacion') | titlecase }}</label>
           <div class="underline"></div>
         </div>
-    </div> 
+    </div>
 
     <div class="form-row">
         <div class="checkbox-wrapper">
@@ -53,14 +53,14 @@
                 <label class="chart">Apalancamiento</label>
             </div>
           <div *ngIf="info['isApalancamiento']" class="input-data" >
-            <input 
-                required 
-                type="text" 
+            <input
+                required
+                type="text"
                 inputmode="numeric"
-                class="input" 
-                placeholder=" " 
-                [name]="'valorApalancamiento' " 
-                [(ngModel)]="info['valorApalancamiento']" 
+                class="input"
+                placeholder=" "
+                [name]="'valorApalancamiento' "
+                [(ngModel)]="info['valorApalancamiento']"
                 (keyup)="fNumber('valorApalancamiento')">
             <div class="underline"></div>
             <label >Apalancamiento</label>
@@ -71,14 +71,14 @@
 
     <div class="form-row">
         <div class="input-data">
-            <input 
-                required 
-                type="text" 
+            <input
+                required
+                type="text"
                 inputmode="numeric"
-                class="input" 
-                placeholder=" " 
-                [name]="'valorRequerido'" 
-                [(ngModel)]="situacionFutura['valorRequerido']" 
+                class="input"
+                placeholder=" "
+                [name]="'valorRequerido'"
+                [(ngModel)]="situacionFutura['valorRequerido']"
                 (keyup)="fNumber2('valorRequerido')"
                 (input)="calcularSituacionFutura()">
             <div class="underline"></div>
@@ -97,26 +97,26 @@
 
 <!-- Form Producto Ofrecido -->
 <form class="form">
-    
-    <div class="form-row">    
+
+    <div class="form-row">
         <div class="output-data" *ngIf="situacionFutura['productoOfrecido']==='Rotativo' " >
             <div class="output">{{ situacionFutura['tasa+Costos'] }}</div>
             <label class="chart">{{ displayName('tasaBeneficiar') | titlecase }}</label>
             <div class="underline"></div>
         </div>
-    
+
 
         <!-- (keypress)="allowNumbers($event,'tasa+Costos')" -->
 
         <div class="input-data" *ngIf="situacionFutura['productoOfrecido']==='Consumo'">
-            <input 
-                required 
-                type="number" 
-                class="input" 
-                placeholder=" " 
-                [name]="'tasaBeneficiar'" 
-                [(ngModel)]="situacionFutura['tasa+Costos']" 
-                
+            <input
+                required
+                type="number"
+                class="input"
+                placeholder=" "
+                [name]="'tasaBeneficiar'"
+                [(ngModel)]="situacionFutura['tasa+Costos']"
+
 
                 (input)="calcularSituacionFutura()"
                 >
@@ -127,12 +127,12 @@
 
     <div class="form-row">
         <div class="input-data">
-            <input 
-                required 
-                type="number" 
-                class="input" 
-                placeholder=" " 
-                [name]="'plazoCredito'" 
+            <input
+                required
+                type="number"
+                class="input"
+                placeholder=" "
+                [name]="'plazoCredito'"
                 [(ngModel)]="situacionFutura['plazo']"
                 min="0"
                 (input)="calcularSituacionFutura()"
@@ -141,18 +141,8 @@
             <label >{{displayName('plazoCredito') | titlecase}}</label>
         </div>
     </div>
-    <!-- Credit Details -->
-    <!-- <div *ngFor="let key of dataComparacion.labels">
-        <div class="form-row">
-            <div class="output-data">
-                <div class="output">{{ situacionFutura[key] }}</div>
-                <label class="chart">{{ displayName(key) | titlecase }}</label>
-                <div class="underline"></div>
-            </div>
-        </div>
-    </div>         -->
 
-    
+
 </form>
 
 <form class="form">
@@ -166,8 +156,8 @@
                     <label class="chart">{{ displayName(key) | titlecase }}</label>
                     <div class="underline"></div>
                 </div>
-            </div> 
-        </div>       
+            </div>
+        </div>
     </form>
 
     <form class="form">
@@ -179,8 +169,8 @@
                     <label class="chart">{{ displayName(key) | titlecase }}</label>
                     <div class="underline"></div>
                 </div>
-            </div> 
-        </div>       
+            </div>
+        </div>
     </form>
 
     <form class="form">
@@ -192,22 +182,23 @@
                     <label class="chart">{{ displayName(key) | titlecase }}</label>
                     <div class="underline"></div>
                 </div>
-            </div> 
-        </div>       
+            </div>
+        </div>
     </form>
 </form>
 <!-- </div> -->
-  
-<button class="custom-button" (click)="generateCharts()">Calculate</button>
-<p></p>
-<button class="custom-button" (click)="generateJsonData()">Generate JSON</button>
 
-<app-generate-chart 
-    #resumenInteres 
+<!-- <button class="custom-button" (click)="generateCharts()">Calculate</button>
+<p></p> -->
+<button class="custom-button" (click)="generateJsonData()">Generar Reporte</button>
+
+
+<app-generate-chart
+    #resumenInteres
     title="Impacto Asesoria Financiera Variacion Costos">
 </app-generate-chart>
-<app-generate-chart 
-    #resumenFlujoCaja 
+<app-generate-chart
+    #resumenFlujoCaja
     title="Impacto Asesoria Financiera Flujo de Caja">
-</app-generate-chart> 
+</app-generate-chart>
 </html>

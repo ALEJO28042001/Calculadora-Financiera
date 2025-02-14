@@ -24,7 +24,7 @@ nav {
   padding: 0px 0px 0px 10px;
 }
 
-nav .wrapper {  
+nav .wrapper {
   height: 70px;
   display: flex;
   align-items: center;
@@ -70,9 +70,16 @@ nav .wrapper {
     }
 }
 
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+
+}
+
 .container{
   display: grid;
-  border-radius: 15px;  
+  border-radius: 15px;
   max-width: 1100px;
   /* justify-content: center; */
   justify-self: center;
@@ -94,7 +101,7 @@ html{
 form{
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-  background-color: aliceblue;  
+  background-color: aliceblue;
   margin:8px;
   margin-left: 0px;
   gap: 15px;
@@ -156,7 +163,7 @@ select{
   height: 100%;
   border-radius: 10px;
 }
-.input-data label 
+.input-data label
 {
   position: absolute;
   pointer-events: none;
@@ -288,8 +295,8 @@ h2{
     text-transform: uppercase;
     position: relative;
   }
-  
-  
+
+
   .switch {
   position: relative;
   display: inline-block;

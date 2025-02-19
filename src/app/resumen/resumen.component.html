@@ -1,9 +1,5 @@
 
 <html>
-<!-- <button class="custom-button" (click)="generateCharts()">Calculate</button> -->
-<p></p>
-<button class="custom-button"  *ngIf="info['infoJson']" (click)="generateJsonData()">Generar Reporte</button>
-<!-- <button class="custom-button" (click)="generatePDF()">Generate PDF</button>  -->
 
 <h2 class="chart-title"> {{info['nombre']}}</h2>
 <!-- <div class="container"> -->
@@ -48,25 +44,16 @@
     </div>
 
     <div class="form-row">
-        <div class="checkbox-wrapper">
-            <div *ngIf="!info['isApalancamiento']" >
+        <div class="checkbox-wrapper" *ngIf="!info['isApalancamiento']" >
                 <label class="chart">Apalancamiento</label>
-            </div>
-          <div *ngIf="info['isApalancamiento']" class="input-data" >
-            <input
-                required
-                type="text"
-                inputmode="numeric"
-                class="input"
-                placeholder=" "
-                [name]="'valorApalancamiento' "
-                [(ngModel)]="info['valorApalancamiento']"
-                (keyup)="fNumber('valorApalancamiento')">
-            <div class="underline"></div>
-            <label >Apalancamiento</label>
         </div>
-          <input type="checkbox" [(ngModel)]="info['isApalancamiento']"  name='isApalancamiento'>
+
+        <div class="output-data" *ngIf="info['isApalancamiento']" >
+          <div class="output">{{ info['valorApalancamiento'] }}</div>
+          <label class="chart">{{ displayName('Apalancamiento') | titlecase }}</label>
+          <div class="underline"></div>
         </div>
+        <input type="checkbox" [(ngModel)]="info['isApalancamiento']" (change)="calcularApalancamiento()" name='isApalancamiento'>
     </div>
 
     <div class="form-row">
@@ -125,6 +112,7 @@
         </div>
     </div>
 
+
     <div class="form-row">
         <div class="input-data">
             <input
@@ -143,7 +131,12 @@
     </div>
 
 
+
+
 </form>
+
+<button class="custom-button" (click)="generateJsonData()">Generar Reporte</button>
+
 
 <form class="form">
 
@@ -186,12 +179,6 @@
         </div>
     </form>
 </form>
-<!-- </div> -->
-
-<!-- <button class="custom-button" (click)="generateCharts()">Calculate</button>
-<p></p> -->
-<button class="custom-button" (click)="generateJsonData()">Generar Reporte</button>
-
 
 <app-generate-chart
     #resumenInteres

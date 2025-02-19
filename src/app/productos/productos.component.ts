@@ -1,5 +1,5 @@
+import { DataService } from './../Services/data.service';
 import { CalculosService } from '../Services/calculos.service';
-import { DataService } from '../Services/data.service';
 import { Component, Input, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,28 +17,30 @@ export class ProductosComponent implements OnInit{
   protected infoCliente:{ [key: string]: string } = {
   }
   error=false;
-  isLoading=false;
   autorizar=false;
   isRef: boolean = false;
   isTarjeta: boolean = false;
+  consultaExitosa: boolean = false;
   productList: Array<{ [key: string]: string }> = [];
   selectedProductIndex: number | null = null; // For editing/deleting selected product
   access=false;
+  datosProductoValidos: boolean = true;
+  primerCampoErroneo: string = '';
+  i: number = 0;
   moneyKeys=[
     "Deuda Actual", "Pago Mensual","Interes Actual", "Interes Beneficiar",
     "Diferencia Interes"
   ]
   primerApellido='';
 
-
-  ngOnInit() { 
+  ngOnInit() {
     this.productList = this.DataService.getData();
     this.infoCliente = this.DataService.getInfoCliente();
-    this.documentoNumber();
+    this.infoCliente['documento'] = this.CalculosService.formatearDocumento(this.infoCliente['documento']);
     this.access = this.DataService.getAccess();
   }
-  gNombreFuncionario(){return this.DataService.getNombreFuncionario();}
-  @Input() product: { [key: string]: string } = {
+  getNombreFuncionario(){return this.DataService.getNombreFuncionario();}
+  product: { [key: string]: string } = {
     "Nombre Producto": "",
     "Tarjeta":"false",
     "Recoger": "true",
@@ -52,8 +54,8 @@ export class ProductosComponent implements OnInit{
     "Interes Beneficiar": "",
     "Diferencia Interes": "",
     "Tasa Beneficiar":"",
-  };   
-  
+  };
+
   keys = ["Nombre Producto",
     "Tarjeta",
     "Recoger",
@@ -68,16 +70,33 @@ export class ProductosComponent implements OnInit{
     "Interes Beneficiar",
     "Diferencia Interes",
 ];
+
 gAccess(){return this.DataService.getAccess()}
 
-  addProduct(product?: any | null) {  
+  addProduct(product?: any | null) {
     if(product){
       this.product=product;
-    }   
+    }
+    this.i = 0;
+    this.datosProductoValidos = true;
+    this.primerCampoErroneo='';
+    do{
+      if(this.product[camposVerificarProducto[this.i]]==='')
+      {
+        this.datosProductoValidos = false;
+        this.primerCampoErroneo = camposVerificarProducto[this.i];
+        this.DataService.setContenidoPopUp('Producto no agregado, revisar: '+this.primerCampoErroneo);
+      }
+      this.i+=1;
+    }
+    while(this.datosProductoValidos && this.i<5)
+    if(this.datosProductoValidos)
+    {
+      this.DataService.setContenidoPopUp('Producto: '+this.product['Nombre Producto']+', agregado o actualizado correctamente');
     for(let field of this.moneyKeys){
       this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
     }
-    
+
     if (this.product['Pago Mensual']==='')
       this.product['Pago Mensual']=
         this.CalculosService.calculateMonthlyPayment(
@@ -88,38 +107,43 @@ gAccess(){return this.DataService.getAccess()}
     if (this.selectedProductIndex === null) {
       // Add a new product
       this.productList.push({ ...this.product });
-      this.resetForm();
+      // this.resetForm();
     } else {
       // Update existing product
       this.productList[this.selectedProductIndex] = { ...this.product };
-    }    
+    }
     this.DataService.setData(this.productList);
     for(let field of this.moneyKeys){
       this.product[field]=this.product[field].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
-  }  
-  
-  
+    }
+  }
+
+
 
   // Function to select a product to edit
   chooseProduct(index: number) {
     this.resetForm();
     this.selectedProductIndex = index;
-    this.product = { ...this.productList[index] }; 
+    this.product = { ...this.productList[index] };
     this.isTarjeta=this.product['Tarjeta']==='true';
     this.isRef=this.product['Recoger']==='true';
-    
+
     for(let field of this.moneyKeys){
-      this.product[field]=this.formatNumber(Number(this.product[field].replace(/[^0-9]/g, '')));
+      this.product[field]=this.CalculosService.formatearNumero(Number(this.product[field].replace(/[^0-9]/g, '')));
     }
   }
 
   deleteProduct(index: number) {
+    this.DataService.setContenidoPopUp('Producto: '+this.product['Nombre Producto']+' ,eliminado correctamente');
     this.productList.splice(index, 1);
     this.resetForm();
   }
 
   resetForm() {
+    // this.keys.forEach(element => {
+    //   this.product[element]='';
+    // });
     this.product = {
       "Nombre Producto": "",
       "Tarjeta": "false",
@@ -151,34 +175,35 @@ gAccess(){return this.DataService.getAccess()}
   }
 
   calculateRealRate(){
-
-      let amount = Number(this.product['Deuda Actual']);
+      let amount = Number(this.product['Deuda Actual'].replace(/[^0-9]/g, ''));
       let months = Number(this.product['Plazo Actual']);
-      let pago = Number(this.product['Pago Mensual']);
-      if(amount>0 && months>0 && pago>0 && this.product['Nombre Producto'].substring(0,10)!=='BENEFICIAR')
-      {
-        this.product['Tasa Real']=((this.CalculosService.findInterestRate(pago,amount, months)*1200)).toFixed(2);  
-      }    
-      this.product['Interes Actual'] = (Number(this.product['Tasa Real'])*amount/1200).toFixed(0);  
+      let pago = Number(this.product['Pago Mensual'].replace(/[^0-9]/g, ''));
+      if(this.product['Nombre Producto'].substring(0,10)!=='BENEFICIAR' && pago<amount)
+          this.product['Tasa Real']=((this.CalculosService.findInterestRate(pago,amount, months)*1200)).toFixed(2);
+      else this.product['Tasa Real'] = "0";
+      if(Number(this.product['Tasa Real'])>0 && amount>0)
+          this.product['Interes Actual'] = this.CalculosService.formatear('numero',(Number(this.product['Tasa Real'])*amount/1200));
+      else this.product['Interes Actual'] = "0";
       this.actualizarDiferencias();
-  }   
+  }
+
   actualizarDiferencias(){
-    this.product['Interes Beneficiar'] = this.formatNumber(Number((Number(this.product['Tasa Beneficiar'])*
-        Number(this.product['Deuda Actual'].replace(/[^0-9]/g, ''))/1200).toFixed(0))); 
-    this.product['Diferencia Interes'] = this.formatNumber(Number((Number(this.product['Interes Actual'].replace(/[^0-9]/g, ''))-
+    this.product['Interes Beneficiar'] = this.CalculosService.formatearNumero(Number((Number(this.product['Tasa Beneficiar'])*
+        Number(this.product['Deuda Actual'].replace(/[^0-9]/g, ''))/1200).toFixed(0)));
+    this.product['Diferencia Interes'] = this.CalculosService.formatearNumero(Number((Number(this.product['Interes Actual'].replace(/[^0-9]/g, ''))-
         Number(this.product['Interes Beneficiar'].replace(/[^0-9]/g, ''))).toFixed(0)));
     this.product['Diferencia Tasas'] = (Number(this.product['Tasa Beneficiar'])-Number(this.product['Tasa Real'])).toFixed(2);
   }
   getNombreCliente(){return this.DataService.getNombreCliente()}
 
-  
+
   procesoAutorizacion(documento:string){
     // agregar logica de validacion
 
     console.log('Autorizacion completa para el documento: ',documento.replace(/[^0-9]/g, ''));
     this.autorizar = this.primerApellido!=='';
     this.error = false;
-    
+
     this.DataService.setDocumentoAutorizado(documento.replace(/[^0-9]/g, ''));
     return true;
   }
@@ -197,52 +222,37 @@ gAccess(){return this.DataService.getAccess()}
 
   async searchData(){
     // console.log(this.getDocumentoAutorizado(),' ',);
-    this.isLoading=true;
+    this.DataService.setEstadoCargando(true);
     this.productList=[];
+    this.consultaExitosa=false;
+
     this.resetForm();
-    const consulta = 
-    await this.DataService.pullData(this.infoCliente['documento'].replace(/[^0-9]/g, ''),this.infoCliente['primerApellido']);
+    const consulta =
+    await this.DataService.pullData(this.getDoc(),this.infoCliente['primerApellido']);
     // console.log('COnsulta:',consulta);
       if(consulta){
         this.DataService.getProductList().map(p=>this.addProduct(p));
         this.resetForm();
         this.error=false;
         this.infoCliente['nombre']=this.DataService.getNombreCliente();
+        this.consultaExitosa=true;
+        this.DataService.setContenidoPopUp('Consulta Exitosa');
       }
       else{
           this.error=true;
           this.autorizar=false;
           this.infoCliente['nombre']='';
+          this.DataService.setContenidoPopUp('Error en la Consulta, verifique datos');
       }
-    
-    this.isLoading=false;
-    this.documentoNumber(); 
-  }
 
-  allowNumbers(event:any,key:string) {
-    const charCode = event.charCode || event.keyCode;
-    if ((charCode >= 48 && charCode <= 57) || charCode === 8 || charCode === 46) {
-        if(this.product[key].length>0){
-          return this.validateRange(this.product[key]+event.key);
-        }
-        else
-        return true;
-    }    
-    return false;
-}
-
-  validateRange(input:string){
-    const value=parseFloat(input);
-
-    if (value >= 6 && value <=  30) {
-      return true;
-    }
-    return false;
+    this.DataService.setEstadoCargando(false);
+    this.infoCliente['documento'] = this.CalculosService.formatearDocumento(this.infoCliente['documento']);
+    this.resetForm();
   }
 
 
   calcularInteresBeneficiar(){
-    this.product['Interes Beneficiar'] = 
+    this.product['Interes Beneficiar'] =
     this.CalculosService.calcularInteres(
       Number(this.product['Deuda Actual'].replace(/[^0-9]/g, '')),
       Number(this.product['Tasa Beneficiar'].replace(/[^0-9.]/g, '')));
@@ -253,11 +263,19 @@ gAccess(){return this.DataService.getAccess()}
     let p=this.product[key].replace(/[^0-9.]/g, '');
     this.product[key] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-  documentoNumber() {
-    let p=this.infoCliente['documento'].replace(/[^0-9]/g, '');
-    this.infoCliente['documento'] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  tasaPermitida(tasa:string){
+    let p=tasa.replace(/[^0-9.]/g, '');
+    this.product['Tasa Beneficiar'] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
   }
-  formatNumber(value: number): string {
-    return value.toLocaleString('en-US', {});
+
+  formatear(funcion:string,value:any) {
+    this.infoCliente['documento'] = this.CalculosService.formatear(funcion,value);
   }
+
+  getEstadoCargando(){return this.DataService.getEstadoCargando()}
+
 }
+
+const camposVerificarProducto=['Nombre Producto','Deuda Actual','Plazo Actual','Pago Mensual','Tasa Beneficiar'];

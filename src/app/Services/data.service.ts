@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({providedIn: 'root'})
 
 export class DataService {
-  constructor(private apiService: ApiService, private http: HttpClient,private CalculosService:CalculosService) {}  
+  constructor(private apiService: ApiService, private http: HttpClient,private CalculosService:CalculosService) {}
   private jsonFile='';
   private productList: Array<{ [key: string]: string }> = [];
   private nombreFuncionario="";
@@ -24,11 +24,20 @@ export class DataService {
   private autoriza=false;
   private documentoAutorizado = '';
   private creditoOfrecidoEsRotativo = false;
+  private contenidoPopUp = '';
+  private estadoCargando = false;
+
+  getEstadoCargando(){return this.estadoCargando}
+  setEstadoCargando(mensaje:boolean){this.estadoCargando = mensaje}
+
+
+  getContenidoPopUp(){return this.contenidoPopUp}
+  setContenidoPopUp(mensaje:string){this.contenidoPopUp = mensaje}
 
   getJsonFile(): string {
     return this.jsonFile;
   }
-  
+
   setJsonFile(value: string) {
     this.jsonFile = value;
   }
@@ -63,7 +72,7 @@ export class DataService {
   getInfoCliente(){return this.infoCliente}
   getNombreCliente(){return this.infoCliente['nombre'] || ''}
   setNombreCliente(nombre:string){this.infoCliente['nombre']=nombre}
-  getAccess(){return this.access}  
+  getAccess(){return this.access}
   getNombreFuncionario(){return this.nombreFuncionario}
   getApalancamiento(){return this.infoCliente['apalancamiento']}
   getSaldoAportes(){return this.infoCliente['saldoAportes']}
@@ -71,7 +80,7 @@ export class DataService {
 
 
 
-  async askLogin(documentoFuncionario:string,clave:string){   
+  async askLogin(documentoFuncionario:string,clave:string){
     var validacionFuncionario = await
     this.apiService.getLoginInfo(documentoFuncionario,clave);
     validacionFuncionario = validacionFuncionario.result[0];
@@ -80,7 +89,7 @@ export class DataService {
       this.access=true;
       this.documentoFuncionario = documentoFuncionario;
     }
-    return this.access;    
+    return this.access;
   }
 
   logOut(){this.access=false}
@@ -113,26 +122,26 @@ async pullData(documento: string,apellido:string) {
           const aportes = aportesResponse.result?.[0]?.['Registros'];
           if (aportes && aportes.length > 0) {
               const lastAporte = aportes[aportes.length - 1]?.['CUOTAMENSUALAPORTE'];
-              this.infoCliente['aportes'] = formatNumber(Number(lastAporte) || 0);
+              this.infoCliente['aportes'] = this.CalculosService.formatear('numero',Number(lastAporte) || 0);
           }
 
           // Calculate saldoAportes
           this.infoCliente['saldoAportes'] =
               Number(basicClientInfo.Registros?.[0]?.VALORCONSOLIDADO || 0) +
               Number(basicClientInfo.Registros?.[1]?.VALORCONSOLIDADO || 0);
-          
+
           // Get beneficiarProducts
-          const rotativosBeneficiarResponse = 
+          const rotativosBeneficiarResponse =
             await this.apiService.getRotativosBeneficiar(basicClientInfo.CodAsociado);
           this.convertData(rotativosBeneficiarResponse.result?.[0]?.Registros || [], beneficiarKeys);
-          
-          const creditosBeneficiarResponse = 
+
+          const creditosBeneficiarResponse =
             await this.apiService.getCreditosBeneficiar(basicClientInfo.CodAsociado);
           this.convertData(creditosBeneficiarResponse.result?.[0]?.Registros || [], beneficiarKeys);
 
           this.esAsociado = true;
           validar=true;
- 
+
       } else {
           this.esAsociado = false;
       }
@@ -189,7 +198,7 @@ async pullData(documento: string,apellido:string) {
 
         this.convertDataCreditoProducts(dataCreditoProductos);
         validar=true;
-      }     
+      }
     } catch (error) {
         console.error('Error in getting DATA CREDITO products:', error);
     }
@@ -197,8 +206,8 @@ async pullData(documento: string,apellido:string) {
   return validar;
 }
 
-convertDataCreditoProducts(productos:any){  
-  
+convertDataCreditoProducts(productos:any){
+
   productos.map((producto:any) =>{
     var renamedObj: any = {};
     renamedObj['Deuda Actual'] = producto['values'][0]['debtBalance'];
@@ -206,33 +215,33 @@ convertDataCreditoProducts(productos:any){
     renamedObj['Pago Mensual'] = producto['values'][0]['valueMonthlyPayment'];
     renamedObj['Tarjeta'] = String(
       producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTA' ||
-      producto['featuresLiabilities']['typeOfCreditDesc'] === 'TCR' || 
-      producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTATIVO'); 
-    renamedObj['Nombre Producto'] = 
+      producto['featuresLiabilities']['typeOfCreditDesc'] === 'TCR' ||
+      producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTATIVO');
+    renamedObj['Nombre Producto'] =
       producto['account']['businessLineName'] + ' ' +
       producto['featuresLiabilities']['typeOfCreditDesc'] + ' ' +
       producto['account']['accountNumber'] + ' SALDO $:' +
-      formatNumber(producto['values'][0]['debtBalance']);
+      this.CalculosService.formatear('numero',producto['values'][0]['debtBalance']);
     renamedObj["Recoger"]= "true";
     renamedObj["Diferencia Tasas"]= "";
     renamedObj["Interes Actual"]= "";
     renamedObj["Interes Beneficiar"]= "";
     renamedObj["Diferencia Interes"]= "";
-    renamedObj["Tasa Beneficiar"]= "";
+    renamedObj["Tasa Beneficiar"]= "1";
     renamedObj["Tasa Entidad"]= "";
     renamedObj["Tasa Real"]= "";
 
     this.addProduct(renamedObj);
-  })  
+  })
 }
 
-  
+
 convertData(registros:any ,newKeysMapping:any){
     registros.map((item: any) => this.renameKeys(item, newKeysMapping));
 }
 renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
       const renamedObj: any = {};
-      for (const key in keyMap) {      
+      for (const key in keyMap) {
         if ( key === 'Tasa Real' ){
           const tasa = obj[keyMap[key]] || "";
           renamedObj["Tasa Entidad"]= tasa;
@@ -240,31 +249,31 @@ renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
           renamedObj["Tasa Real"]= tasa;
         }
         else if (key === "Nombre Producto") {
-          renamedObj[key] = (obj["TIPOENTIDAD"] || "BENEFICIAR" )+ 
-          " "+obj[keyMap[key]] + " " + (obj["NUMEROOBLIGACION"]||obj["PAGARE"]||obj["TARJETA"]) 
-          +" SALDO:$" +formatNumber(obj["SALDOOBLIGACION"]*1000||Number(obj["SALDO"]));
-        } 
+          renamedObj[key] = (obj["TIPOENTIDAD"] || "BENEFICIAR" )+
+          " "+obj[keyMap[key]] + " " + (obj["NUMEROOBLIGACION"]||obj["PAGARE"]||obj["TARJETA"])
+          +" SALDO:$" +this.CalculosService.formatear('numero',obj["SALDOOBLIGACION"]*1000||Number(obj["SALDO"]));
+        }
         else if (key === "Plazo Actual") {
           renamedObj[key] = String(obj[keyMap[key]] - (obj["CUOTASCANCELADAS"] || obj["ALTURA"])||36);
         }
         else if (keyMap[key] === "VALORCUOTA" || keyMap[key] === "SALDOOBLIGACION") {
           renamedObj[key] = obj[keyMap[key]] * 1000;
-        } 
+        }
         else if (key === "Tarjeta"){
           renamedObj[key] = String(obj[keyMap[key]] === 'ROTA' ||
-        obj[keyMap[key]] === 'TCR' || obj[keyMap[key]] === 'ROTATIVO');  }      
-        
+        obj[keyMap[key]] === 'TCR' || obj[keyMap[key]] === 'ROTATIVO');  }
+
         else {
           renamedObj[key]=obj[keyMap[key]];
         }
-      } 
+      }
       renamedObj["Recoger"]= "true";
       renamedObj["Diferencia Tasas"]= "";
       renamedObj["Interes Actual"]= "";
       renamedObj["Interes Beneficiar"]= "";
       renamedObj["Diferencia Interes"]= "";
       this.addProduct(renamedObj);
-  }    
+  }
 }
 
 const cifinKeys=
@@ -285,7 +294,5 @@ const beneficiarKeys=
   "Deuda Actual": "SALDO",
   "Tasa Real":"TASA",
 }
- 
-function formatNumber(value: number): string {
-  return value.toLocaleString('en-US', {maximumFractionDigits:0});
-}
+
+

@@ -4,12 +4,12 @@
 <form class="form" *ngIf="gAccess()">
       <div class="form-row">
       <div class="input-data">
-        <input type="chart" 
+        <input type="chart"
                 inputmode="numeric"
-                required class="input" 
-               placeholder=" " name="documento" 
+                required class="input"
+               placeholder=" " name="documento"
                [(ngModel)]="infoCliente['documento']"
-               (keyup)="documentoNumber()"
+               (keyup)="formatear('documento',infoCliente['documento'])"
                >
         <div class="underline"></div>
         <label>Documento</label>
@@ -17,65 +17,66 @@
     </div>
     <div class="form-row">
       <div class="input-data">
-        <input type="chart" required class="" 
-               placeholder=" " name="primerApellido" 
+        <input type="chart" required class=""
+               placeholder=" " name="primerApellido"
                [(ngModel)]="infoCliente['primerApellido']"
                >
         <div class="underline"></div>
         <label>Apellido</label>
       </div>
     </div>
-      <p class="error-message" *ngIf="error && !autorizar && !isLoading">Documento no Autorizado</p>
-        <button *ngIf="error && !autorizar && !isLoading"
+      <p class="error-message" *ngIf="error && !autorizar ">Documento no Autorizado</p>
+        <button *ngIf="error && !autorizar "
           class="custom-button" (click)="procesoAutorizacion(infoCliente['documento'])"
           >Autorizar Consulta</button>
-      <p class="error-message" *ngIf="autorizar && primerApellido!=='' &&!isLoading" >Autorizado</p>
+      <p class="error-message" *ngIf="autorizar && primerApellido!==''" >Autorizado</p>
 
-      <p class="error-message" *ngIf="autorizar && getDocumentoAutorizado()===getDoc() 
-        && !isLoading && !error" >Sin Informacion</p>
+      <p class="error-message" *ngIf="autorizar && getDocumentoAutorizado()===getDoc()
+         && !error" >Sin Informacion</p>
 
-    <div class="form-row" *ngIf="!error && getNombreCliente()!=='' &&!isLoading ">
+    <div class="form-row" *ngIf="!error && getNombreCliente()!=='' ">
       <div class="input-data">
-        <input type="chart" required class="" 
-               placeholder=" " name="nombre" 
+        <input type="chart" required class=""
+               placeholder=" " name="nombre"
                [(ngModel)]="infoCliente['nombre']"
                >
         <div class="underline"></div>
         <label>Nombre</label>
       </div>
     </div>
-    <div class="form-row" *ngIf="isLoading">
-    <div  class="spinner-container">
-      <div class="spinner"></div>
-      <p>Loading, please wait...</p>
-    </div>
-  </div>
-    <button 
-     *ngIf="!isLoading"
-      class="custom-button" (click)="searchData()"> GET DATA</button>
- 
+    <button
+     *ngIf="!getEstadoCargando()"
+      class="custom-button" (click)="searchData()"> CONSULTAR</button>
+
 </form>
 
-<!-- Lista de Productos -->
+
+
+<!-- Informacion del Producto -->
+<div *ngIf="consultaExitosa">
+
+  <!-- Lista de Productos -->
+<h2 *ngIf="productList.length === 0" class="chart-title"> Sin Productos</h2>
+
 <div *ngIf="productList.length > 0" class="dropdown-group">
+  <h2 class="chart-title"> Listado de productos</h2>
+
 <select [(ngModel)]="selectedProductIndex" class="dropdown"
   (change)="chooseProduct(selectedProductIndex!)">
   <option *ngFor="let product of productList; let i = index" [value]="i" >
     {{ product['Nombre Producto'] }} </option>
 </select>
 </div>
-
-<!-- Informacion del Producto -->
 <form class="form">
 <div class="form-row">
     <div class="input-data">
-      <input type="chart" required class="input" 
+      <input type="chart" required class="input"
              placeholder=" " name="Nombre Producto"
              [(ngModel)]="product['Nombre Producto']">
       <div class="underline"></div>
       <label>Nombre Producto</label>
     </div>
-</div>  
+</div>
 
 <div class="form-row">
       <div class="checkbox-wrapper">
@@ -85,7 +86,7 @@
         <input type="checkbox" name="refinanciamiento" [(ngModel)]="isRef" (change)="eleccionRecoger($event)"/>
       </div>
 </div>
-  
+
 <div class="form-row" *ngFor="let field of [
     'Deuda Actual',
     'Plazo Actual',
@@ -93,15 +94,17 @@
     'Tasa Entidad',
     ]; let i = index">
 <div class="input-data">
-  <input 
+  <input
     type="chart"
     inputmode="numeric"
-    required 
-    class="input" 
-    placeholder=" " 
-    [name]="'input' + i" 
+    required
+    class="input"
+    placeholder=" "
+    [name]="'input' + i"
     [(ngModel)]="product[field]"
     (keyup)="fNumber(field)"
+    (keyup)=" calculateRealRate()"
+
     >
   <div class="underline"></div>
   <label>{{ field | titlecase }}</label>
@@ -124,12 +127,12 @@
 
 <div class="form-row">
       <div class="input-data">
-        <input type="chart" required class="input" 
+        <input type="chart" required class="input"
         inputmode="numeric"
-       placeholder=" " name="Tasa Beneficiar" 
+       placeholder=" " name="Tasa Beneficiar"
        [(ngModel)]="product['Tasa Beneficiar']"
        (keyup)="calcularInteresBeneficiar()"
-       (keypress)="allowNumbers($event,'Tasa Beneficiar')">
+       (keypress)="tasaPermitida(product['Tasa Beneficiar'])">
         <div class="underline"></div>
         <label>Tasa Beneficiar</label>
       </div>
@@ -145,4 +148,12 @@
     <button *ngIf="productList.length > 0" class="custom-buttonB" (click)="resetForm()">Nuevo Producto  </button>
     <button *ngIf="productList.length > 0" class="custom-buttonB delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
 </form>
+
+</div>
+
+
+
+
+
+
 

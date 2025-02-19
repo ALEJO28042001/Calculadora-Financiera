@@ -15,4 +15,7 @@ export class AppComponent{
   getAccess(){return this.DataService.getAccess()}
   logOut(){this.DataService.logOut()}
   getNombreFuncionario(){return this.DataService.getNombreFuncionario()}
+  closePopUp(){this.DataService.setContenidoPopUp('')}
+  getContenidoPopUp(){return this.DataService.getContenidoPopUp()}
+  getEstadoCargando(){return this.DataService.getEstadoCargando()}
 }

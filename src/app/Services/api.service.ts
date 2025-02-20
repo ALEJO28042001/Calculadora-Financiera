@@ -5,6 +5,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   providedIn: 'root'
 })
 export class ApiService {
+
+  //Test
   private urlCifin = 'https://test.beneficiar.com.co/TestConsultaCifin/ConsultaCifinIsapi.dll/api/rest/TServerMethodCifin/ConsultarBD';
   private urlEstadoCuenta = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/ConsultaEstadoDeCuenta'
   private urlCartera = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/Cartera';
@@ -13,6 +15,18 @@ export class ApiService {
   private urlPoblarDataCredito = 'https://test.beneficiar.com.co/testDataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaDatacredito';
   private urlJsonDataCredito = 'https://test.beneficiar.com.co/testDataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaExistente';
   private urlRotativo = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/Rotativo';
+  //produccion
+  /*
+  private urlCifin = 'https://services.beneficiar.com.co/ConsultaCifin/ConsultaCifinIsapi.dll/api/rest/TServerMethodCifin/ConsultarBD';
+  private urlEstadoCuenta = 'https://services.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/ConsultaEstadoDeCuenta'
+  private urlCartera = 'https://services.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/Cartera';
+  private urlLogin = 'https://services.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethIngresoAsociado/IngresoEstadoCuentaAfiliado';
+  private urlAportes = 'https://services.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/AhorroAportes';
+  private urlPoblarDataCredito = 'https://services.beneficiar.com.co/DataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaDatacredito';
+  private urlJsonDataCredito = 'https://services.beneficiar.com.co/DataCredito/ServerBecDataCreditoIsapi.dll/api/v1.0/TServMethDataCredito/ConsultaExistente';
+  private urlRotativo = 'https://services.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/Rotativo';
+  */
+
   // Basic auth username and password
   private  usernameCifin = 'ServerAdmin';
   private  passwordCifin = 'B3N3F1C14R_R3ST';

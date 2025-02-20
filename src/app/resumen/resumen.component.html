@@ -1,5 +1,5 @@
 
-<html>
+<html *ngIf="getEstadoConsulta()">
 
 <h2 class="chart-title"> {{info['nombre']}}</h2>
 <!-- <div class="container"> -->
@@ -92,9 +92,6 @@
             <div class="underline"></div>
         </div>
 
-
-        <!-- (keypress)="allowNumbers($event,'tasa+Costos')" -->
-
         <div class="input-data" *ngIf="situacionFutura['productoOfrecido']==='Consumo'">
             <input
                 required
@@ -130,12 +127,29 @@
         </div>
     </div>
 
+    <div class="form-row">
+        <div class="input-data">
+            <input
+                required
+                type="number"
+                class="input"
+                placeholder=" "
+                [name]="'plazoCredito'"
+                [(ngModel)]="situacionFutura['plazo']"
+                min="0"
+                (input)="calcularSituacionFutura()"
+                >
+                <div class="underline"></div>
+            <label >{{displayName('Revisa Garantia') | titlecase}}</label>
+        </div>
+    </div>
+
 
 
 
 </form>
 
-<button class="custom-button" (click)="generateJsonData()">Generar Reporte</button>
+<button class="custom-button" (click)="validacionInformacion()">Generar Reporte</button>
 
 
 <form class="form">
@@ -155,7 +169,7 @@
 
     <form class="form">
         <h2 class="chart-title">FUTURO</h2>
-        <div *ngFor="let key of getKeysObject(situacionActual)">
+        <div *ngFor="let key of getKeysObject(diferenciasSituaciones)">
             <div class="form-row">
                 <div class="output-data">
                     <div class="output">{{ situacionFutura[key] }}</div>

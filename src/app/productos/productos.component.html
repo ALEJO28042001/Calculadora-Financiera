@@ -1,7 +1,7 @@
 
 <router-outlet></router-outlet>
 
-<form class="form" *ngIf="gAccess()">
+<form class="form" *ngIf="getAccess() || getEstadoConsulta()">
       <div class="form-row">
       <div class="input-data">
         <input type="chart"
@@ -53,17 +53,17 @@
 
 
 <!-- Informacion del Producto -->
-<div *ngIf="consultaExitosa">
+<div *ngIf="getEstadoConsulta()">
 
   <!-- Lista de Productos -->
-<h2 *ngIf="productList.length === 0" class="chart-title"> Sin Productos</h2>
+<h2 *ngIf="getProducList().length === 0" class="chart-title"> Sin Productos</h2>
 
-<div *ngIf="productList.length > 0" class="dropdown-group">
+<div *ngIf="getProducList().length > 0" class="dropdown-group">
   <h2 class="chart-title"> Listado de productos</h2>
 
 <select [(ngModel)]="selectedProductIndex" class="dropdown"
   (change)="chooseProduct(selectedProductIndex!)">
-  <option *ngFor="let product of productList; let i = index" [value]="i" >
+  <option *ngFor="let product of getProducList(); let i = index" [value]="i" >
     {{ product['Nombre Producto'] }} </option>
 </select>
 </div>
@@ -145,8 +145,8 @@
     <button class="custom-buttonB" (click)="addProduct()">
       {{ selectedProductIndex === null ? 'Agregar Producto' : 'Actualizar Producto' }}
     </button>
-    <button *ngIf="productList.length > 0" class="custom-buttonB" (click)="resetForm()">Nuevo Producto  </button>
-    <button *ngIf="productList.length > 0" class="custom-buttonB delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
+    <button *ngIf="selectedProductIndex" class="custom-buttonB" (click)="resetProduct()">Nuevo Producto  </button>
+    <button *ngIf="selectedProductIndex" class="custom-buttonB delete" (click)="deleteProduct(selectedProductIndex!)">Eliminar Producto</button>
 </form>
 
 </div>

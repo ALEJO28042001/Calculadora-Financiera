@@ -17,18 +17,18 @@ export class CalculosService {
     return capital - cuota * (1 - plazo * Math.pow(1 + r, -plazo) / (1 + r));
   }
 
-  findInterestRate(cuota: number, capital: number, plazo: number, initialGuess: number = 0.05): number {
+  findInterestRate(pagoMensual: number, capital: number, plazo: number, initialGuess: number = 0.05): number {
     const tolerance = 1e-6;
     let r = initialGuess;
-    let diff = this.calculateFunction(r, cuota, capital, plazo);
+    let diff = this.calculateFunction(r, pagoMensual, capital, plazo);
 
     while (Math.abs(diff) > tolerance) {
-      const derivative = this.calculateDerivative(r, cuota, capital, plazo);
+      const derivative = this.calculateDerivative(r, pagoMensual, capital, plazo);
       if (derivative === 0) {
         throw new Error('Derivative is zero; Newton-Raphson method fails.');
       }
       r = r - diff / derivative;
-      diff = this.calculateFunction(r, cuota, capital, plazo);
+      diff = this.calculateFunction(r, pagoMensual, capital, plazo);
     }
     return r || 0;
   }
@@ -52,30 +52,35 @@ export class CalculosService {
   num(s:string){
     return Number(s) || 0;
   }
-  base64FromLocalImage(imagePath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous'; // Prevents CORS issues
-      img.src = imagePath;
 
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
+  calcularSituacion(productos:any, aportes:string){
+    let pago = 0;
+    let tasaPonderada = 0;
+    let costoFinanciero = 0;
+    let deuda = 0;
 
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          const base64String = canvas.toDataURL('image/png'); // Convert to PNG format
-          resolve(base64String);
-        } else {
-          reject(new Error('Could not create canvas context'));
+        for (let i = 0; i < productos.length; i++) {
+          pago += Number(
+            productos[i]["Pago Mensual"].replace(/[^0-9]/g, ''));
+          tasaPonderada += Number(
+            productos[i]["Tasa Real"]);
+          costoFinanciero += Number(
+            productos[i]["Interes Actual"].replace(/[^0-9]/g, ''));
+          deuda += Number(
+            productos[i]["Deuda Actual"].replace(/[^0-9]/g, ''));
         }
-      };
+    tasaPonderada = (tasaPonderada/productos.length||0);  
 
-      img.onerror = (err) => reject(err);
-    });
+    const situacion = { // Create the object to return
+      deudaTotal: this.formatearNumero(deuda),
+      pagoMensual: this.formatearNumero(pago),
+      'tasa+Costos': tasaPonderada,
+      costoFinanciero: this.formatearNumero(costoFinanciero),
+      aportes: aportes
+    };
+    return  situacion
   }
+
   formatDate() {
     const date = new Date();
     const day = date.getDate();
@@ -110,7 +115,7 @@ export class CalculosService {
 
     // Title
     doc.setFontSize(16);
-    doc.text('Asesoría Financiera Integral '+jsonData['DatosSolicitud'][0]['Fecha']+' '+jsonData['DatosSolicitud'][0]['Hora'], 10, 10);
+    doc.text('Asesoría Financiera Integral '+this.formatDate()+' '+new Date().toLocaleTimeString(), 10, 10);
     let yLine=20;
 
     const imgWidth = 50; // Width in mm
@@ -138,8 +143,10 @@ export class CalculosService {
       });
 
     // Save the PDF
-    doc.save('ReporteDatos.pdf');
+    doc.save(`Asesoría Financiera Integral: ${jsonData['DatosAsociado'][0]['Documento'] }.pdf`);
   }
+
+
 
 }
 

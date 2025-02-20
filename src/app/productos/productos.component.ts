@@ -20,10 +20,7 @@ export class ProductosComponent implements OnInit{
   autorizar=false;
   isRef: boolean = false;
   isTarjeta: boolean = false;
-  consultaExitosa: boolean = false;
-  productList: Array<{ [key: string]: string }> = [];
   selectedProductIndex: number | null = null; // For editing/deleting selected product
-  access=false;
   datosProductoValidos: boolean = true;
   primerCampoErroneo: string = '';
   i: number = 0;
@@ -33,13 +30,13 @@ export class ProductosComponent implements OnInit{
   ]
   primerApellido='';
 
+  getEstadoConsulta(){return this.DataService.getEstadoConsulta()}
+
   ngOnInit() {
-    this.productList = this.DataService.getData();
     this.infoCliente = this.DataService.getInfoCliente();
     this.infoCliente['documento'] = this.CalculosService.formatearDocumento(this.infoCliente['documento']);
-    this.access = this.DataService.getAccess();
   }
-  getNombreFuncionario(){return this.DataService.getNombreFuncionario();}
+  // getNombreFuncionario(){return this.DataService.getNombreFuncionario();} 888888888888888888
   product: { [key: string]: string } = {
     "Nombre Producto": "",
     "Tarjeta":"false",
@@ -71,7 +68,7 @@ export class ProductosComponent implements OnInit{
     "Diferencia Interes",
 ];
 
-gAccess(){return this.DataService.getAccess()}
+getAccess(){return this.DataService.getAccess()}
 
   addProduct(product?: any | null) {
     if(product){
@@ -93,54 +90,48 @@ gAccess(){return this.DataService.getAccess()}
     if(this.datosProductoValidos)
     {
       this.DataService.setContenidoPopUp('Producto: '+this.product['Nombre Producto']+', agregado o actualizado correctamente');
-    for(let field of this.moneyKeys){
-      this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
-    }
-
-    if (this.product['Pago Mensual']==='')
-      this.product['Pago Mensual']=
-        this.CalculosService.calculateMonthlyPayment(
-          Number(this.product['Plazo Actual']),
-          Number(this.product['Tasa Real']),
-          Number(this.product['Deuda Actual'])).toFixed(0);
+      for(let field of this.moneyKeys){
+        this.product[field]=String(this.product[field]).replace(/[^0-9]/g, '');
+      }
     this.calculateRealRate();
     if (this.selectedProductIndex === null) {
       // Add a new product
-      this.productList.push({ ...this.product });
-      // this.resetForm();
+      this.DataService.addProduct({ ...this.product });
+      // this.resetProduct();
     } else {
       // Update existing product
-      this.productList[this.selectedProductIndex] = { ...this.product };
+      this.DataService.updateProduct({ ...this.product },this.selectedProductIndex);
     }
-    this.DataService.setData(this.productList);
     for(let field of this.moneyKeys){
       this.product[field]=this.product[field].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     }
   }
 
+  getProducList(){return this.DataService.getProductList()}
+
 
 
   // Function to select a product to edit
   chooseProduct(index: number) {
-    this.resetForm();
+    this.resetProduct();
     this.selectedProductIndex = index;
-    this.product = { ...this.productList[index] };
+    this.product = { ...this.DataService.getProduct(index) };
     this.isTarjeta=this.product['Tarjeta']==='true';
     this.isRef=this.product['Recoger']==='true';
-
     for(let field of this.moneyKeys){
-      this.product[field]=this.CalculosService.formatearNumero(Number(this.product[field].replace(/[^0-9]/g, '')));
+      this.product[field]=this.CalculosService.formatear('numero',Number(this.product[field].replace(/[^0-9]/g, '')));
     }
   }
 
   deleteProduct(index: number) {
+    this.DataService.deleteProduct(1);
+    this.resetProduct();
     this.DataService.setContenidoPopUp('Producto: '+this.product['Nombre Producto']+' ,eliminado correctamente');
-    this.productList.splice(index, 1);
-    this.resetForm();
+
   }
 
-  resetForm() {
+  resetProduct() {
     // this.keys.forEach(element => {
     //   this.product[element]='';
     // });
@@ -181,9 +172,7 @@ gAccess(){return this.DataService.getAccess()}
       if(this.product['Nombre Producto'].substring(0,10)!=='BENEFICIAR' && pago<amount)
           this.product['Tasa Real']=((this.CalculosService.findInterestRate(pago,amount, months)*1200)).toFixed(2);
       else this.product['Tasa Real'] = "0";
-      if(Number(this.product['Tasa Real'])>0 && amount>0)
-          this.product['Interes Actual'] = this.CalculosService.formatear('numero',(Number(this.product['Tasa Real'])*amount/1200));
-      else this.product['Interes Actual'] = "0";
+      
       this.actualizarDiferencias();
   }
 
@@ -200,7 +189,6 @@ gAccess(){return this.DataService.getAccess()}
   procesoAutorizacion(documento:string){
     // agregar logica de validacion
 
-    console.log('Autorizacion completa para el documento: ',documento.replace(/[^0-9]/g, ''));
     this.autorizar = this.primerApellido!=='';
     this.error = false;
 
@@ -221,21 +209,19 @@ gAccess(){return this.DataService.getAccess()}
   }
 
   async searchData(){
-    // console.log(this.getDocumentoAutorizado(),' ',);
-    this.DataService.setEstadoCargando(true);
-    this.productList=[];
-    this.consultaExitosa=false;
+    this.resetProduct();
 
-    this.resetForm();
+    this.DataService.setEstadoCargando(true);
+    this.DataService.setEstadoConsulta(false);
+
     const consulta =
     await this.DataService.pullData(this.getDoc(),this.infoCliente['primerApellido']);
-    // console.log('COnsulta:',consulta);
       if(consulta){
-        this.DataService.getProductList().map(p=>this.addProduct(p));
-        this.resetForm();
+        // this.DataService.getProductList().map(p=>this.addProduct(p));
+        // this.resetProduct();
         this.error=false;
         this.infoCliente['nombre']=this.DataService.getNombreCliente();
-        this.consultaExitosa=true;
+        this.DataService.setEstadoConsulta(true);
         this.DataService.setContenidoPopUp('Consulta Exitosa');
       }
       else{
@@ -247,7 +233,7 @@ gAccess(){return this.DataService.getAccess()}
 
     this.DataService.setEstadoCargando(false);
     this.infoCliente['documento'] = this.CalculosService.formatearDocumento(this.infoCliente['documento']);
-    this.resetForm();
+    this.resetProduct();
   }
 
 

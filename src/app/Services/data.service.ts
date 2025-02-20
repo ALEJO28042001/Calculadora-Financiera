@@ -17,15 +17,26 @@ export class DataService {
     'calificacion':'NC',
     'rating':0
   };
-  private interestRange=[];
-  private access=true;
+  private access=false; // #####################################################
   private esAsociado=false;
-  private compraCartera=false;
   private autoriza=false;
   private documentoAutorizado = '';
   private creditoOfrecidoEsRotativo = false;
   private contenidoPopUp = '';
   private estadoCargando = false;
+  private productosRecoger : Array<{ [key: string]: string }> = [];
+  private totalRecoger = 0;
+  private situacionActual: Info= {
+    'deudaTotal': '',
+    'pagoMensual': '',
+    'tasa+Costos': 0,
+    'costoFinanciero': '',
+    'aportes':''
+  };
+  private estadoConsulta=false;
+
+  getEstadoConsulta(){return this.estadoConsulta}
+  setEstadoConsulta(estado:boolean){this.estadoConsulta = estado}
 
   getEstadoCargando(){return this.estadoCargando}
   setEstadoCargando(mensaje:boolean){this.estadoCargando = mensaje}
@@ -33,6 +44,8 @@ export class DataService {
 
   getContenidoPopUp(){return this.contenidoPopUp}
   setContenidoPopUp(mensaje:string){this.contenidoPopUp = mensaje}
+
+  setAccess(access:boolean){this.access=access}
 
   getJsonFile(): string {
     return this.jsonFile;
@@ -63,8 +76,6 @@ export class DataService {
   setSalario(ingresos:string){this.infoCliente['ingresos']=ingresos}
 
 
-  getCompraCartera(){return this.compraCartera}
-  setCompraCartera(eleccion:boolean){this.compraCartera=eleccion}
   getDocumento(){return this.infoCliente['documento']}
   getAportes(){return this.infoCliente['aportes']}
   setDocumento(documento:string){this.infoCliente['documento']=documento}
@@ -78,7 +89,11 @@ export class DataService {
   getSaldoAportes(){return this.infoCliente['saldoAportes']}
   getCalificacion(){return this.infoCliente['calificacion']}
 
+  getTotalRecoger(){return this.totalRecoger}
+  getSituacionActual(){return this.situacionActual}
 
+  getProductosRecoger(){return this.productosRecoger}
+  
 
   async askLogin(documentoFuncionario:string,clave:string){
     var validacionFuncionario = await
@@ -92,20 +107,21 @@ export class DataService {
     return this.access;
   }
 
-  logOut(){this.access=false}
   setData(data:Array<{ [key: string]: string }>){this.productList=data}
   getData() {return this.productList}
+
 addProduct(product: {[key: string]:string}){
     this.productList.push(product);
 }
 updateProduct(product :{[key: string]:string},index:number){
     this.productList[index]=product;
 }
+getProduct(index:number){return this.productList[index]}
 deleteProduct(index:number){
   this.productList.slice(index,1);
 }
 async pullData(documento: string,apellido:string) {
-  this.productList = [];
+  this.resetValues();  
   let basicClientInfo: any;
   this.infoCliente={'documento':documento}
   let validar = false;
@@ -123,6 +139,7 @@ async pullData(documento: string,apellido:string) {
           if (aportes && aportes.length > 0) {
               const lastAporte = aportes[aportes.length - 1]?.['CUOTAMENSUALAPORTE'];
               this.infoCliente['aportes'] = this.CalculosService.formatear('numero',Number(lastAporte) || 0);
+              this.situacionActual['aportes']=Number(lastAporte) || 0;
           }
 
           // Calculate saldoAportes
@@ -148,28 +165,29 @@ async pullData(documento: string,apellido:string) {
   } catch (error) {
       console.error('Error in getting basic client info:', error);
   }
- // Consulta SIFIN
-    // if (this.esAsociado || (this.documentoAutorizado === documento)) {
-    //     try {
-    //         const cifinProductsResponse = await this.apiService.getCifinProducts(documento);
+//  Consulta SIFIN 
+/*    if (this.esAsociado || (this.documentoAutorizado === documento)) {
+        try {
+            const cifinProductsResponse = await this.apiService.getCifinProducts(documento);
 
-    //         if (cifinProductsResponse['CodError'] === '0') {
-    //             // this.infoCliente['calificacion'] = cifinProductsResponse.CALIFICACION;
+            if (cifinProductsResponse['CodError'] === '0') {
+                // this.infoCliente['calificacion'] = cifinProductsResponse.CALIFICACION;
 
-    //             // Filter valid cifin products
-    //             let cifinProducts = cifinProductsResponse.JAObligaciones || [];
-    //             cifinProducts = cifinProducts.filter(
-    //                 (item: any) =>
-    //                     item['CALIDAD'] === 'PRIN' &&
-    //                     item['NOMBREENTIDAD'] !== 'BENEFICIAR- COOP. DE AHORRO Y'
-    //             );
-    //             this.convertData(cifinProducts, cifinKeys);
-    //             validar=true;
-    //         }
-    //     } catch (error) {
-    //         console.error('Error in getting CIFIN products:', error);
-    //     }
-    // }
+                // Filter valid cifin products
+                let cifinProducts = cifinProductsResponse.JAObligaciones || [];
+                cifinProducts = cifinProducts.filter(
+                    (item: any) =>
+                        item['CALIDAD'] === 'PRIN' &&
+                        item['NOMBREENTIDAD'] !== 'BENEFICIAR- COOP. DE AHORRO Y'
+                );
+                this.convertData(cifinProducts, cifinKeys);
+                validar=true;
+            }
+        } catch (error) {
+            console.error('Error in getting CIFIN products:', error);
+        }
+    }
+*/         
   // Consulta Data Credito
   if (this.esAsociado || (this.documentoAutorizado === documento)) {
     try {
@@ -195,33 +213,46 @@ async pullData(documento: string,apellido:string) {
                   (item: any) =>
                     Number(item?.['values']?.[0]?.['debtBalance'] || 0) > 0
               );
-
+              console.log(dataCreditoProductos);
         this.convertDataCreditoProducts(dataCreditoProductos);
+
         validar=true;
       }
     } catch (error) {
         console.error('Error in getting DATA CREDITO products:', error);
     }
-}
+    
+  }
   return validar;
 }
 
-convertDataCreditoProducts(productos:any){
+calcularSituacionActual(){
+  this.productosRecoger = this.productList.filter((item) =>item['Recoger'] === 'true');
 
+    this.situacionActual = {};
+    this.situacionActual = this.CalculosService.calcularSituacion(
+                this.productosRecoger,this.infoCliente['aportes']);
+}
+
+// Metodo para extraer la data de los productos reportados por DataCredito a un formato compatible a
+// la informacion deseada
+convertDataCreditoProducts(productos:any){
+  console.log('productos dfata>',productos);
   productos.map((producto:any) =>{
     var renamedObj: any = {};
-    renamedObj['Deuda Actual'] = producto['values'][0]['debtBalance'];
-    renamedObj['Plazo Actual'] = String(producto['values'][0]['totalNumberOfInstallments']);
-    renamedObj['Pago Mensual'] = producto['values'][0]['valueMonthlyPayment'];
+    renamedObj['Deuda Actual'] = this.CalculosService.formatear('numero',producto['values'][0]['debtBalance']);
+    renamedObj['Plazo Actual'] = this.CalculosService.formatear('numero',producto['values'][0]['totalNumberOfInstallments']-producto['values'][0]['paidInstallments']);
+    renamedObj['Pago Mensual'] = this.CalculosService.formatear('numero',
+                                  producto['values'][0]['valueMonthlyPayment'] || 0);
     renamedObj['Tarjeta'] = String(
-      producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTA' ||
-      producto['featuresLiabilities']['typeOfCreditDesc'] === 'TCR' ||
-      producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTATIVO');
+        producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTA' ||
+        producto['featuresLiabilities']['typeOfCreditDesc'] === 'TCR' ||
+        producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTATIVO');
     renamedObj['Nombre Producto'] =
-      producto['account']['businessLineName'] + ' ' +
-      producto['featuresLiabilities']['typeOfCreditDesc'] + ' ' +
-      producto['account']['accountNumber'] + ' SALDO $:' +
-      this.CalculosService.formatear('numero',producto['values'][0]['debtBalance']);
+        producto['account']['businessLineName'] + ' ' +
+        producto['featuresLiabilities']['typeOfCreditDesc'] + ' ' +
+        producto['account']['accountNumber'] + ' SALDO $:' +
+        this.CalculosService.formatear('numero',producto['values'][0]['debtBalance']);
     renamedObj["Recoger"]= "true";
     renamedObj["Diferencia Tasas"]= "";
     renamedObj["Interes Actual"]= "";
@@ -229,8 +260,20 @@ convertDataCreditoProducts(productos:any){
     renamedObj["Diferencia Interes"]= "";
     renamedObj["Tasa Beneficiar"]= "1";
     renamedObj["Tasa Entidad"]= "";
-    renamedObj["Tasa Real"]= "";
 
+    
+
+    renamedObj["Tasa Real"] = (this.CalculosService.findInterestRate(
+                              producto['values'][0]['valueMonthlyPayment'] || 0,
+                              producto['values'][0]['debtBalance'],
+                              producto['values'][0]['totalNumberOfInstallments']-producto['values'][0]['paidInstallments']
+                              )*1200).toFixed(2);
+
+    if(Number(renamedObj['Tasa Real'])>0 && producto['values'][0]['debtBalance']>0)
+      renamedObj['Interes Actual'] = this.CalculosService.formatear(
+              'numero',(Number(renamedObj['Tasa Real'])*
+              producto['values'][0]['debtBalance']/1200));
+    else renamedObj['Interes Actual'] = "0";
     this.addProduct(renamedObj);
   })
 }
@@ -239,6 +282,8 @@ convertDataCreditoProducts(productos:any){
 convertData(registros:any ,newKeysMapping:any){
     registros.map((item: any) => this.renameKeys(item, newKeysMapping));
 }
+
+// Metodo para renombrar los keys de los productos
 renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
       const renamedObj: any = {};
       for (const key in keyMap) {
@@ -272,8 +317,49 @@ renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
       renamedObj["Interes Actual"]= "";
       renamedObj["Interes Beneficiar"]= "";
       renamedObj["Diferencia Interes"]= "";
+      
+      if (renamedObj['Pago Mensual']==='' || !renamedObj['Pago Mensual'])
+        renamedObj['Pago Mensual']=
+          this.CalculosService.calculateMonthlyPayment(
+            Number(renamedObj['Plazo Actual']),
+              Number(renamedObj['Tasa Real']),
+            Number(renamedObj['Deuda Actual'])).toFixed(0) || '';
+
+      if(Number(renamedObj['Tasa Real'])>0 && renamedObj['Deuda Actual']>0)
+        renamedObj['Interes Actual'] = this.CalculosService.formatear(
+                'numero',(Number(renamedObj['Tasa Real'])*
+                renamedObj['Deuda Actual']/1200));
+      else renamedObj['Interes Actual'] = "0";
       this.addProduct(renamedObj);
   }
+
+  resetValues() {
+    this.jsonFile = '';
+    this.productList = [];
+    // this.nombreFuncionario = "";
+    // this.documentoFuncionario = "";
+    this.infoCliente = {'documento':'',
+      'nombre':'',
+      'calificacion':'NC',
+      'rating':0
+    };
+    this.esAsociado = false;
+    this.autoriza = false;
+    this.documentoAutorizado = '';
+    this.creditoOfrecidoEsRotativo = false;
+    this.contenidoPopUp = '';
+    this.productosRecoger = [];
+    this.totalRecoger = 0;
+    this.situacionActual = {
+      'deudaTotal': '',
+      'pagoMensual': '',
+      'tasa+Costos': 0,
+      'costoFinanciero': '',
+      'aportes':''
+    };
+    this.estadoConsulta = false;
+  }
+
 }
 
 const cifinKeys=
@@ -285,6 +371,7 @@ const cifinKeys=
   "Deuda Actual": "SALDOOBLIGACION" ,
   "Tasa Real":"",
 }
+
 const beneficiarKeys=
 {
   "Tarjeta": "LINEA",
@@ -296,3 +383,6 @@ const beneficiarKeys=
 }
 
 
+interface Info {
+  [key: string]:any;
+}

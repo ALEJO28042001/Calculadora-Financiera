@@ -15,11 +15,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './resumen.component.css'
 })
 export class ResumenComponent implements OnInit {
-
-
   info: Info = {
-    'todosLosProductosList': [],
-    'productosRefinanciamientoList': [],
     'tasaUsura': 28.8,
     'cuotaAportes': '0',
     'saldoAportes': '',
@@ -35,25 +31,29 @@ export class ResumenComponent implements OnInit {
   datosProductoValidos: boolean = true;
   primerCampoErroneo: string = '';
   i:number=0;
+  @ViewChild('resumenInteres') resumenInteres!: GenerateChartComponent;
+  @ViewChild('resumenFlujoCaja') resumenFlujoCaja!: GenerateChartComponent;
+
 
 
   seleccionarProducto(event: any) {
     this.situacionFutura['productoOfrecido'] = event.target.checked ? 'Rotativo' : 'Consumo';
-    this.situacionFutura['tasa+Costos'] = event.target.checked ? 20 : 13 ;
+    this.situacionFutura['tasa+Costos'] = event.target.checked ? '20' : '13' ;
     this.calcularSituacionFutura();
   }
 
-  calcularAportes(){this.info['cuotaAportes']=this.CalculosService.formatear('numero',Number(this.info['ingresos'].replace(/[^0-9]/g, '')||0)*0.06);
+  calcularAportes(){
+    this.info['cuotaAportes']=this.CalculosService.formatear('numero',Number(this.info['ingresos'].replace(/[^0-9]/g, '')||0)*0.06);
     this.situacionFutura['aportes']=this.info['cuotaAportes'];
     this.calcularSituacionFutura();
   }
+
   calcularApalancamiento(){
-    if(this.info['isApalancamiento']){
+    if(this.info['isApalancamiento'] && this.situacionFutura['deudaTotal']!+''){
     this.info['valorApalancamiento']=this.CalculosService.formatearNumero(
-      Number(this.situacionFutura['deudaTotal']?.replace(/[^0-9]/g, '')??0)
-      /this.info['fraccionApalancamiento']
-      -Number(this.info['saldoAportes']?.replace(/[^0-9]/g, '')??0));
-      console.log(this.info['valorApalancamiento']);
+      Math.max(0, 
+        Number(this.situacionFutura['deudaTotal']?.replace(/[^0-9]/g, '')??0) / this.info['fraccionApalancamiento'] - 
+        Number(this.info['saldoAportes']?.replace(/[^0-9]/g, '')??0)));
     }
     else {this.info['valorApalancamiento']='';}
   }
@@ -66,12 +66,12 @@ export class ResumenComponent implements OnInit {
     'aportes':''
   }
   situacionFutura: Info= {
-    'deudaTotal': '',
+    'deudaTotal': '0',
     'pagoMensual': '',
-    'tasa+Costos': 13,
+    'tasa+Costos': '13',
     'costoFinanciero': '',
     'aportes':'',
-    'plazo': 0,
+    'plazo': '0',
     'valorRequerido':'',
     'productoOfrecido' : 'Consumo'
   }
@@ -87,9 +87,7 @@ export class ResumenComponent implements OnInit {
     'labels': ['Deuda Total', 'Pago Mensual', 'Tasa + Costos', 'Costo Financiero', 'Aportes'],
    }
 
-  @ViewChild('resumenInteres') resumenInteres!: GenerateChartComponent;
-  @ViewChild('resumenFlujoCaja') resumenFlujoCaja!: GenerateChartComponent;
-
+  
   constructor(private DataService: DataService, private CalculosService:CalculosService) {}
 
   getKeysObject(o:Object){return Object.keys(o)}
@@ -99,46 +97,21 @@ export class ResumenComponent implements OnInit {
       this.info["nombre"] = this.DataService.getNombreCliente();
       this.info['cuotaAportes'] = this.DataService.getAportes();
       this.situacionFutura['aportes']=this.info['cuotaAportes'];
-      this.situacionActual['aportes']=this.info['cuotaAportes']|| '';
+      this.DataService.calcularSituacionActual();
+      this.situacionActual = this.DataService.getSituacionActual();
 
       this.info['ingresos'] = this.CalculosService.formatear('numero',Number(this.DataService.getSalario()|| 0) );
-      this.info['productosRefinanciamientoList'] = this.DataService.getData().filter(
-        (item) =>item['Recoger'] === 'true');
-      this.calcularSituacionActual();
+      
       this.infoCliente=this.DataService.getInfoCliente();
-  }
-  calcularSituacionActual(){
-    let pagoActual = 0;
-    let tasaPonderadaActual = 0;
-    let costoFinancieroActual = 0;
-    let deudaActual = 0;
-
-        for (let i = 0; i < this.info["productosRefinanciamientoList"].length; i++) {
-          pagoActual += Number(
-            this.info["productosRefinanciamientoList"][i]["Pago Mensual"].replace(/[^0-9]/g, ''));
-          tasaPonderadaActual += Number(
-            this.info["productosRefinanciamientoList"][i]["Tasa Real"]);
-          costoFinancieroActual += Number(
-            this.info["productosRefinanciamientoList"][i]["Interes Actual"].replace(/[^0-9]/g, ''));
-          deudaActual += Number(
-            this.info["productosRefinanciamientoList"][i]["Deuda Actual"].replace(/[^0-9]/g, ''));
-        }
-
-    this.situacionActual['costoFinanciero']=this.CalculosService.formatear('numero',costoFinancieroActual);
-    this.situacionActual['pagoMensual']=this.CalculosService.formatear('numero',pagoActual);
-    this.situacionActual['deudaTotal']=this.CalculosService.formatear('numero',deudaActual);
-    this.situacionActual["tasa+Costos"] = (tasaPonderadaActual/this.info['productosRefinanciamientoList'].length||0).toFixed(2);
   }
 
   calcularSituacionFutura() {
-
-    if(this.situacionFutura['plazo']>0 && this.situacionFutura["tasa+Costos"]>0 &&
+    if(Number(this.situacionFutura['plazo'])>0 && this.situacionFutura["tasa+Costos"]>0 &&
       (this.situacionActual['deudaTotal']!=='' || this.situacionFutura["valorRequerido"]!=='')){
         let deudaFutura=
           Number(this.situacionActual['deudaTotal'].replace(/[^0-9]/g, '')) +
           Number(this.situacionFutura["valorRequerido"].replace(/[^0-9]/g, ''))
         this.situacionFutura['deudaTotal'] = this.CalculosService.formatear('numero',deudaFutura);
-
         this.situacionFutura['pagoMensual'] = this.CalculosService.formatear('numero',
           this.CalculosService.calculateMonthlyPayment(
             this.situacionFutura["plazo"],
@@ -148,7 +121,7 @@ export class ResumenComponent implements OnInit {
         );
 
         this.situacionFutura["costoFinanciero"] = this.CalculosService.formatear('numero',
-          Number((this.situacionFutura['tasa+Costos']*deudaFutura/1200).toFixed(0)));
+          Number(( Number(this.situacionFutura['tasa+Costos'])*deudaFutura/1200).toFixed(0)));
         if(deudaFutura>0){
           this.info['infoJson']=true;
         }
@@ -334,58 +307,34 @@ export class ResumenComponent implements OnInit {
   getCreditoOfrecidoEsRotativo(){return this.DataService.getCreditoOfrecidoEsRotativo}
 
   displayName(n:string):string{
-    n= n
-    // Insert a space before each uppercase letter
-    .replace(/([A-Z])/g, ' $1')
-    // Capitalize the first letter of each word
+    n= n.replace(/([A-Z])/g, ' $1');
     return n;
   }
 
-  allowNumbers(event:any,key:string) {
-    const charCode = event.charCode || event.keyCode;
-    // Allow numbers (0-9), and control keys like backspace
-    if ((charCode >= 48 && charCode <= 57) || charCode === 8 || charCode === 46) {
-        if(this.info[key].length>0){
-          return this.validateRange(this.info[key]+event.key);
-        }
-        else
-        return true;
-    }
-    return false; // Block other characters
-}
-allowNumbers2(event:any) {
-  const charCode = event.charCode || event.keyCode;
-  // Allow numbers (0-9), and control keys like backspace
-  if (charCode >= 48 && charCode <= 57) {
-      return true;
-  }
-  return false; // Block other characters
-}
-
-  validateRange(input:string){
-    const value=parseFloat(input);
-
-    if (value >= 6 && value <=  30) {
-      return true;
-    }
-    return false;
-  }
-  generateJsonData() {
+  validacionInformacion(){
     this.i = 0;
-        this.datosProductoValidos = true;
-        this.primerCampoErroneo='';
-        do{
-          if(this.info[camposVerificarProducto[this.i]]==='')
-          {
-            this.datosProductoValidos = false;
-            this.primerCampoErroneo = camposVerificarProducto[this.i];
-            this.DataService.setContenidoPopUp('Producto no agregado, revisar: '+this.primerCampoErroneo);
-          }
-          this.i+=1;
-        }
-        while(this.datosProductoValidos && this.i<5)
+    this.datosProductoValidos = true;
+    this.primerCampoErroneo='';
+    do{
+      if(Number(this.situacionFutura[camposVerificarProducto[this.i]])<=0)
+      {
+        this.datosProductoValidos = false;
+        this.primerCampoErroneo = camposVerificarProducto[this.i];
+        this.DataService.setContenidoPopUp('Reporte no generado, revisar: '+this.primerCampoErroneo+' futuro');
+      }
+      this.i+=1;
+    }
+    while(this.datosProductoValidos && this.i<camposVerificarProducto.length)
 
-    if(this.info['infoJson']){
+    if(this.datosProductoValidos)
+      this.generateJsonData();
+  }
+  getEstadoConsulta(){return this.DataService.getEstadoConsulta()}
+
+  generateJsonData() {
+    // console.log(this.info['productosRefinanciamientoList']);
+    // console.log((this.info?['productosRefinanciamientoList'] : []));
+
     const jsonData:Info = {
       DatosFuncionario:[{
         Documento: this.DataService.getDocumentoFuncionario(),
@@ -396,7 +345,7 @@ allowNumbers2(event:any) {
         Documento: this.DataService.getDocumento() || 'N/A',
         Calificacion: this.DataService.getCalificacion() || 1,
         SaldoAportes: this.info['saldoAportes'] || '0',
-        AutorizacionConsulta: {
+        AutorizacionConsulta: { 
           autorizacion: 'any',
         },
       }],
@@ -404,35 +353,30 @@ allowNumbers2(event:any) {
         Linea: this.situacionFutura['productoOfrecido'] || 'Consumo',
         Monto: this.situacionFutura['deudaTotal'] || 0,
         ValorRequerido: this.situacionFutura['valorRequerido'] || 0,
-        Plazo: this.situacionFutura['plazo'] || 0,
-        Tasa: this.situacionFutura['tasa+Costos'] || 0,
+        Plazo: Number(this.situacionFutura['plazo']) || 0,
+        Tasa: Number(this.situacionFutura['tasa+Costos']) || 0,
         ValorCuota: this.situacionFutura['pagoMensual'] || 0,
         ValorCuotaAportes: this.situacionFutura['aportes'] || 0,
         Ingresos: this.info['ingresos'] || 0,
-        Fecha: this.CalculosService.formatDate(),
-        Hora: new Date().toLocaleTimeString(),
         Apalancamiento: this.info['valorApalancamiento'] || 0,
       }],
-      ProductosRecoger: (this.info?['productosRefinanciamientoList'] : []).map((product: any) => ({
+      ProductosRecoger: (this.DataService.getProductosRecoger() || []).map((product: any) => ({
         Nombre: product['Nombre Producto'] || 'N/A',
         Tipo: product['Tarjeta'] === 'true' ? 'Rotativo' : 'Consumo',
-        SaldoActual: this.CalculosService.formatear('numero',Number(product['Deuda Actual']) || 0),
+        SaldoActual: product['Deuda Actual'] || 0,
         Plazo: product['Plazo Actual'] || '0',
-        PagoMensual: this.CalculosService.formatear('numero',Number(product['Pago Mensual']) || 0),
+        PagoMensual: product['Pago Mensual'] || 0,
         Tasa: product['Tasa Real'] || '0',
       }
-    ))
+      ))
     };
 
   this.DataService.setJsonFile(JSON.stringify(jsonData, null, 2)); // You can replace this with a service call to save or send the data
   this.CalculosService.generatePDF(jsonData);
   this.DataService.setContenidoPopUp('Reporte Generado Correctamente');
-}
-}
-
+  }
 
   getEsAsociado(){return this.DataService.getEsAsociado()}
-  getCompraCartera(){return this.DataService.getCompraCartera()}
 
 }
 
@@ -442,4 +386,4 @@ interface Info {
   [key: string]:any;
 }
 
-const camposVerificarProducto=['deudaTotal','plazo','tasa+Costos'];
+const camposVerificarProducto=['plazo','deudaTotal','tasa+Costos','aportes'];

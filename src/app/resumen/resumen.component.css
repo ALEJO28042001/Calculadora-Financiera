@@ -327,3 +327,14 @@ h2{
 input:checked + .slider:before {
   background-color: #4caf50; /* Change head color when toggled */
 }
+
+.dropdown-group{
+  padding: 20px;
+  padding-top: 35px;
+  min-height: 30px;
+
+}
+.dropdown{
+  min-height: 30px;
+  border-radius: 10px;
+}

@@ -172,7 +172,7 @@ getAccess(){return this.DataService.getAccess()}
       if(this.product['Nombre Producto'].substring(0,10)!=='BENEFICIAR' && pago<amount)
           this.product['Tasa Real']=((this.CalculosService.findInterestRate(pago,amount, months)*1200)).toFixed(2);
       else this.product['Tasa Real'] = "0";
-      
+
       this.actualizarDiferencias();
   }
 

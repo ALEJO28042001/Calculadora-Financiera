@@ -75,12 +75,27 @@
 
 </form>
 
-<h2 class="chart-title" > {{situacionFutura['productoOfrecido']}}
-    <label class="switch">
-        <input type="checkbox" (change)="seleccionarProducto($event)" />
-        <span class="slider"></span>
-      </label>
-</h2>
+<div>
+  <h2 class="chart-title">Tipo de Producto</h2>
+  <div class="dropdown-group">
+      <select [(ngModel)]="indexProducto" class="dropdown" (change)="seleccionProducto(indexProducto)">
+          <option *ngFor="let producto of getTiposProductos(); let i = index" [value]="i">
+              {{ producto['VALOR'] }}
+          </option>
+      </select>
+  </div>
+</div>
+
+<div>
+  <h2 class="chart-title">Tipo de Garantia</h2>
+  <div class="dropdown-group">
+      <select [(ngModel)]="indexGarantia" class="dropdown" (change)="seleccionGarantia(indexGarantia)">
+          <option *ngFor="let garantia of getTiposGarantias(); let i = index" [value]="i">
+              {{ garantia['VALOR'] }}
+          </option>
+      </select>
+  </div>
+</div>
 
 <!-- Form Producto Ofrecido -->
 <form class="form">
@@ -123,29 +138,9 @@
                 (input)="calcularSituacionFutura()"
                 >
                 <div class="underline"></div>
-            <label >{{displayName('plazoCredito') | titlecase}}</label>
+            <label > Plazo Producto</label>
         </div>
     </div>
-
-    <div class="form-row">
-        <div class="input-data">
-            <input
-                required
-                type="number"
-                class="input"
-                placeholder=" "
-                [name]="'plazoCredito'"
-                [(ngModel)]="situacionFutura['plazo']"
-                min="0"
-                (input)="calcularSituacionFutura()"
-                >
-                <div class="underline"></div>
-            <label >{{displayName('Revisa Garantia') | titlecase}}</label>
-        </div>
-    </div>
-
-
-
 
 </form>
 

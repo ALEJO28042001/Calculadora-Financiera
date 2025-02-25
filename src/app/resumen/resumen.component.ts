@@ -30,17 +30,11 @@ export class ResumenComponent implements OnInit {
   infoCliente: Info ={}
   datosProductoValidos: boolean = true;
   primerCampoErroneo: string = '';
+  indexGarantia = 4;
+  indexProducto = 3;
   i:number=0;
   @ViewChild('resumenInteres') resumenInteres!: GenerateChartComponent;
   @ViewChild('resumenFlujoCaja') resumenFlujoCaja!: GenerateChartComponent;
-
-
-
-  seleccionarProducto(event: any) {
-    this.situacionFutura['productoOfrecido'] = event.target.checked ? 'Rotativo' : 'Consumo';
-    this.situacionFutura['tasa+Costos'] = event.target.checked ? '20' : '13' ;
-    this.calcularSituacionFutura();
-  }
 
   calcularAportes(){
     this.info['cuotaAportes']=this.CalculosService.formatear('numero',Number(this.info['ingresos'].replace(/[^0-9]/g, '')||0)*0.06);
@@ -51,8 +45,8 @@ export class ResumenComponent implements OnInit {
   calcularApalancamiento(){
     if(this.info['isApalancamiento'] && this.situacionFutura['deudaTotal']!+''){
     this.info['valorApalancamiento']=this.CalculosService.formatearNumero(
-      Math.max(0, 
-        Number(this.situacionFutura['deudaTotal']?.replace(/[^0-9]/g, '')??0) / this.info['fraccionApalancamiento'] - 
+      Math.max(0,
+        Number(this.situacionFutura['deudaTotal']?.replace(/[^0-9]/g, '')??0) / this.info['fraccionApalancamiento'] -
         Number(this.info['saldoAportes']?.replace(/[^0-9]/g, '')??0)));
     }
     else {this.info['valorApalancamiento']='';}
@@ -87,7 +81,7 @@ export class ResumenComponent implements OnInit {
     'labels': ['Deuda Total', 'Pago Mensual', 'Tasa + Costos', 'Costo Financiero', 'Aportes'],
    }
 
-  
+
   constructor(private DataService: DataService, private CalculosService:CalculosService) {}
 
   getKeysObject(o:Object){return Object.keys(o)}
@@ -101,7 +95,6 @@ export class ResumenComponent implements OnInit {
       this.situacionActual = this.DataService.getSituacionActual();
 
       this.info['ingresos'] = this.CalculosService.formatear('numero',Number(this.DataService.getSalario()|| 0) );
-      
       this.infoCliente=this.DataService.getInfoCliente();
   }
 
@@ -220,8 +213,6 @@ export class ResumenComponent implements OnInit {
 
     this.resumenInteres.chart.update();
   }
-
-
   paymentChart() {
     // Labels for each bar
     this.resumenFlujoCaja.chartData.labels = [
@@ -302,13 +293,8 @@ export class ResumenComponent implements OnInit {
     let p=this.situacionFutura[key].replace(/[^0-9]/g, '');
     this.situacionFutura[key] = p.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-
-
-  getCreditoOfrecidoEsRotativo(){return this.DataService.getCreditoOfrecidoEsRotativo}
-
-  displayName(n:string):string{
-    n= n.replace(/([A-Z])/g, ' $1');
-    return n;
+  displayName(n:string): string{
+    return this.CalculosService.displayName(n);
   }
 
   validacionInformacion(){
@@ -332,52 +318,94 @@ export class ResumenComponent implements OnInit {
   getEstadoConsulta(){return this.DataService.getEstadoConsulta()}
 
   generateJsonData() {
-    // console.log(this.info['productosRefinanciamientoList']);
-    // console.log((this.info?['productosRefinanciamientoList'] : []));
 
-    const jsonData:Info = {
-      DatosFuncionario:[{
-        Documento: this.DataService.getDocumentoFuncionario(),
-        Nombre: this.DataService.getNombreFuncionario()
-      }],
-      DatosAsociado: [{
-        TipoDoc: 'C',
-        Documento: this.DataService.getDocumento() || 'N/A',
-        Calificacion: this.DataService.getCalificacion() || 1,
-        SaldoAportes: this.info['saldoAportes'] || '0',
-        AutorizacionConsulta: { 
-          autorizacion: 'any',
-        },
-      }],
-      DatosSolicitud: [{
-        Linea: this.situacionFutura['productoOfrecido'] || 'Consumo',
-        Monto: this.situacionFutura['deudaTotal'] || 0,
-        ValorRequerido: this.situacionFutura['valorRequerido'] || 0,
-        Plazo: Number(this.situacionFutura['plazo']) || 0,
-        Tasa: Number(this.situacionFutura['tasa+Costos']) || 0,
-        ValorCuota: this.situacionFutura['pagoMensual'] || 0,
-        ValorCuotaAportes: this.situacionFutura['aportes'] || 0,
-        Ingresos: this.info['ingresos'] || 0,
-        Apalancamiento: this.info['valorApalancamiento'] || 0,
-      }],
-      ProductosRecoger: (this.DataService.getProductosRecoger() || []).map((product: any) => ({
-        Nombre: product['Nombre Producto'] || 'N/A',
-        Tipo: product['Tarjeta'] === 'true' ? 'Rotativo' : 'Consumo',
-        SaldoActual: product['Deuda Actual'] || 0,
-        Plazo: product['Plazo Actual'] || '0',
-        PagoMensual: product['Pago Mensual'] || 0,
-        Tasa: product['Tasa Real'] || '0',
-      }
-      ))
-    };
+  // const jsonData:Info = {
+  //   'Datos del funcionario':[{
+  //     Documento: this.CalculosService.formatear('documento',this.DataService.getDocumentoFuncionario()),
+  //     Nombre: this.DataService.getNombreFuncionario()
+  //   }],
+  //   'DatosAsociado': [{
+  //     TipoDoc: 'C',
+  //     Documento: this.CalculosService.formatear('documento',this.DataService.getDocumento()) || 'N/A',
+  //     Calificacion: this.DataService.getCalificacion() || 1,
+  //     SaldoAportes: this.info['saldoAportes'] || '0',
+  //     AutorizacionConsulta: {
+  //       autorizacion: 'any',
+  //     },
+  //   }],
+  //   'Datos de la solicitud': [{
+  //     Linea: this.seleccionProducto(this.indexProducto)['VALOR'] || 'CONSUMO',
+  //     CodLin: this.seleccionProducto(this.indexProducto)['CAMPO'] || '15',
+  //     Monto: this.situacionFutura['deudaTotal'] || 0,
+  //     ValorRequerido: this.situacionFutura['valorRequerido'] || 0,
+  //     Plazo: Number(this.situacionFutura['plazo']) || 0,
+  //     Tasa: Number(this.situacionFutura['tasa+Costos']) || 0,
+  //     ValorCuota: this.situacionFutura['pagoMensual'] || 0,
+  //     Aportes: this.situacionFutura['aportes'] || 0,
+  //     Ingresos: this.info['ingresos'] || 0,
+  //     Apalancamiento: this.info['valorApalancamiento'] || 0,
+  //     CodGarantia: this.seleccionGarantia(this.indexGarantia)['CAMPO'] || 'PS'
+  //   }],
+  //   'Productos a recoger': (this.DataService.getProductosRecoger() || []).map((product: any) => ({
+  //     Nombre: product['Nombre Producto'] || 'N/A',
+  //     Tipo: product['Tarjeta'] === 'true' ? 'Rotativo' : 'Consumo',
+  //     SaldoActual: this.CalculosService.formatearNumero(Number(product['Deuda Actual'].replace(/[^0-9]/g, '')) || 0) ,
+  //     Plazo: product['Plazo Actual'] || '0',
+  //     PagoMensual: this.CalculosService.formatearNumero(Number(product['Pago Mensual'].replace(/[^0-9]/g, '')) || 0) ,
+  //     Tasa: Number(product['Tasa Real']).toFixed(2) || '0.00',
+  //   }
+  //   ))
+  // };
 
-  this.DataService.setJsonFile(JSON.stringify(jsonData, null, 2)); // You can replace this with a service call to save or send the data
+  const jsonData:Info = {
+    'DatosFuncionario':[{
+      Documento: this.CalculosService.formatear('documento',this.DataService.getDocumentoFuncionario()),
+      Nombre: this.DataService.getNombreFuncionario()
+    }],
+    'DatosAsociado': [{
+      TipoDoc: 'C',
+      Documento: this.CalculosService.formatear('documento',this.DataService.getDocumento()) || 'N/A',
+      Calificacion: this.DataService.getCalificacion() || 1,
+      SaldoAportes: this.info['saldoAportes'] || '0',
+      AutorizacionConsulta: {
+        autorizacion: 'any',
+      },
+    }],
+    'DatosSolicitud': [{
+      Linea: this.seleccionProducto(this.indexProducto)['VALOR'] || 'CONSUMO',
+      CodLin: this.seleccionProducto(this.indexProducto)['CAMPO'] || '15',
+      Monto: this.situacionFutura['deudaTotal'] || 0,
+      ValorRequerido: this.situacionFutura['valorRequerido'] || 0,
+      Plazo: Number(this.situacionFutura['plazo']) || 0,
+      Tasa: Number(this.situacionFutura['tasa+Costos']) || 0,
+      ValorCuota: this.situacionFutura['pagoMensual'] || 0,
+      Aportes: this.situacionFutura['aportes'] || 0,
+      Ingresos: this.info['ingresos'] || 0,
+      Apalancamiento: this.info['valorApalancamiento'] || 0,
+      CodGarantia: this.seleccionGarantia(this.indexGarantia)['CAMPO'] || 'PS'
+    }],
+    'ProductosRecoger': (this.DataService.getProductosRecoger() || []).map((product: any) => ({
+      Nombre: product['Nombre Producto'] || 'N/A',
+      Tipo: product['Tarjeta'] === 'true' ? 'Rotativo' : 'Consumo',
+      SaldoActual: this.CalculosService.formatearNumero(Number(product['Deuda Actual'].replace(/[^0-9]/g, '')) || 0) ,
+      Plazo: product['Plazo Actual'] || '0',
+      PagoMensual: this.CalculosService.formatearNumero(Number(product['Pago Mensual'].replace(/[^0-9]/g, '')) || 0) ,
+      Tasa: Number(product['Tasa Real']).toFixed(2) || '0.00',
+    }
+    ))
+  };
+  this.DataService.guardarAsesoria(jsonData);
   this.CalculosService.generatePDF(jsonData);
+  this.DataService.setJsonFile(jsonData);
   this.DataService.setContenidoPopUp('Reporte Generado Correctamente');
   }
 
   getEsAsociado(){return this.DataService.getEsAsociado()}
+  getTiposGarantias(){return this.DataService.getTiposGarantias()}
+  seleccionGarantia(index:number){return this.DataService.getGarantia(index)}
 
+  getTiposProductos(){return this.DataService.getTiposProductos()}
+  seleccionProducto(index:number){return this.DataService.getProducto(index)}
 }
 
 

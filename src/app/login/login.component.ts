@@ -20,7 +20,7 @@ export class LoginComponent implements OnInit{
 
   ngOnInit(): void {
     this.nombreFuncionario=this.DataService.getNombreFuncionario();
-    this.access=this.DataService.getAccess();    
+    this.access=this.DataService.getAccess();
   }
   gAccess(){return this.DataService.getAccess()}
 
@@ -36,10 +36,10 @@ export class LoginComponent implements OnInit{
     this.isLoading=true;
     if (this.cedula && this.password) {
       let cc = this.cedula.replace(/[^0-9]/g, '');
-      var token = await this.DataService.askLogin(cc,this.encrypt(this.password));
+      var token = await this.DataService.askLogin(cc,this.password);
       if(token){
         this.nombreFuncionario=this.DataService.getNombreFuncionario();
-        this.access=this.DataService.getAccess();   
+        this.access=this.DataService.getAccess();
         this.error=false;
         this.router.navigate(['/Productos']);
       }
@@ -48,13 +48,9 @@ export class LoginComponent implements OnInit{
       }
     }
 
-    this.isLoading=false; 
+    this.isLoading=false;
   }
 
-  encrypt(clave:string):string{
-    // return Md5.hashStr(clave);
-    return clave;
-  }
   fNumber(h:string) {
     let p= this.cedula.replace(/[^0-9]/g, '');
     this.cedula = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");

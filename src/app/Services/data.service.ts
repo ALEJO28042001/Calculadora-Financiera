@@ -35,6 +35,10 @@ export class DataService {
   };
   private estadoConsulta=false;
 
+  private tiposGarantias: any;
+  private tiposProductos:any;
+  private plazoCreditos = [];
+
   getEstadoConsulta(){return this.estadoConsulta}
   setEstadoConsulta(estado:boolean){this.estadoConsulta = estado}
 
@@ -51,8 +55,13 @@ export class DataService {
     return this.jsonFile;
   }
 
-  setJsonFile(value: string) {
-    this.jsonFile = value;
+  setJsonFile(jsonData: any) {
+    this.jsonFile = JSON.stringify(cleanNumbers(jsonData), null, 2);
+  }
+
+  async guardarAsesoria(json:any){
+    let a =await  this.apiService.guardarAsesoria(json);
+    console.log(json);
   }
 
   getDocumentoFuncionario(){return this.documentoFuncionario}
@@ -93,7 +102,7 @@ export class DataService {
   getSituacionActual(){return this.situacionActual}
 
   getProductosRecoger(){return this.productosRecoger}
-  
+
 
   async askLogin(documentoFuncionario:string,clave:string){
     var validacionFuncionario = await
@@ -103,9 +112,16 @@ export class DataService {
       this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
       this.access=true;
       this.documentoFuncionario = documentoFuncionario;
+      this.tiposGarantias = await this.apiService.getTabla('TIPO_GARANTIA');
+      this.tiposProductos= await this.apiService.getTabla('LINEA_CREDITO');
+
+      // this.plazoCreditos= await this.apiService.getTabla('TIPO_GARANTIA');
     }
     return this.access;
   }
+
+  getGarantia(index:number){return this.tiposGarantias[index]}
+  getProducto(index:number){return this.tiposProductos[index]}
 
   setData(data:Array<{ [key: string]: string }>){this.productList=data}
   getData() {return this.productList}
@@ -121,7 +137,7 @@ deleteProduct(index:number){
   this.productList.slice(index,1);
 }
 async pullData(documento: string,apellido:string) {
-  this.resetValues();  
+  this.resetValues();
   let basicClientInfo: any;
   this.infoCliente={'documento':documento}
   let validar = false;
@@ -165,7 +181,7 @@ async pullData(documento: string,apellido:string) {
   } catch (error) {
       console.error('Error in getting basic client info:', error);
   }
-//  Consulta SIFIN 
+//  Consulta SIFIN
 /*    if (this.esAsociado || (this.documentoAutorizado === documento)) {
         try {
             const cifinProductsResponse = await this.apiService.getCifinProducts(documento);
@@ -187,7 +203,7 @@ async pullData(documento: string,apellido:string) {
             console.error('Error in getting CIFIN products:', error);
         }
     }
-*/         
+*/
   // Consulta Data Credito
   if (this.esAsociado || (this.documentoAutorizado === documento)) {
     try {
@@ -213,7 +229,6 @@ async pullData(documento: string,apellido:string) {
                   (item: any) =>
                     Number(item?.['values']?.[0]?.['debtBalance'] || 0) > 0
               );
-              console.log(dataCreditoProductos);
         this.convertDataCreditoProducts(dataCreditoProductos);
 
         validar=true;
@@ -221,7 +236,7 @@ async pullData(documento: string,apellido:string) {
     } catch (error) {
         console.error('Error in getting DATA CREDITO products:', error);
     }
-    
+
   }
   return validar;
 }
@@ -234,10 +249,12 @@ calcularSituacionActual(){
                 this.productosRecoger,this.infoCliente['aportes']);
 }
 
+getTiposGarantias(){return this.tiposGarantias}
+getTiposProductos(){return this.tiposProductos}
+
 // Metodo para extraer la data de los productos reportados por DataCredito a un formato compatible a
 // la informacion deseada
 convertDataCreditoProducts(productos:any){
-  console.log('productos dfata>',productos);
   productos.map((producto:any) =>{
     var renamedObj: any = {};
     renamedObj['Deuda Actual'] = this.CalculosService.formatear('numero',producto['values'][0]['debtBalance']);
@@ -261,7 +278,7 @@ convertDataCreditoProducts(productos:any){
     renamedObj["Tasa Beneficiar"]= "1";
     renamedObj["Tasa Entidad"]= "";
 
-    
+
 
     renamedObj["Tasa Real"] = (this.CalculosService.findInterestRate(
                               producto['values'][0]['valueMonthlyPayment'] || 0,
@@ -317,7 +334,7 @@ renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
       renamedObj["Interes Actual"]= "";
       renamedObj["Interes Beneficiar"]= "";
       renamedObj["Diferencia Interes"]= "";
-      
+
       if (renamedObj['Pago Mensual']==='' || !renamedObj['Pago Mensual'])
         renamedObj['Pago Mensual']=
           this.CalculosService.calculateMonthlyPayment(
@@ -386,3 +403,62 @@ const beneficiarKeys=
 interface Info {
   [key: string]:any;
 }
+function cleanNumbers(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(cleanNumbers);
+  } else if (typeof obj === "object" && obj !== null) {
+    for (const key in obj) {
+      if (key !== "Tasa") {
+        obj[key] = cleanNumbers(obj[key]);
+      }
+    }
+  } else if (typeof obj === "string" && /^[0-9,\.]+$/.test(obj)) {
+    return obj.replace(/[.,]/g, "");
+  }
+  return obj;
+}
+
+
+const jsonData2={
+  "DatosFuncionario":[
+     {
+        "Documento":"1030686968",
+        "Nombre":"PRUEBAS PRUEBAS PRUEBAS PRUEBAS"
+     }
+  ],
+  "DatosAsociado":[
+     {
+        "TipoDoc":"C",
+        "Documento":"79749433",
+        "Calificacion":"A",
+        "SaldoAportes":"50,193,029",
+        "AutorizacionConsulta":{
+           "autorizacion":"any",
+           "Fecha":"17/2/2025",
+           "Hora":"15:38:50"
+        }
+     }
+  ],
+  "DatosSolicitud":[
+     {
+        "Linea":"Consumo",
+        "Monto":0,
+        "ValorRequerido":0,
+        "Plazo":0,
+        "Tasa":13,
+        "ValorCuota":0,
+        "ValorCuotaAportes":"369,540",
+        "Ingresos":"6,159,000"
+     }
+  ],
+  "ProductosRecoger":[
+     {
+        "Nombre":"BENEFICIAR CREDITO ROTATIVO 14393 SALDO:$0",
+        "Tipo":"Consumo",
+        "SaldoActual":"0",
+        "Plazo":"36",
+        "PagoMensual":"0",
+        "Tasa":"21"
+     }
+  ]
+};

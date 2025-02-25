@@ -27,6 +27,11 @@ export class ApiService {
   private urlRotativo = 'https://services.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethEstadoDeCuenta/Rotativo';
   */
 
+  //Diccionarios
+  private urlDiccionarios = 'https://services.beneficiar.com.co/diccionario/api/ConsultaDiccionario';
+  //Save Json
+  private urlGuardarAsesoria = 'https://test.beneficiar.com.co/app/ServidorSistinfeRestWebIsapi.dll/datasnapbeneficiar/beneficiar/TServeMethCalculadora/CalculadoraConsulta';
+
   // Basic auth username and password
   private  usernameCifin = 'ServerAdmin';
   private  passwordCifin = 'B3N3F1C14R_R3ST';
@@ -41,7 +46,7 @@ export class ApiService {
 
     private  usernameBeneficiar = 'BecRest001';
     private  passwordBeneficiar = '#BnF_x001';
-    private  credentialsBeneficiar = 
+    private  credentialsBeneficiar =
         btoa(`${this.usernameBeneficiar}:${this.passwordBeneficiar}`); // Encode credentials to base64
     private headersBeneficiar = {
     'Authorization': `Basic ${this.credentialsBeneficiar}`,
@@ -53,7 +58,7 @@ export class ApiService {
 
     private  usernameDataCredito = 'becUsWeb';
     private  passwordDataCredito = 'zkJlSPHA8m3GDTgza774G5X89ztJShR@9Sa3A$mrumhz@anb8uhkaDLzQDJY8Q3h';
-    private  credentialsDataCredito = 
+    private  credentialsDataCredito =
         btoa(`${this.usernameDataCredito}:${this.passwordDataCredito}`); // Encode credentials to base64
     private headersDataCredito = {
     'Authorization': `Basic ${this.credentialsDataCredito}`,
@@ -62,9 +67,20 @@ export class ApiService {
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
     };
-  
+
+    private credentialsBeneficiarProduccion =
+    btoa(`${'ServerAdmin'}:${'B3N3F1C14R_R3ST'}`);
+
+    private headersBeneficiarProduccion = {
+      'Authorization': `Basic ${this.credentialsBeneficiarProduccion}`,
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin':'*',
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
+      };
+
   constructor(private http: HttpClient) {}
-     
+
   async consultarDB(body: any, url: string, headers: Record<string, string>): Promise<any> {
         try {
           const resp = await fetch(url, {
@@ -72,32 +88,32 @@ export class ApiService {
             body: JSON.stringify(body),
             headers: headers})
           .then((response) => response.json())
-           ;      
-          
+           ;
+
           return resp;
         } catch (error) {
         }
-    }     
-    
+    }
+
   async getBeneficiarInfo(documento:string){
         return this.consultarDB({
             "FECHA":formattedDate,
             "DOC":documento,
-            "TIPODOC":"C"            
+            "TIPODOC":"C"
         },this.urlEstadoCuenta,this.headersBeneficiar);
     }
   async  getCreditosBeneficiar(codAsociado:string){
     return this.consultarDB({
             "FECHA":formattedDate,
-            "CODAFILIADO":codAsociado   
-    },this.urlCartera,this.headersBeneficiar);        
-  }  
+            "CODAFILIADO":codAsociado
+    },this.urlCartera,this.headersBeneficiar);
+  }
   async  getRotativosBeneficiar(codAsociado:string){
     return this.consultarDB({
             "FECHA":formattedDate,
-            "CODAFILIADO":codAsociado   
-    },this.urlRotativo,this.headersBeneficiar);        
-  } 
+            "CODAFILIADO":codAsociado
+    },this.urlRotativo,this.headersBeneficiar);
+  }
 
   async  getLoginInfo(documento:string,clave:string){
       return this.consultarDB({
@@ -153,7 +169,24 @@ async  getJsonDataCredito(documento:number){
       "Documento": documento
       },this.urlJsonDataCredito,this.headersDataCredito).then((result) => result);
 }
-  
+
+async getTabla(tabla:string){
+  const tab= await this.consultarDB({
+    "tabla" : tabla
+  },this.urlDiccionarios,this.headersBeneficiarProduccion).then((result)=> result.result[0]);
+
+  if(tab.CodError==='0')
+  {
+    return Object.keys(tab[tabla]).map((element)=>tab[tabla][element]);
+  }
+  return []
+}
+
+async guardarAsesoria(json:any){
+  return await this.consultarDB(
+    json,this.urlGuardarAsesoria,this.headersBeneficiar).then((result)=> result);
+}
+
   async getInterestRange(){return [6,30]}
 }
 const currentDate = new Date();

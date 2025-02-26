@@ -61,7 +61,7 @@ export class DataService {
 
   async guardarAsesoria(json:any){
     let a =await  this.apiService.guardarAsesoria(json);
-    console.log(json);
+    console.log(a);
   }
 
   getDocumentoFuncionario(){return this.documentoFuncionario}

@@ -1,12 +1,9 @@
-<div class="component" *ngIf="!gAccess()">
+<div class="component" *ngIf="!getAccess()">
   <form class="form" action="">
     <div class="form-row">
     <img class="img" src="https://zonaprivada.beneficiar.com.co/assets/images/logo.png" alt="">
     </div>
-    <div clas="form-row" *ngIf="error">
-      <p class="error-message">Info invalida</p>
-    </div>
-  
+
     <div class="form-row">
       <div class="input-data">
         <input
@@ -22,8 +19,8 @@
         <div class="underline"></div>
             <label>Cedula</label>
         </div>
-    </div>  
-       
+    </div>
+
     <div class="form-row">
       <div class="input-data">
       <input
@@ -36,22 +33,17 @@
         placeholder=""
       >
       <div class="underline"></div>
-          <label>Password</label>
+          <label>Contraseña</label>
       </div>
     </div>
-    <div *ngIf="isLoading" class="spinner-container">
-      <div class="spinner"></div>
-      <p>Loading, please wait...</p>
-    </div>
-        <button  class="custom-button"  (click)="onSubmit()"  *ngIf="!gAccess()">  Ingresar
+        <button  class="custom-button"  (click)="onSubmit()"  *ngIf="!getAccess()">  Ingresar
 </button>
   </form>
   </div>
-  
 
 
-<div *ngIf="gAccess()">Resultado del estudio
+
+<div *ngIf="getAccess()">Resultado del estudio
   <p>{{getJsonFile()}}</p>
 </div>
-  
-          
+

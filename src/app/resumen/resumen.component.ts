@@ -394,9 +394,10 @@ export class ResumenComponent implements OnInit {
     }
     ))
   };
-  this.DataService.guardarAsesoria(jsonData);
   this.CalculosService.generatePDF(jsonData);
   this.DataService.setJsonFile(jsonData);
+  console.log(jsonData);
+  this.DataService.guardarAsesoria(jsonData);
   this.DataService.setContenidoPopUp('Reporte Generado Correctamente');
   }
 

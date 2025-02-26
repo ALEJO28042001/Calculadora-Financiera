@@ -1,35 +1,28 @@
+import { CalculosService } from './../Services/calculos.service';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../Services/data.service';
-import { RouterLink} from '@angular/router';
 import { Router } from '@angular/router';
-import { Md5 } from 'ts-md5';
 
 
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule,RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit{
-  constructor(private DataService: DataService, private router:Router) { }
+  constructor(private DataService: DataService, private router:Router, private CalculosService: CalculosService) { }
 
   ngOnInit(): void {
-    this.nombreFuncionario=this.DataService.getNombreFuncionario();
-    this.access=this.DataService.getAccess();
   }
-  gAccess(){return this.DataService.getAccess()}
 
   isLoading=false;
   cedula='';
   password: string = '';
-  nombreFuncionario="";
-  access=false;
-  error=false;
 
 
   async onSubmit() {
@@ -38,16 +31,12 @@ export class LoginComponent implements OnInit{
       let cc = this.cedula.replace(/[^0-9]/g, '');
       var token = await this.DataService.askLogin(cc,this.password);
       if(token){
-        this.nombreFuncionario=this.DataService.getNombreFuncionario();
-        this.access=this.DataService.getAccess();
-        this.error=false;
         this.router.navigate(['/Productos']);
       }
       else{console.log("Info Invalida");
-        this.error=true;
+        this.DataService.setContenidoPopUp('Cedula o Constraseña Incorrecta');
       }
     }
-
     this.isLoading=false;
   }
 
@@ -56,4 +45,5 @@ export class LoginComponent implements OnInit{
     this.cedula = p.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
   getJsonFile(){return this.DataService.getJsonFile()}
+  getAccess(){return this.DataService.getAccess()}
 }

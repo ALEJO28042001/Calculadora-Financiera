@@ -132,7 +132,7 @@ export class CalculosService {
 
     Object.keys(jsonData).forEach((section:string) => {
       doc.setFontSize(12);
-      doc.text(section, 10, yLine);
+      doc.text(this.displayName(section), 10, yLine);
       yLine +=5;
 
       if(Object.keys(jsonData[section][0]).length<6){
@@ -192,7 +192,7 @@ export class CalculosService {
 
 
     // Save the PDF
-    doc.save(`Asesoría Financiera Integral: ${jsonData['DatosAsociado'][0]['Documento'] }.pdf`);
+    doc.save(`Asesoría Financiera Integral: ${String(jsonData['DatosAsociado'][0]['Documento']).replace(/[^0-9]/g, '') }.pdf`);
   }
 
   displayName(n:string):string{

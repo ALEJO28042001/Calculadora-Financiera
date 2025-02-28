@@ -19,7 +19,6 @@ export class ProductosComponent implements OnInit{
   error=false;
   autorizar=false;
   isRef: boolean = false;
-  isTarjeta: boolean = false;
   selectedProductIndex: number | null = null; // For editing/deleting selected product
   datosProductoValidos: boolean = true;
   primerCampoErroneo: string = '';
@@ -39,7 +38,7 @@ export class ProductosComponent implements OnInit{
   // getNombreFuncionario(){return this.DataService.getNombreFuncionario();} 888888888888888888
   product: { [key: string]: string } = {
     "Nombre Producto": "",
-    "Tarjeta":"false",
+    "Linea":"",
     "Recoger": "true",
     "Deuda Actual": "",
     "Plazo Actual": "",
@@ -54,7 +53,7 @@ export class ProductosComponent implements OnInit{
   };
 
   keys = ["Nombre Producto",
-    "Tarjeta",
+    "Linea",
     "Recoger",
     "Deuda Actual",
     "Plazo Actual",
@@ -117,7 +116,6 @@ getAccess(){return this.DataService.getAccess()}
     this.resetProduct();
     this.selectedProductIndex = index;
     this.product = { ...this.DataService.getProduct(index) };
-    this.isTarjeta=this.product['Tarjeta']==='true';
     this.isRef=this.product['Recoger']==='true';
     for(let field of this.moneyKeys){
       this.product[field]=this.CalculosService.formatear('numero',Number(this.product[field].replace(/[^0-9]/g, '')));
@@ -151,13 +149,7 @@ getAccess(){return this.DataService.getAccess()}
       "Diferencia Interes": "",
     };
     this.selectedProductIndex=null;
-    this.isTarjeta = false;
     this.isRef = false;
-  }
-
-  tipoDeProducto(e:any){
-  this.isTarjeta = (e.target as HTMLInputElement).checked;
-  this.product['Tarjeta']=String(this.isTarjeta);
   }
 
   eleccionRecoger(e:any){

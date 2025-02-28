@@ -26,6 +26,8 @@ export class DataService {
   private estadoCargando = false;
   private productosRecoger : Array<{ [key: string]: string }> = [];
   private totalRecoger = 0;
+  private tasaMinima = 5;
+  private tasaUsura = 26.30;
   private situacionActual: Info= {
     'deudaTotal': '',
     'pagoMensual': '',
@@ -37,10 +39,12 @@ export class DataService {
 
   private tiposGarantias: any;
   private tiposProductos:any;
-  private plazoCreditos = [];
 
   getEstadoConsulta(){return this.estadoConsulta}
   setEstadoConsulta(estado:boolean){this.estadoConsulta = estado}
+
+  getTasaUsura(){return this.tasaUsura}
+  getTasaMinima(){return this.tasaMinima}
 
   getEstadoCargando(){return this.estadoCargando}
   setEstadoCargando(mensaje:boolean){this.estadoCargando = mensaje}
@@ -222,13 +226,35 @@ async pullData(documento: string,apellido:string) {
                     element['account']['rating'];
                   this.infoCliente['calificacion']=
                     element['account']['ratingDesc'];
+                }
+                console.log(element['account']['rating'],element['account']['ratingDesc'])
+
+              });
+              let dataCreditoTarjetas = dataCreditoConsulta.creditCard || [];
+              dataCreditoTarjetas.forEach((element: any) => {
+                if(element['account']['rating']>(this.infoCliente['rating']|0))
+                {
+                  this.infoCliente['rating']=
+                    element['account']['rating'];
+                  this.infoCliente['calificacion']=
+                    element['account']['ratingDesc'];
 
                 }
+                console.log(element['account']['rating'],element['account']['ratingDesc'])
+
               });
               dataCreditoProductos = dataCreditoProductos.filter(
                   (item: any) =>
                     Number(item?.['values']?.[0]?.['debtBalance'] || 0) > 0
               );
+              dataCreditoTarjetas = dataCreditoTarjetas.filter(
+                (item: any) =>
+                  Number(item?.['values']?.[0]?.['debtBalance'] || 0) > 0
+              );
+
+        // this.convertDataCreditoProducts(dataCreditoTarjetas);
+
+        this.convertDataCreditoProducts(dataCreditoTarjetas);
         this.convertDataCreditoProducts(dataCreditoProductos);
 
         validar=true;
@@ -254,45 +280,67 @@ getTiposProductos(){return this.tiposProductos}
 
 // Metodo para extraer la data de los productos reportados por DataCredito a un formato compatible a
 // la informacion deseada
-convertDataCreditoProducts(productos:any){
-  productos.map((producto:any) =>{
-    var renamedObj: any = {};
-    renamedObj['Deuda Actual'] = this.CalculosService.formatear('numero',producto['values'][0]['debtBalance']);
-    renamedObj['Plazo Actual'] = this.CalculosService.formatear('numero',producto['values'][0]['totalNumberOfInstallments']-producto['values'][0]['paidInstallments']);
-    renamedObj['Pago Mensual'] = this.CalculosService.formatear('numero',
-                                  producto['values'][0]['valueMonthlyPayment'] || 0);
-    renamedObj['Tarjeta'] = String(
-        producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTA' ||
-        producto['featuresLiabilities']['typeOfCreditDesc'] === 'TCR' ||
-        producto['featuresLiabilities']['typeOfCreditDesc'] === 'ROTATIVO');
-    renamedObj['Nombre Producto'] =
-        producto['account']['businessLineName'] + ' ' +
-        producto['featuresLiabilities']['typeOfCreditDesc'] + ' ' +
-        producto['account']['accountNumber'] + ' SALDO $:' +
-        this.CalculosService.formatear('numero',producto['values'][0]['debtBalance']);
-    renamedObj["Recoger"]= "true";
-    renamedObj["Diferencia Tasas"]= "";
-    renamedObj["Interes Actual"]= "";
-    renamedObj["Interes Beneficiar"]= "";
-    renamedObj["Diferencia Interes"]= "";
-    renamedObj["Tasa Beneficiar"]= "1";
-    renamedObj["Tasa Entidad"]= "";
+convertDataCreditoProducts(productos: any[]) {
+  return productos.map((producto: any) => {
+    const renamedObj: any = {};
 
+    const values = producto?.values?.[0];
+    const features = producto?.featuresLiabilities;
+    const account = producto?.account;
+    const creditCard = producto?.FeaturesCreditCard;
 
+    const debtBalance = values?.debtBalance;
+    const totalInstallments = values?.totalNumberOfInstallments;
+    const paidInstallments = values?.paidInstallments;
+    const monthlyPayment = values?.valueMonthlyPayment;
+    const creditType = features?.typeOfCreditDesc;
+    const subAccountType = account?.subAccountTypeDesc;
+    const businessLineName = account?.businessLineName;
+    const businessLineCode = account?.businessLineCode;
+    const accountNumber = account?.accountNumber;
+    const franchiseName = creditCard?.franchiseName;
 
-    renamedObj["Tasa Real"] = (this.CalculosService.findInterestRate(
-                              producto['values'][0]['valueMonthlyPayment'] || 0,
-                              producto['values'][0]['debtBalance'],
-                              producto['values'][0]['totalNumberOfInstallments']-producto['values'][0]['paidInstallments']
-                              )*1200).toFixed(2);
+    renamedObj['Deuda Actual'] = debtBalance !== undefined ? this.CalculosService.formatear('numero', debtBalance) : null;
+    renamedObj['Plazo Actual'] = totalInstallments && paidInstallments !== undefined ? this.CalculosService.formatear('numero', totalInstallments - paidInstallments) : null;
+    renamedObj['Pago Mensual'] = monthlyPayment !== undefined ? this.CalculosService.formatear('numero', monthlyPayment) : null;
 
-    if(Number(renamedObj['Tasa Real'])>0 && producto['values'][0]['debtBalance']>0)
-      renamedObj['Interes Actual'] = this.CalculosService.formatear(
-              'numero',(Number(renamedObj['Tasa Real'])*
-              producto['values'][0]['debtBalance']/1200));
-    else renamedObj['Interes Actual'] = "0";
+    renamedObj['Linea'] = creditType || subAccountType;
+
+    let nombreProducto = '';
+    if (businessLineName) {
+      nombreProducto = businessLineName;
+    } else if (businessLineCode && creditType) {
+      nombreProducto = `${businessLineCode} ${creditType}`;
+    } else if (businessLineCode && subAccountType && franchiseName) {
+      nombreProducto = `${businessLineCode} ${subAccountType} ${franchiseName}`;
+    }
+    if (accountNumber || debtBalance !== undefined) {
+      nombreProducto += ` ${accountNumber || ''} SALDO $:${debtBalance !== undefined ? this.CalculosService.formatear('numero', debtBalance) : ''}`;
+    }
+    renamedObj['Nombre Producto'] = nombreProducto;
+
+    renamedObj['Recoger'] = 'true';
+    renamedObj['Diferencia Tasas'] = '';
+    renamedObj['Interes Actual'] = '';
+    renamedObj['Interes Beneficiar'] = '';
+    renamedObj['Diferencia Interes'] = '';
+    renamedObj['Tasa Beneficiar'] = '1';
+    renamedObj['Tasa Entidad'] = '';
+
+    const tasaReal = monthlyPayment && debtBalance && totalInstallments && paidInstallments !== undefined
+      ? (this.CalculosService.findInterestRate(monthlyPayment, debtBalance, totalInstallments - paidInstallments) * 1200).toFixed(2)
+      : null;
+
+    renamedObj['Tasa Real'] =tasaReal || this.tasaUsura;
+
+    if (tasaReal && debtBalance) {
+      renamedObj['Interes Actual'] = this.CalculosService.formatear('numero', (Number(tasaReal) * debtBalance) / 1200);
+    } else {
+      renamedObj['Interes Actual'] = '0';
+    }
+
     this.addProduct(renamedObj);
-  })
+  });
 }
 
 
@@ -321,9 +369,8 @@ renameKeys(obj: any, keyMap: { [oldKey: string]: string }) {
         else if (keyMap[key] === "VALORCUOTA" || keyMap[key] === "SALDOOBLIGACION") {
           renamedObj[key] = obj[keyMap[key]] * 1000;
         }
-        else if (key === "Tarjeta"){
-          renamedObj[key] = String(obj[keyMap[key]] === 'ROTA' ||
-        obj[keyMap[key]] === 'TCR' || obj[keyMap[key]] === 'ROTATIVO');  }
+        else if (key === "Linea"){
+          renamedObj[key] = obj[keyMap[key]]}
 
         else {
           renamedObj[key]=obj[keyMap[key]];
@@ -391,7 +438,7 @@ const cifinKeys=
 
 const beneficiarKeys=
 {
-  "Tarjeta": "LINEA",
+  "Linea": "LINEA",
   "Nombre Producto": "LINEA",
   "Pago Mensual": "VRCUOTA",
   "Plazo Actual": "PLAZO",
@@ -418,47 +465,3 @@ function cleanNumbers(obj: any): any {
   return obj;
 }
 
-
-const jsonData2={
-  "DatosFuncionario":[
-     {
-        "Documento":"1030686968",
-        "Nombre":"PRUEBAS PRUEBAS PRUEBAS PRUEBAS"
-     }
-  ],
-  "DatosAsociado":[
-     {
-        "TipoDoc":"C",
-        "Documento":"79749433",
-        "Calificacion":"A",
-        "SaldoAportes":"50,193,029",
-        "AutorizacionConsulta":{
-           "autorizacion":"any",
-           "Fecha":"17/2/2025",
-           "Hora":"15:38:50"
-        }
-     }
-  ],
-  "DatosSolicitud":[
-     {
-        "Linea":"Consumo",
-        "Monto":0,
-        "ValorRequerido":0,
-        "Plazo":0,
-        "Tasa":13,
-        "ValorCuota":0,
-        "ValorCuotaAportes":"369,540",
-        "Ingresos":"6,159,000"
-     }
-  ],
-  "ProductosRecoger":[
-     {
-        "Nombre":"BENEFICIAR CREDITO ROTATIVO 14393 SALDO:$0",
-        "Tipo":"Consumo",
-        "SaldoActual":"0",
-        "Plazo":"36",
-        "PagoMensual":"0",
-        "Tasa":"21"
-     }
-  ]
-};

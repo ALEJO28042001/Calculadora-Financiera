@@ -16,7 +16,6 @@ import { FormsModule } from '@angular/forms';
 })
 export class ResumenComponent implements OnInit {
   info: Info = {
-    'tasaUsura': 28.8,
     'cuotaAportes': '0',
     'saldoAportes': '',
     'nombre': '',
@@ -32,6 +31,9 @@ export class ResumenComponent implements OnInit {
   primerCampoErroneo: string = '';
   indexGarantia = 4;
   indexProducto = 3;
+  comentarios = '';
+  capacidadPago=0;
+  calificacionesBuenas = ['A', 'AA', 'AAA'];
   i:number=0;
   @ViewChild('resumenInteres') resumenInteres!: GenerateChartComponent;
   @ViewChild('resumenFlujoCaja') resumenFlujoCaja!: GenerateChartComponent;
@@ -62,7 +64,7 @@ export class ResumenComponent implements OnInit {
   situacionFutura: Info= {
     'deudaTotal': '0',
     'pagoMensual': '',
-    'tasa+Costos': '13',
+    'tasa+Costos': '',
     'costoFinanciero': '',
     'aportes':'',
     'plazo': '0',
@@ -93,9 +95,13 @@ export class ResumenComponent implements OnInit {
       this.situacionFutura['aportes']=this.info['cuotaAportes'];
       this.DataService.calcularSituacionActual();
       this.situacionActual = this.DataService.getSituacionActual();
+      this.situacionFutura['tasa+Costos']=this.getTasaUsura();
 
       this.info['ingresos'] = this.CalculosService.formatear('numero',Number(this.DataService.getSalario()|| 0) );
       this.infoCliente=this.DataService.getInfoCliente();
+      if (!this.calificacionesBuenas.includes(this.infoCliente['calificacion'])) {
+        this.DataService.setContenidoPopUp(`¡ ¡ ¡ ATENCIÓN ! ! ! Calificación: `+ this.DataService.getCalificacion());
+      }
   }
 
   calcularSituacionFutura() {
@@ -125,6 +131,7 @@ export class ResumenComponent implements OnInit {
     else{
       this.situacionFutura['pagoMensual']= '';
       this.situacionFutura['costoFinanciero']= '';
+      this.situacionFutura['deudaTotal'] = '';
       this.info['infoJson']=false;
 
     }
@@ -144,6 +151,7 @@ export class ResumenComponent implements OnInit {
       this.interestChart();
     }
     this.calcularApalancamiento();
+    this.calcularCapacidadPago();
   }
 
   interestChart() {
@@ -302,6 +310,7 @@ export class ResumenComponent implements OnInit {
     this.datosProductoValidos = true;
     this.primerCampoErroneo='';
     do{
+
       if(Number(this.situacionFutura[camposVerificarProducto[this.i]])<=0)
       {
         this.datosProductoValidos = false;
@@ -311,51 +320,47 @@ export class ResumenComponent implements OnInit {
       this.i+=1;
     }
     while(this.datosProductoValidos && this.i<camposVerificarProducto.length)
-
+    if(Number(this.situacionFutura['tasa+Costos'])>this.getTasaUsura())
+    {
+      this.datosProductoValidos = false;
+        this.DataService.setContenidoPopUp('Reporte no generado, tasa mayor a Usura');
+    }
+    if(Number(this.situacionFutura['tasa+Costos'])<this.getTasaMinima())
+      {
+        this.datosProductoValidos = false;
+          this.DataService.setContenidoPopUp('Reporte no generado, tasa inferior a Esperada');
+      }
     if(this.datosProductoValidos)
       this.generateJsonData();
   }
   getEstadoConsulta(){return this.DataService.getEstadoConsulta()}
 
-  generateJsonData() {
+  calcularCapacidadPago() {
+    const aportes = this.extractNumber(this.situacionFutura['aportes']);
+    const pagoMensual = this.extractNumber(this.situacionFutura['pagoMensual']);
+    const ingresos = this.extractNumber(this.info['ingresos']);
 
-  // const jsonData:Info = {
-  //   'Datos del funcionario':[{
-  //     Documento: this.CalculosService.formatear('documento',this.DataService.getDocumentoFuncionario()),
-  //     Nombre: this.DataService.getNombreFuncionario()
-  //   }],
-  //   'DatosAsociado': [{
-  //     TipoDoc: 'C',
-  //     Documento: this.CalculosService.formatear('documento',this.DataService.getDocumento()) || 'N/A',
-  //     Calificacion: this.DataService.getCalificacion() || 1,
-  //     SaldoAportes: this.info['saldoAportes'] || '0',
-  //     AutorizacionConsulta: {
-  //       autorizacion: 'any',
-  //     },
-  //   }],
-  //   'Datos de la solicitud': [{
-  //     Linea: this.seleccionProducto(this.indexProducto)['VALOR'] || 'CONSUMO',
-  //     CodLin: this.seleccionProducto(this.indexProducto)['CAMPO'] || '15',
-  //     Monto: this.situacionFutura['deudaTotal'] || 0,
-  //     ValorRequerido: this.situacionFutura['valorRequerido'] || 0,
-  //     Plazo: Number(this.situacionFutura['plazo']) || 0,
-  //     Tasa: Number(this.situacionFutura['tasa+Costos']) || 0,
-  //     ValorCuota: this.situacionFutura['pagoMensual'] || 0,
-  //     Aportes: this.situacionFutura['aportes'] || 0,
-  //     Ingresos: this.info['ingresos'] || 0,
-  //     Apalancamiento: this.info['valorApalancamiento'] || 0,
-  //     CodGarantia: this.seleccionGarantia(this.indexGarantia)['CAMPO'] || 'PS'
-  //   }],
-  //   'Productos a recoger': (this.DataService.getProductosRecoger() || []).map((product: any) => ({
-  //     Nombre: product['Nombre Producto'] || 'N/A',
-  //     Tipo: product['Tarjeta'] === 'true' ? 'Rotativo' : 'Consumo',
-  //     SaldoActual: this.CalculosService.formatearNumero(Number(product['Deuda Actual'].replace(/[^0-9]/g, '')) || 0) ,
-  //     Plazo: product['Plazo Actual'] || '0',
-  //     PagoMensual: this.CalculosService.formatearNumero(Number(product['Pago Mensual'].replace(/[^0-9]/g, '')) || 0) ,
-  //     Tasa: Number(product['Tasa Real']).toFixed(2) || '0.00',
-  //   }
-  //   ))
-  // };
+    if (isNaN(aportes) || isNaN(pagoMensual) || isNaN(ingresos) || ingresos === 0 || pagoMensual === 0) {
+      this.capacidadPago = 0; // Handle invalid input
+      return;
+    }
+
+    this.capacidadPago = Number(((aportes + pagoMensual) / ingresos).toFixed(2));
+    this.estadoCapacidadPago();
+  }
+
+  private extractNumber(value: string | number | undefined): number {
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const extracted = Number(value.replace(/[^0-9]/g, ''));
+      return isNaN(extracted) ? 0 : extracted;
+    }
+    return 0; // Default to 0 if value is undefined or null
+  }
+
+  generateJsonData() {
 
   const jsonData:Info = {
     'DatosFuncionario':[{
@@ -381,18 +386,20 @@ export class ResumenComponent implements OnInit {
       ValorCuota: this.situacionFutura['pagoMensual'] || 0,
       Aportes: this.situacionFutura['aportes'] || 0,
       Ingresos: this.info['ingresos'] || 0,
+      CapacidadPago:this.capacidadPago || 0,
       Apalancamiento: this.info['valorApalancamiento'] || 0,
       CodGarantia: this.seleccionGarantia(this.indexGarantia)['CAMPO'] || 'PS'
     }],
+    'Comentarios':[{Comentario:this.comentarios || ''}],
     'ProductosRecoger': (this.DataService.getProductosRecoger() || []).map((product: any) => ({
       Nombre: product['Nombre Producto'] || 'N/A',
-      Tipo: product['Tarjeta'] === 'true' ? 'Rotativo' : 'Consumo',
+      Tipo: product['Linea'],
       SaldoActual: this.CalculosService.formatearNumero(Number(product['Deuda Actual'].replace(/[^0-9]/g, '')) || 0) ,
       Plazo: product['Plazo Actual'] || '0',
       PagoMensual: this.CalculosService.formatearNumero(Number(product['Pago Mensual'].replace(/[^0-9]/g, '')) || 0) ,
       Tasa: Number(product['Tasa Real']).toFixed(2) || '0.00',
     }
-    ))
+    )),
   };
   this.CalculosService.generatePDF(jsonData);
   this.DataService.setJsonFile(jsonData);
@@ -407,6 +414,49 @@ export class ResumenComponent implements OnInit {
 
   getTiposProductos(){return this.DataService.getTiposProductos()}
   seleccionProducto(index:number){return this.DataService.getProducto(index)}
+
+  getTasaUsura(){return this.DataService.getTasaUsura()}
+  getTasaMinima(){return this.DataService.getTasaMinima()}
+
+  validateAndCalculate(event: any) {
+    const inputElement = event.target as HTMLInputElement;
+    const inputValue = inputElement.value;
+
+    // Regular expression to allow only digits and dots
+    if (!/^[0-9.]*$/.test(inputValue)) {
+      // Remove invalid characters
+      inputElement.value = inputValue.replace(/[^0-9.]/g, '');
+      this.situacionFutura['tasa+Costos'] = inputElement.value; // Update ngModel
+    }
+
+    // Ensure only one dot is allowed
+    if ((inputValue.match(/\./g) || []).length > 1) {
+      //Remove the last dot
+      inputElement.value = inputValue.slice(0,inputValue.lastIndexOf('.'));
+      this.situacionFutura['tasa+Costos'] = inputElement.value;
+    }
+
+    // Call your calculation function
+    this.calcularSituacionFutura();
+  }
+
+  estadoCalificacion(): string {
+    if (this.calificacionesBuenas.includes(this.infoCliente['calificacion'])) {
+      return 'rgb(96, 255, 96)';
+    } else {
+      return 'red';
+    }
+  }
+
+  estadoCapacidadPago(): string {
+    if (this.capacidadPago < 0.36) {
+      return 'rgb(96, 255, 96)';
+    } else if (this.capacidadPago >= 0.36 && this.capacidadPago <= 0.42) {
+      return 'rgb(253, 250, 70)';
+    } else {
+      return 'red';
+    }
+  }
 }
 
 

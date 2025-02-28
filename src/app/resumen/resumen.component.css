@@ -329,8 +329,8 @@ input:checked + .slider:before {
 }
 
 .dropdown-group{
-  padding: 20px;
-  padding-top: 35px;
+  /* padding: 20px; */
+  /* padding-top: 35px; */
   min-height: 30px;
 
 }
@@ -338,3 +338,8 @@ input:checked + .slider:before {
   min-height: 30px;
   border-radius: 10px;
 }
+
+/* In your component's CSS or global CSS: */
+.colorGreen { color: green; }
+.colorYellow { color: rgb(249, 242, 36); }
+.colorRed { color: red; }

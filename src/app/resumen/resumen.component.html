@@ -36,11 +36,13 @@
         </div>
     </div>
     <div class="form-row">
-        <div class="output-data">
-          <div class="output">{{ infoCliente['calificacion'] }}</div>
-          <label class="chart">{{ displayName('Calificacion') | titlecase }}</label>
-          <div class="underline"></div>
+      <div class="output-data">
+        <div class="output" [style.color]="estadoCalificacion()">
+          {{ infoCliente['calificacion'] }}
         </div>
+        <label class="chart">Calificacion</label>
+        <div class="underline"></div>
+      </div>
     </div>
 
     <div class="form-row">
@@ -98,52 +100,67 @@
 </div>
 
 <!-- Form Producto Ofrecido -->
-<form class="form">
+  <form class="form">
 
     <div class="form-row">
-        <div class="output-data" *ngIf="situacionFutura['productoOfrecido']==='Rotativo' " >
-            <div class="output">{{ situacionFutura['tasa+Costos'] }}</div>
-            <label class="chart">{{ displayName('tasaBeneficiar') | titlecase }}</label>
-            <div class="underline"></div>
-        </div>
 
-        <div class="input-data" *ngIf="situacionFutura['productoOfrecido']==='Consumo'">
-            <input
-                required
-                type="number"
-                class="input"
-                placeholder=" "
-                [name]="'tasaBeneficiar'"
-                [(ngModel)]="situacionFutura['tasa+Costos']"
-
-
-                (input)="calcularSituacionFutura()"
-                >
-            <div class="underline"></div>
-            <label >{{displayName('tasaBeneficiar') | titlecase}}</label>
-        </div>
-    </div>
-
+      <div class="input-data">
+        <input
+          required
+          type="text"
+          class="input"
+          placeholder=" "
+          [name]="'tasaBeneficiar'"
+          [(ngModel)]="situacionFutura['tasa+Costos']"
+          (input)="validateAndCalculate($event)"
+        />
+        <div class="underline"></div>
+        <label>Tasa Beneficiar</label>
+      </div>
+  </div>
 
     <div class="form-row">
-        <div class="input-data">
-            <input
-                required
-                type="number"
-                class="input"
-                placeholder=" "
-                [name]="'plazoCredito'"
-                [(ngModel)]="situacionFutura['plazo']"
-                min="0"
-                (input)="calcularSituacionFutura()"
-                >
-                <div class="underline"></div>
-            <label > Plazo Producto</label>
-        </div>
+      <div class="input-data">
+        <input
+            required
+            type="number"
+            class="input"
+            placeholder=" "
+            [name]="'plazoCredito'"
+            [(ngModel)]="situacionFutura['plazo']"
+            (input)="calcularSituacionFutura()"
+        >
+        <div class="underline"></div>
+        <label > Plazo Producto</label>
+      </div>
     </div>
 
+    <div class="form-row">
+      <div class="output-data">
+        <div class="output" [style.background]="estadoCapacidadPago()">
+        </div>
+        <label class="chart" [style.color]="'black'">Cap. de Pago: {{ capacidadPago }}</label>
+      </div>
+    </div>
+
+  </form>
+
+<form action="">
+<div class="form-row">
+  <div class="input-data">
+    <input
+      required
+      type="text"
+      class="input"
+      placeholder=" "
+      [name]="'Comentarios'"
+      [(ngModel)]="comentarios"
+    >
+    <div class="underline"></div>
+    <label>Comentarios</label>
+</div>
+</div>
 </form>
-
 <button class="custom-button" (click)="validacionInformacion()">Generar Reporte</button>
 
 

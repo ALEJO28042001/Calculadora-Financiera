@@ -17,6 +17,7 @@ export class DataService {
     'calificacion':'NC',
     'rating':0
   };
+  private codigoFuncionario ='';
   private access=false; // #####################################################
   private esAsociado=false;
   private autoriza=false;
@@ -39,6 +40,8 @@ export class DataService {
 
   private tiposGarantias: any;
   private tiposProductos:any;
+
+  getCodigoFuncionario(){return this.codigoFuncionario}
 
   getEstadoConsulta(){return this.estadoConsulta}
   setEstadoConsulta(estado:boolean){this.estadoConsulta = estado}
@@ -65,7 +68,6 @@ export class DataService {
 
   async guardarAsesoria(json:any){
     let a =await  this.apiService.guardarAsesoria(json);
-    console.log(a);
   }
 
   getDocumentoFuncionario(){return this.documentoFuncionario}
@@ -116,6 +118,7 @@ export class DataService {
       this.nombreFuncionario=validacionFuncionario["NOMBRES"]+" "+validacionFuncionario["APELLIDOS"];
       this.access=true;
       this.documentoFuncionario = documentoFuncionario;
+      this.codigoFuncionario = validacionFuncionario['CODAFILIADO'];
       this.tiposGarantias = await this.apiService.getTabla('TIPO_GARANTIA');
       this.tiposProductos= await this.apiService.getTabla('LINEA_CREDITO');
 
@@ -227,8 +230,6 @@ async pullData(documento: string,apellido:string) {
                   this.infoCliente['calificacion']=
                     element['account']['ratingDesc'];
                 }
-                console.log(element['account']['rating'],element['account']['ratingDesc'])
-
               });
               let dataCreditoTarjetas = dataCreditoConsulta.creditCard || [];
               dataCreditoTarjetas.forEach((element: any) => {
@@ -238,10 +239,7 @@ async pullData(documento: string,apellido:string) {
                     element['account']['rating'];
                   this.infoCliente['calificacion']=
                     element['account']['ratingDesc'];
-
                 }
-                console.log(element['account']['rating'],element['account']['ratingDesc'])
-
               });
               dataCreditoProductos = dataCreditoProductos.filter(
                   (item: any) =>

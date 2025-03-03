@@ -372,6 +372,7 @@ export class ResumenComponent implements OnInit {
       Documento: this.CalculosService.formatear('documento',this.DataService.getDocumento()) || 'N/A',
       Calificacion: this.DataService.getCalificacion() || 1,
       SaldoAportes: this.info['saldoAportes'] || '0',
+      CODAFILIADO: this.DataService.getCodigoFuncionario(),
       AutorizacionConsulta: {
         autorizacion: 'any',
       },
@@ -391,19 +392,19 @@ export class ResumenComponent implements OnInit {
       CodGarantia: this.seleccionGarantia(this.indexGarantia)['CAMPO'] || 'PS'
     }],
     'Comentarios':[{Comentario:this.comentarios || ''}],
-    'ProductosRecoger': (this.DataService.getProductosRecoger() || []).map((product: any) => ({
+    'Productos': (this.DataService.getProductList() || []).map((product: any) => ({
       Nombre: product['Nombre Producto'] || 'N/A',
       Tipo: product['Linea'],
       SaldoActual: this.CalculosService.formatearNumero(Number(product['Deuda Actual'].replace(/[^0-9]/g, '')) || 0) ,
       Plazo: product['Plazo Actual'] || '0',
       PagoMensual: this.CalculosService.formatearNumero(Number(product['Pago Mensual'].replace(/[^0-9]/g, '')) || 0) ,
       Tasa: Number(product['Tasa Real']).toFixed(2) || '0.00',
+      Recoger: product['Recoger']==='true' ? 'Si' : 'No'
     }
     )),
   };
   this.CalculosService.generatePDF(jsonData);
   this.DataService.setJsonFile(jsonData);
-  console.log(jsonData);
   this.DataService.guardarAsesoria(jsonData);
   this.DataService.setContenidoPopUp('Reporte Generado Correctamente');
   }

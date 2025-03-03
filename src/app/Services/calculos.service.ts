@@ -109,7 +109,6 @@ export class CalculosService {
   }
 
   limpiarJson(obj: any): any {
-    console.log(obj);
     if (Array.isArray(obj)) {
       return obj.map(this.limpiarJson);
     } else if (typeof obj === "object" && obj !== null) {
@@ -128,7 +127,6 @@ export class CalculosService {
 
 
   generatePDF(jsonData:any) {
-    // console.log(jsonData);
 
     const doc = new jsPDF();
     doc.setFont('helvetica');
@@ -153,17 +151,19 @@ export class CalculosService {
       doc.text(this.displayName(section), 10, yLine);
       yLine +=5;
 
-      if(Object.keys(jsonData[section][0]).length<6){
+      const columnasDerecha=['SaldoActual','Plazo','PagoMensual','Tasa'];
+
+      if(Object.keys(jsonData[section][0]).length<8){
         autoTable(doc, {
           startY: yLine,
           head: [Object.keys(jsonData[section][0])], // Dynamic headers
           body:  Object.values(jsonData[section].map((product: any) => Object.values(product))),
-          columnStyles: {
-            0: { halign: 'left' }, // First column, left align
-            1: { halign: 'left' }, // Second column, center align
+          styles: {
+            halign: 'center' // Aplica alineación central a todas las columnas
           },
+
           didParseCell: function(data) {
-            if (data.column.index > 1) {
+            if (data.column.index > 1 && data.column.index < 6 && section==='Productos') {
                 data.cell.styles.halign = 'right'; // Or 'center' or 'right'
             }
         }
@@ -176,15 +176,9 @@ export class CalculosService {
             head: [Object.keys(jsonData[section][0]).slice(0, 6)],
             body: Object.values(jsonData[section].map((product: any) => Object.values(product)).map((row:any) => row.slice(0,6))), // Slice the values
 
-            columnStyles: {
-                0: { halign: 'left' },
-                1: { halign: 'left' },
+            styles: {
+              halign: 'center' // Aplica alineación central a todas las columnas
             },
-            didParseCell: function(data) {
-                if (data.column.index > 1) {
-                    data.cell.styles.halign = 'right';
-                }
-            }
         });
 
         yLine += 17;
@@ -193,15 +187,9 @@ export class CalculosService {
             startY: yLine,
             head: [Object.keys(jsonData[section][0]).slice(6, 11)],
             body: Object.values(jsonData[section].map((product: any) => Object.values(product)).map((row:any) => row.slice(6,11))), // Slice the values
-            columnStyles: {
-                0: { halign: 'left' },
-                1: { halign: 'left' },
+            styles: {
+              halign: 'center' // Aplica alineación central a todas las columnas
             },
-            didParseCell: function(data) {
-                if (data.column.index > 1) {
-                    data.cell.styles.halign = 'right';
-                }
-            }
         });
 
         yLine += 25;
